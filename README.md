@@ -35,4 +35,4 @@ If you find any bug, please feel free to contact us via Discord [![Discord Chat]
 
 Pull requests are welcome as well. Before you submit your PR, please check your code with [flake8](https://flake8.pycqa.org/en/latest/) and format it if needed. There's also `prettier` if you need to format JS code (in `websocket/`).
 
-Translation contributions are also welcome.
+Translation contributions are also welcome..
