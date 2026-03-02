@@ -4793,8 +4793,8 @@ msgid "This site works best with JavaScript enabled."
 msgstr "Trang web này hoạt động tốt nhất khi JavaScript được cho phép."
 
 #: templates/base.html:372
-msgid "proudly powered by %(dmoj)s and %(vnoi)s"
-msgstr "dựa trên nền tảng %(dmoj)s và %(vnoi)s"
+msgid "proudly powered by %(vnoj)s (based on %(dmoj)s)"
+msgstr "được phát triển dựa trên %(vnoj)s (nền tảng %(dmoj)s)"
 
 #: templates/base.html:377
 msgid "follow us on %(github)s and %(facebook)s"
@@ -6740,7 +6740,7 @@ msgid ""
 "Please activate your %(site_name)s account in the next %(expiration_days)d "
 "days."
 msgstr ""
-"Hãy kích hoạt tài khoản %(site_name)s của bạn trong vòng %(expiration_days)d ngày"
+"Hãy kích hoạt tài khoản %(site_name)s của bạn trong vòng %(expiration_days)d ngày "
 "tới"
 
 #: templates/registration/activation_email.html:5
