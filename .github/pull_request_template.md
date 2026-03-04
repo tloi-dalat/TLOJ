@@ -2,11 +2,9 @@
 
 Briefly describe the change in this PR.
 
-# Check
+# Safety Check
 
-Before submitting this PR, please answer the following:
-
-**Are you confident that this change will NOT crash the site or break critical functionality?**
+Are you confident that this change will NOT crash the site or break critical functionality?
 
 * [ ] **Absolutely yes** - I tested thoroughly and I'm fully confident.
 * [ ] **Probably yes** - I tested the main paths and nothing seems risky.
