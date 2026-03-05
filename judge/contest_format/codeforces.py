@@ -11,7 +11,6 @@ from django.utils.translation import gettext as _, gettext_lazy
 
 from judge.contest_format.default import DefaultContestFormat
 from judge.contest_format.registry import register_contest_format
-from judge.timezone import from_database_time
 from judge.utils.timedelta import nice_repr
 
 
