@@ -17,19 +17,20 @@ from judge.utils.timedelta import nice_repr
 
 @register_contest_format('codeforces')
 class CodeforcesContestFormat(DefaultContestFormat):
+    """
+    Codeforces Standard scoring format.
+
+    For each solved problem, the score is:
+        score = max(0.3 * x, x - floor(120 * x * t / (250 * d)) - 50 * w)
+
+    where:
+        x = initial (maximum) score for the problem
+        t = time of accepted submission in whole minutes (floored)
+        d = contest duration in minutes
+        w = number of incorrect submissions before the first accepted one
+    """
+
     name = gettext_lazy('Codeforces')
-    """
-        Codeforces Standard scoring format.
-
-        For each solved problem, the score is:
-            score = max(0.3 * x, x - floor(120 * x * t / (250 * d)) - 50 * w)
-
-        where:
-            x = initial (maximum) score for the problem
-            t = time of accepted submission in whole minutes (floored)
-            d = contest duration in minutes
-            w = number of incorrect submissions before the first accepted one
-    """
 
     @classmethod
     def validate(cls, config):
@@ -44,19 +45,31 @@ class CodeforcesContestFormat(DefaultContestFormat):
         """
         Compute the Codeforces score for a single problem.
 
+        Rounding: penalty and min_score are floored via math.floor;
+        the returned value is always an int to avoid float drift.
+
         :param max_score: Initial (maximum) score for the problem (x).
         :param duration_minutes: Contest duration in minutes (d).
         :param time_minutes: Time of accepted submission in whole minutes, floored (t).
         :param wrong_attempts: Number of incorrect submissions before the first AC (w).
         :return: The computed score as an integer.
         """
-        if duration_minutes <= 0:
-            return max_score
+        # Guard: invalid or non-positive max_score
+        if max_score is None or max_score <= 0:
+            return 0
+
+        # Guard: clamp negative/None time to 0
+        if time_minutes is None or time_minutes < 0:
+            time_minutes = 0
+
+        # Guard: zero or negative contest duration
+        if duration_minutes is None or duration_minutes <= 0:
+            return int(max_score)
 
         penalty = math.floor(120 * max_score * time_minutes / (250 * duration_minutes))
-        raw_score = max_score - penalty - 50 * wrong_attempts
-        min_score = math.floor(0.3 * max_score)
-        return max(min_score, raw_score)
+        raw_score = int(max_score) - penalty - 50 * wrong_attempts
+        min_score = math.floor(0.3 * max_score)  # floor of 30% guarantee
+        return int(max(min_score, raw_score))
 
     def update_participation(self, participation):
         cumtime = 0
@@ -80,43 +93,58 @@ class CodeforcesContestFormat(DefaultContestFormat):
                 GROUP BY cp.id
             """, (participation.id, participation.id))
 
-            for score, time, prob, max_points in cursor.fetchall():
-                time = from_database_time(time)
-                dt = (time - participation.start).total_seconds()
+            rows = cursor.fetchall()
 
-                # t = time in whole minutes (floored)
-                t = max(int(dt // 60), 0)
+        # Guard: no submissions at all — save zeroed participation and return
+        if not rows:
+            participation.cumtime = 0
+            participation.score = 0
+            participation.tiebreaker = 0
+            participation.format_data = {}
+            participation.save()
+            return
 
-                # Compute wrong attempts (w): non-CE/IE submissions before the first AC, minus the AC itself
-                if score:
-                    subs = participation.submissions.exclude(submission__result__isnull=True) \
-                                                    .exclude(submission__result__in=['IE', 'CE']) \
-                                                    .filter(problem_id=prob)
-                    wrong = subs.filter(submission__date__lte=time).count() - 1
-                else:
-                    wrong = 0
+        for score, time, prob, max_points in rows:
+            time = from_database_time(time)
+            dt = (time - participation.start).total_seconds()
+            if dt < 0:
+                dt = 0
 
-                if score:
-                    # Apply the Codeforces scoring formula
-                    problem_score = self._compute_score(max_points, contest_duration, t, wrong)
-                    cumtime = max(cumtime, dt)
-                else:
-                    problem_score = 0
-                    # Count total wrong attempts for display even when not solved
-                    subs = participation.submissions.exclude(submission__result__isnull=True) \
-                                                    .exclude(submission__result__in=['IE', 'CE']) \
-                                                    .filter(problem_id=prob)
-                    wrong = subs.count()
+            # t = time in whole minutes (floored)
+            t = max(int(dt // 60), 0)
 
-                format_data[str(prob)] = {
-                    'time': dt,
-                    'points': problem_score,
-                    'penalty': wrong,
-                    'max_points': max_points,
-                }
-                points += problem_score
+            if score:
+                # Compute wrong attempts (w):
+                # Count non-CE/IE submissions strictly *before* the best submission time
+                # that did NOT achieve max score.  This avoids the fragile count()-1
+                # pattern and correctly handles multiple max-score submissions.
+                wrong = participation.submissions \
+                    .exclude(submission__result__isnull=True) \
+                    .exclude(submission__result__in=['IE', 'CE']) \
+                    .filter(problem_id=prob, submission__date__lt=time) \
+                    .exclude(points=score) \
+                    .count()
 
-        participation.cumtime = max(cumtime, 0)
+                # Apply the Codeforces scoring formula
+                problem_score = self._compute_score(max_points, contest_duration, t, wrong)
+                cumtime = max(cumtime, dt)
+            else:
+                problem_score = 0
+                # Count total wrong attempts for display even when not solved
+                subs = participation.submissions.exclude(submission__result__isnull=True) \
+                                                .exclude(submission__result__in=['IE', 'CE']) \
+                                                .filter(problem_id=prob)
+                wrong = subs.count()
+
+            format_data[str(prob)] = {
+                'time': dt,
+                'points': problem_score,
+                'penalty': wrong,
+                'max_points': max_points,
+            }
+            points += problem_score
+
+        participation.cumtime = int(max(cumtime, 0))
         participation.score = round(points, self.contest.points_precision)
         participation.tiebreaker = 0
         participation.format_data = format_data
