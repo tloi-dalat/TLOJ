@@ -214,7 +214,7 @@ class CodeforcesContestFormat(DefaultContestFormat):
 
     def get_short_form_display(self):
         yield _('Codeforces scoring: Points decrease as time passes and for each incorrect submission.')
-        yield _('Formula: ~~\\max(0.3x,\\; x - \\lfloor \\frac{120xt}{250d} \\rfloor - 50w)~~')
-        yield _('(~~x~~: max points, ~~t~~: submission time (min), '
-                '~~d~~: contest duration (min), ~~w~~: wrong attempts)')
+        yield _('Formula: ~\\max(0.3x,\\; x - \\lfloor \\frac{120xt}{250d} \\rfloor - 50w)~')
+        yield _('(~x~: max points, ~t~: submission time (min), '
+                '~d~: contest duration (min), ~w~: wrong attempts)')
         yield _('Ties will be broken by the time of the last score-altering submission.')
