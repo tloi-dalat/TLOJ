@@ -81,17 +81,14 @@ class CodeforcesContestFormat(DefaultContestFormat):
 
         with connection.cursor() as cursor:
             cursor.execute("""
-                SELECT MAX(cs.points) as `score`, (
-                    SELECT MIN(csub.date)
-                        FROM judge_contestsubmission ccs LEFT OUTER JOIN
-                             judge_submission csub ON (csub.id = ccs.submission_id)
-                        WHERE ccs.problem_id = cp.id AND ccs.participation_id = %s AND ccs.points = MAX(cs.points)
-                ) AS `time`, cp.id AS `prob`, cp.points AS `max_points`
-                FROM judge_contestproblem cp INNER JOIN
-                     judge_contestsubmission cs ON (cs.problem_id = cp.id AND cs.participation_id = %s) LEFT OUTER JOIN
-                     judge_submission sub ON (sub.id = cs.submission_id)
+                SELECT cp.id AS prob,
+                       cp.points AS max_points,
+                       MAX(cs.points) AS score
+                FROM judge_contestproblem cp
+                INNER JOIN judge_contestsubmission cs
+                    ON (cs.problem_id = cp.id AND cs.participation_id = %s)
                 GROUP BY cp.id
-            """, (participation.id, participation.id))
+            """, (participation.id,))
 
             rows = cursor.fetchall()
 
@@ -104,31 +101,8 @@ class CodeforcesContestFormat(DefaultContestFormat):
             participation.save()
             return
 
-        for score, time, prob, max_points in rows:
-            time = from_database_time(time)
-            dt = (time - participation.start).total_seconds()
-            if dt < 0:
-                dt = 0
-
-            # t = time in whole minutes (floored)
-            t = max(int(dt // 60), 0)
-
-            if score:
-                # Compute wrong attempts (w):
-                # Count non-CE/IE submissions strictly *before* the best submission time
-                # that did NOT achieve max score.  This avoids the fragile count()-1
-                # pattern and correctly handles multiple max-score submissions.
-                wrong = participation.submissions \
-                    .exclude(submission__result__isnull=True) \
-                    .exclude(submission__result__in=['IE', 'CE']) \
-                    .filter(problem_id=prob, submission__date__lt=time) \
-                    .exclude(points=score) \
-                    .count()
-
-                # Apply the Codeforces scoring formula
-                problem_score = self._compute_score(max_points, contest_duration, t, wrong)
-                cumtime = max(cumtime, dt)
-            else:
+        for prob, max_points, score in rows:
+            if not score:
                 problem_score = 0
                 # Count total wrong attempts for display even when not solved
                 subs = participation.submissions.exclude(submission__result__isnull=True) \
@@ -136,13 +110,57 @@ class CodeforcesContestFormat(DefaultContestFormat):
                                                 .filter(problem_id=prob)
                 wrong = subs.count()
 
+                format_data[str(prob)] = {
+                    'time': 0,
+                    'points': problem_score,
+                    'penalty': wrong,
+                    'max_points': max_points,
+                }
+                continue
+
+            # Query 2: Get the earliest submission date that achieved the max score
+            # for this problem. This is a separate, unambiguous query.
+            best_time_qs = participation.submissions.filter(
+                problem_id=prob,
+                points=score,
+            ).order_by('submission__date').values_list('submission__date', flat=True)[:1]
+
+            best_time_list = list(best_time_qs)
+            if not best_time_list or best_time_list[0] is None:
+                # Defensive: shouldn't happen if score > 0, but guard against it
+                best_time = participation.start
+            else:
+                best_time = best_time_list[0]
+
+            dt = (best_time - participation.start).total_seconds()
+            if dt < 0:
+                dt = 0
+
+            # t = time in whole minutes (floored)
+            t = max(int(dt // 60), 0)
+
+            # Compute wrong attempts (w):
+            # Count non-CE/IE submissions strictly *before* the best submission time
+            # that did NOT achieve max score.  This avoids the fragile count()-1
+            # pattern and correctly handles multiple max-score submissions.
+            wrong = participation.submissions \
+                .exclude(submission__result__isnull=True) \
+                .exclude(submission__result__in=['IE', 'CE']) \
+                .filter(problem_id=prob, submission__date__lt=best_time) \
+                .exclude(points=score) \
+                .count()
+
+            # Apply the Codeforces scoring formula
+            problem_score = self._compute_score(max_points, contest_duration, t, wrong)
+            cumtime = max(cumtime, dt)
+            points += problem_score
+
             format_data[str(prob)] = {
                 'time': dt,
                 'points': problem_score,
                 'penalty': wrong,
                 'max_points': max_points,
             }
-            points += problem_score
 
         participation.cumtime = int(max(cumtime, 0))
         participation.score = round(points, self.contest.points_precision)
@@ -196,7 +214,8 @@ class CodeforcesContestFormat(DefaultContestFormat):
         return ret[::-1]
 
     def get_short_form_display(self):
-        yield _('Codeforces scoring: score = max(0.3x, x − ⌊120xt/(250d)⌋ − 50w).')
-        yield _('**x** = max points, **t** = submission time (min), **d** = contest duration (min), '
-                '**w** = wrong attempts.')
-        yield _('Ties will be broken by the time of the last score altering submission.')
+        yield _('Codeforces scoring: Points decrease as time passes and for each incorrect submission.')
+        yield _('Formula: ~~\\max(0.3x,\\; x - \\lfloor \\frac{120xt}{250d} \\rfloor - 50w)~~')
+        yield _('(~~x~~: max points, ~~t~~: submission time (min), '
+                '~~d~~: contest duration (min), ~~w~~: wrong attempts)')
+        yield _('Ties will be broken by the time of the last score-altering submission.')
