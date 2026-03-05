@@ -8734,11 +8734,13 @@ msgstr "Tổ chức này không phải là mở."
 #~ "Tính rating tất cả những người đã tham gia kỳ thi (kể cả không nộp bài "
 #~ "nào)."
 
-#~ msgid "proudly powered by %(vnoj)s (based on %(dmoj)s)"
-#~ msgstr "được phát triển dựa trên %(vnoj)s (nền tảng %(dmoj)s)"
+#: templates/base.html:372
+msgid "proudly powered by %(vnoj)s (based on %(dmoj)s)"
+msgstr "được phát triển bởi %(vnoj)s (dựa trên %(dmoj)s)"
 
-#~ msgid "follow us on %(github)s and %(facebook)s"
-#~ msgstr "theo dõi bọn mình trên %(github)s và %(facebook)s"
+#: templates/base.html:377
+msgid "follow us on %(github)s and %(facebook)s"
+msgstr "theo dõi bọn mình trên %(github)s và %(facebook)s"
 
 #~ msgid "In the meantime, try resubmitting in a few seconds."
 #~ msgstr "Bạn có thể thử nộp lại bài trong vài giây nữa"
