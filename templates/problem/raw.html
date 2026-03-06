@@ -44,32 +44,45 @@
             content: ": ";
         }
 
-        .content-description table {
-            border-collapse: collapse;
-            width: 100%;
-            margin-bottom: 0.5em;
-        }
-
-        .content-description table th,
-        .content-description table td {
-            border: 1px solid #ccc;
-            padding: 7px 5px;
-            text-align: center;
-            vertical-align: middle;
-        }
-
-        .content-description table th {
-            background-color: #231f20;
-            color: #fff;
-            font-weight: 600;
-        }
-
         .problem-info-entry {
             vertical-align: top;
-            float: center;
             padding: 0.6em;
             display: inline-block;
             text-align: left;
+        }
+
+        .content-description table {
+            border-collapse: collapse;
+            width: auto;
+            max-width: 100%;
+            margin: 1em auto;
+            color: black !important;
+            background-color: white !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+
+        .content-description table,
+        .content-description tr,
+        .content-description td,
+        .content-description th {
+            page-break-inside: auto !important;
+        }
+
+        .content-description th,
+        .content-description td {
+            border: 1px solid #ccc !important;
+            padding: 8px 12px !important;
+            color: black !important;
+            background: white !important;
+            background-color: white !important;
+        }
+
+        .content-description th {
+            font-weight: bold;
+            background-color: #f0f0f0 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
     </style>
 </head>
