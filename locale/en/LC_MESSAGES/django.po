@@ -712,7 +712,7 @@ msgid "Your password can't be entirely numeric."
 msgstr ""
 
 #: judge/custom_translations.py:24 templates/base.html:246
-msgid "PRoblems"
+msgid "Problems"
 msgstr ""
 
 #: judge/custom_translations.py:25 templates/blog/blog-post.html:34

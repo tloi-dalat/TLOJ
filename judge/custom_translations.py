@@ -21,7 +21,7 @@ _('This password is entirely numeric.')
 _("Your password can't be entirely numeric.")
 
 # NavBar
-_('PRoblems')
+_('Problems')
 _('posted {time}')
 
 # Comment
