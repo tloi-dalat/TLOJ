@@ -243,7 +243,7 @@
                 {% set org = request.organization %}
                 <li class="home-nav-element"><a href="{{ url('organization_home', org.slug) }}">{% include "site-logo-fragment.html" %}</a></li>
                 <li class="home-nav-element"><span class="nav-divider"></span></li>
-                {{ make_navbar_item('problem-list', url('problem_list_organization', org.slug), _('Problems')) }}
+                {{ make_navbar_item('problem-list', url('problem_list_organization', org.slug), _('PRoblems')) }}
                 {{ make_navbar_item('submission-list', url('submission_list_organization', org.slug), _('Submissions')) }}
                 {{ make_navbar_item('contest-list',  url('contest_list_organization', org.slug), _('Contests')) }}
                 {{ make_navbar_item('users',org.get_users_url(), _('Users')) }}

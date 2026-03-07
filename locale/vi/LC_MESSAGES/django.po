@@ -727,7 +727,7 @@ msgid "Your password can't be entirely numeric."
 msgstr "Mật khẩu không được hoàn toàn bằng số."
 
 #: judge/custom_translations.py:24 templates/base.html:246
-msgid "Problems"
+msgid "PRoblems"
 msgstr "Danh sách bài"
 
 #: judge/custom_translations.py:25 templates/blog/blog-post.html:34
