@@ -206,7 +206,7 @@ class ProblemTestCase(CommonDataMixin, TestCase):
                 'is_testcase_accessible_by': self.assertTrue,
             },
             'normal': {
-                'is_testcase_accessible_by': self.assertFalse,
+                'is_testcase_accessible_by': self.assertTrue,
             },
             'anonymous': {
                 'is_testcase_accessible_by': self.assertFalse,
