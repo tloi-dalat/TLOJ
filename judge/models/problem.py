@@ -203,7 +203,7 @@ class Problem(models.Model):
                                                          default=SubmissionSourceAccess.FOLLOW,
                                                          choices=SUBMISSION_SOURCE_ACCESS)
     testcase_visibility_mode = models.CharField(verbose_name=_('Testcase visibility'), max_length=1,
-                                                default=ProblemTestcaseAccess.AUTHOR_ONLY,
+                                                default=ProblemTestcaseAccess.OUT_CONTEST,
                                                 choices=PROBLEM_TESTCASE_ACCESS)
 
     testcase_result_visibility_mode = models.CharField(verbose_name=_('Testcase result visibility'), max_length=1,
