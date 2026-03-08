@@ -32,6 +32,18 @@
                 placeholder: ''
             };
 
+            function pointInputs($row) {
+                return $row.find('input[id$=points]');
+            }
+
+            function pretestInputs($row) {
+                return $row.find('input[id$=is_pretest], input[id$=pretest]');
+            }
+
+            function exampleInputs($row) {
+                return $row.find('input[id$=is_example], input[id$=example]');
+            }
+
             var $table = $('#case-table');
             $table.on('add-row', function (e, $tr) {
                 $tr.find('input').filter('[id$=file]').each(function () {
@@ -53,24 +65,66 @@
                 });
             });
 
-            var order = 0;
+            function syncBatchPretest($startRow) {
+                if ($startRow.attr('data-type') !== 'S') return;
 
-            function handle_table_reorder() {
-                var in_batch = false;
-                $table.find('tbody:first tr').each(function () {
-                    switch ($(this).attr('data-type')) {
-                        case 'C':
-                            $(this).find('input[id$=points], input[id$=pretest]').toggle(!in_batch);
-                            break;
-                        case 'S':
-                            in_batch = true;
-                            break;
-                        case 'E':
-                            in_batch = false;
+                var checked = pretestInputs($startRow).is(':checked');
+                $startRow.nextUntil('tr[data-type=S], tr[data-type=E], tr[data-type=\"\"]').each(function () {
+                    var $row = $(this);
+                    if ($row.attr('data-type') === 'C') {
+                        pretestInputs($row).prop('checked', checked);
                     }
                 });
             }
 
+            var order = 0;
+
+            function handle_table_reorder() {
+                var in_batch = false;
+                var batch_pretest = false;
+
+                $table.find('tbody:first tr').each(function () {
+                    var $row = $(this);
+                    var type = $row.attr('data-type');
+                    var $points = pointInputs($row);
+                    var $pretest = pretestInputs($row);
+                    var $example = exampleInputs($row);
+
+                    switch (type) {
+                        case 'C':
+                            $points.toggle(!in_batch);
+                            $pretest.toggle(true);
+                            $example.toggle(true);
+                            if (in_batch) {
+                                $pretest.prop('checked', batch_pretest);
+                            }
+                            break;
+
+                        case 'S':
+                            in_batch = true;
+                            batch_pretest = $pretest.is(':checked');
+                            $points.toggle(true);
+                            $pretest.toggle(true);
+                            $example.toggle(false);
+                            syncBatchPretest($row);
+                            break;
+
+                        case 'E':
+                            in_batch = false;
+                            batch_pretest = false;
+                            $points.toggle(false);
+                            $pretest.toggle(false);
+                            $example.toggle(false);
+                            break;
+
+                        default:
+                            $points.toggle(false);
+                            $pretest.toggle(false);
+                            $example.toggle(false);
+                            break;
+                    }
+                });
+            }
             function try_parse_json(json) {
                 try {
                     return JSON.parse(json);
@@ -300,6 +354,10 @@
                     }
                     $tr.attr('data-type', val).nextUntil('tr[data-type=S], tr[data-type=E], tr[data-type=""]')
                         .find('input[id$=points], input[id$=pretest]').toggle(!disabled);
+                    exampleInputs($tr).toggle(val === 'C');
+                    if (val === 'S') {
+                        syncBatchPretest($tr);
+                    }
                 }).change();
 
                 var tooltip_classes = 'tooltipped tooltipped-s';
@@ -590,6 +648,11 @@
                 };
                 reader.readAsArrayBuffer(fileInput);
             })
+            pretestInputs($tr).change(function () {
+                if ($tr.attr('data-type') === 'S') {
+                    syncBatchPretest($tr);
+                }
+            });
             $('form').dirty('setAsClean');
         }).change();
     </script>
@@ -733,6 +796,7 @@
                 <th>{{ _('Input file') }}</th>
                 <th>{{ _('Output file') }}</th>
                 <th>{{ _('Points') }}</th>
+                <th>{{ _('Example?') }}</th>
                 {% if request.user.is_staff %}
                 <th>{{ _('Pretest?') }}</th>
                 {% endif %}
@@ -749,7 +813,7 @@
             {% for form in all_case_forms %}
                 {% if form.non_field_errors() %}
                     <tr>
-                        <td colspan="{{ 9 + cases_formset.can_delete }}">{{ form.non_field_errors() }}</td>
+                        <td colspan="{{ 10 + cases_formset.can_delete }}">{{ form.non_field_errors() }}</td>
                     </tr>
                 {% endif %}
                 {% if form.prefix and '__prefix__' in form.prefix %}
@@ -769,6 +833,7 @@
                         {{ form.output_file.errors }}{{ form.output_file }}
                     </td>
                     <td>{{ form.points.errors }}{{ form.points }}{% if not request.user.is_staff %}{{ form.is_pretest.as_hidden() }}{% endif %}</td>
+                    <td>{{ form.is_example.errors }}{{ form.is_example }}</td>
                     {% if request.user.is_staff %}
                         <td>{{ form.is_pretest.errors }}{{ form.is_pretest }}</td>
                     {% endif %}
