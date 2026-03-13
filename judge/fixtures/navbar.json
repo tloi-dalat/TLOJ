@@ -5,7 +5,7 @@
         "fields": {
             "order": 1,
             "key": "problems",
-            "label": "PRoblems",
+            "label": "Problems",
             "path": "/problems/",
             "regex": "^/problem",
             "parent": null,
@@ -74,7 +74,7 @@
             "regex": "^/about/$",
             "parent": null,
             "lft": 1,
-            "rght": 8,
+            "rght": 6,
             "tree_id": 5,
             "level": 0
         }
@@ -100,29 +100,13 @@
         "pk": 7,
         "fields": {
             "order": 7,
-            "key": "checkers",
-            "label": "Custom Checkers",
-            "path": "/custom_checkers/",
-            "regex": "^/custom_checkers/$",
+            "key": "fanpage",
+            "label": "Fanpage",
+            "path": "https://www.facebook.com/tloi.dl",
+            "regex": "^https://www.facebook.com/tloi.dl$",
             "parent": 5,
             "lft": 4,
             "rght": 5,
-            "tree_id": 5,
-            "level": 1
-        }
-    },
-    {
-        "model": "judge.navigationbar",
-        "pk": 8,
-        "fields": {
-            "order": 8,
-            "key": "github",
-            "label": "Github",
-            "path": "https://github.com/VNOI-Admin/OJ",
-            "regex": "^https://github.com/VNOI-Admin/OJ$",
-            "parent": 5,
-            "lft": 6,
-            "rght": 7,
             "tree_id": 5,
             "level": 1
         }

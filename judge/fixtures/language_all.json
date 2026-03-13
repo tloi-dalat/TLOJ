@@ -984,5 +984,43 @@
         "extension": "zig",
 		"include_in_problem": true
     }
+},
+{
+    "model": "judge.language",
+    "pk": 76,
+    "fields": {
+        "key": "CPPTHEMIS",
+        "name": "C++ (Themis)",
+        "short_name": null,
+        "common_name": "C++ (Themis)",
+        "ace": "c_cpp",
+        "pygments": "cpp",
+        "template": "#include <bits/stdc++.h>\n\nusing namespace std;\n\nint main() {\n    ios_base::sync_with_stdio(false);\n    cin.tie(NULL);\n    \n    return 0;\n}",
+        "info": "",
+        "description": "Compile options: `g++ -std=c++14 -pipe -O2 -s -static -lm -x c++ -DTHEMIS -Wl,-z,stack-size=66060288`",
+        "extension": "cpp",
+        "file_only": false,
+        "file_size_limit": 0,
+        "include_in_problem": true
+    }
+},
+{
+    "model": "judge.language",
+    "pk": 77,
+    "fields": {
+        "key": "PASTHEMIS",
+        "name": "Pascal (Themis)",
+        "short_name": null,
+        "common_name": "Pascal (Themis)",
+        "ace": "pascal",
+        "pygments": "pascal",
+        "template": "program main;\n\nbegin\n    readln;\n    writeln('Hello, World!');\nend.",
+        "info": "",
+        "description": "Compile options: `fpc -Fe/dev/stderr -dTHEMIS -O2 -XS -Sg -Cs66060288`",
+        "extension": "pas",
+        "file_only": false,
+        "file_size_limit": 0,
+        "include_in_problem": true
+    }
 }
 ]
