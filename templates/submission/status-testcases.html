@@ -80,16 +80,19 @@
                 <br>
                 <div class="batch-cases">
             {% endif %}
-        {% if can_view_testcase_status %}
+        {% if can_view_testcase_status or example_case_ids %}
         <table class="submissions-status-table">{% for case in batch.cases %}
+            {% set is_example_case = case.case in example_case_ids %}
+            {% if can_view_testcase_status or is_example_case %}
             {% set current_test_case_count = test_case_counter() %}
-            {% set print_case_output = can_view_test and case.output %}
+            {% set can_view_case_test = can_view_test or is_example_case %}
+            {% set print_case_output = can_view_case_test and case.output %}
             {% set print_case_ext_feedback = case.extended_feedback
                                              and
                                              ((not request.in_contest and current_test_case_count <= feedback_limit)
-                                              or can_view_test or can_view_feedback) %}
+                                              or can_view_case_test or can_view_feedback) %}
             {% set curr_data = cases_data.get(case.case, None) %}
-            {% set has_extended_data = print_case_output or print_case_ext_feedback or (can_view_test and curr_data) %}
+            {% set has_extended_data = print_case_output or print_case_ext_feedback or (can_view_case_test and curr_data) %}
 
             <tr id="{{ case.id }}" class="case-row toggle closed">
                 <td>
@@ -131,7 +134,7 @@
                 <tr id="{{ case.id }}-output" style="display:none" class="case-feedback toggled">
                     <td colspan="5" class="case-output">
                         <div class="case-info">
-                            {% if can_view_test and curr_data %}
+                            {% if can_view_case_test and curr_data %}
                                 <strong>{{ _('Input:') }}</strong>
                                 <pre class="case-output">{{ curr_data['input']|linebreaksbr }}</pre>
                                 <strong>{{ _('Answer:') }}</strong>
@@ -153,6 +156,7 @@
                         </div>
                     </td>
                 </tr>
+            {% endif %}
             {% endif %}
         {% endfor %}
         </table>

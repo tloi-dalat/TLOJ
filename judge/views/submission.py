@@ -254,8 +254,20 @@ class SubmissionStatus(SubmissionDetailBase):
             context['batches'][-1]['not_graded'] = True
 
         context['statuses'] = combine_statuses(statuses, submission)
+
+        example_case_ids = set()
+        normal_case_number = 0
+        for problem_case in submission.problem.cases.order_by('order'):
+            if problem_case.type != 'C':
+                continue
+            normal_case_number += 1
+            if problem_case.is_example:
+                example_case_ids.add(normal_case_number)
+
+        context['example_case_ids'] = example_case_ids
+
         context['can_view_test'] = submission.problem.is_testcase_accessible_by(self.request.user)
-        if context['can_view_test']:
+        if context['can_view_test'] or example_case_ids:
             context['cases_data'] = get_problem_testcases_data(submission.problem)
         else:
             context['cases_data'] = {}

@@ -95,7 +95,7 @@ class ProblemCaseForm(ModelForm):
     class Meta:
         model = ProblemTestCase
         fields = ('order', 'type', 'input_file', 'output_file', 'points',
-                  'is_pretest',  # 'output_limit', 'output_prefix',
+                  'is_pretest', 'is_example',  # 'output_limit', 'output_prefix',
                   'checker', 'checker_args', 'generator_args')
         widgets = {
             'generator_args': HiddenInput,
