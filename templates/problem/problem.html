@@ -39,8 +39,54 @@
             min-width: 12.5em;
         }
 
-        #problem-types, #allowed-langs, #available-judges {
+        #problem-contests, #problem-types, #allowed-langs, #available-judges {
             padding-top: 1em;
+        }
+
+        #problem-contests .toggled a {
+            font-weight: bold;
+            color: inherit;
+        }
+
+        .pi-value.toggled {
+            padding-left: 1.5em;
+        }
+
+        .more-contests-wrap {
+            display: block; /* Move to new line */
+            cursor: pointer;
+            position: relative;
+            margin-top: 5px;
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+        }
+
+        .more-contests-list::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 0;
+            right: 0;
+            height: 15px;
+        }
+
+        .more-contests-list {
+            display: none;
+            position: absolute;
+            background: #fff;
+            border: 1px solid #ccc;
+            padding: 8px 12px;
+            z-index: 100;
+            width: max-content;
+            max-width: 280px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            border-radius: 4px;
+            left: 0; /* Align left for better readability in sidebar */
+            bottom: 120%;
+        }
+
+        .more-contests-wrap:hover .more-contests-list {
+            display: block;
         }
 
         .problem-info-entry {
@@ -413,6 +459,37 @@
     {% endif %}
 
     {% if not contest_problem or not contest_problem.contest.hide_problem_tags %}
+        {% set contest_problems = problem.contests.filter(contest__is_visible=True).order_by('contest__start_time') %}
+        {% set total_contests = contest_problems.count() %}
+        {% if total_contests %}
+            <div id="problem-contests">
+                <div class="toggle closed unselectable">
+                    <i class="fa fa-chevron-right fa-fw"></i>
+                    {{ _('From contests') }}
+                </div>
+                <div style="display:none" class="toggled pi-value">
+                    {% set current_contest_id = request.profile.current_contest.contest_id if request.profile.current_contest else None %}
+                    {% for cp in contest_problems[:3] %}
+                        <a href="{{ cp.contest.get_absolute_url() }}">{{ cp.contest.name }}</a>
+                        {%- if current_contest_id and cp.contest_id == current_contest_id %}
+                            {{ _('(current contest)') }}
+                        {%- endif -%}
+                        {%- if not loop.last and (total_contests <= 3 or loop.index < 3) %}, {% endif %}
+                    {% endfor %}
+                    {% if total_contests > 3 %}
+                        <div class="more-contests-wrap" style="font-size: 0.9em; opacity: 0.8;">
+                            <span>{{ _('and') }} {{ _('%(count)d more', count=total_contests - 3) }}</span>
+                            <div class="more-contests-list">
+                                {% for cp in contest_problems[3:] %}
+                                    <a href="{{ cp.contest.get_absolute_url() }}" style="color: inherit; font-weight: bold; display: block; margin: 4px 0;">{{ cp.contest.name }}</a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+
         <div id="problem-types">
             {% with types=problem.types_list %}
                 <div class="toggle closed unselectable">

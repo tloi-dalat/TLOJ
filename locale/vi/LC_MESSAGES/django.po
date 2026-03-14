@@ -8209,21 +8209,23 @@ msgstr "Không có gì ở đây."
 msgid "Undo vote"
 msgstr ""
 
-#: templates/ticket/ticket.html:258
-msgid "Close ticket"
-msgstr "Đóng vấn đề"
+#~ msgid "Version Matrix"
+#~ msgstr "Phiên bản của trình chấm"
 
-#: templates/ticket/ticket.html:260
-msgid "Reopen ticket"
-msgstr "Mở lại vấn đề"
+#~ msgid "Maximum single-case runtime:"
+#~ msgstr "Thời gian chạy test lâu nhất:"
 
-#: templates/urlshortener/confirm_delete.html:65
-#, fuzzy
-#| msgid "Are you sure you want to delete this security key?"
-msgid ""
-"Are you sure you want to delete this URL shortener? This action cannot be "
-"undone."
-msgstr "Bạn có chắc muốn xoá khoá bảo mật này?"
+msgid "From contests"
+msgstr "Từ các kỳ thi"
+
+msgid "(current contest)"
+msgstr "(kỳ thi hiện tại)"
+
+msgid "and"
+msgstr "và"
+
+msgid "%(count)d more"
+msgstr "%(count)d kỳ thi khác"
 
 #: templates/urlshortener/confirm_delete.html:70
 #, fuzzy
@@ -8759,9 +8761,3 @@ msgstr "theo dõi bọn mình trên %(github)s và %(facebook)s"
 
 #~ msgid "Update preview"
 #~ msgstr "Cập nhật preview"
-
-#~ msgid "Version Matrix"
-#~ msgstr "Phiên bản của trình chấm"
-
-#~ msgid "Maximum single-case runtime:"
-#~ msgstr "Thời gian chạy test lâu nhất:"
