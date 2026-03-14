@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from operator import attrgetter
 
 from django import forms
@@ -221,23 +221,19 @@ class ProblemAdmin(NoBatchDeleteMixin, VersionAdmin):
         )
 
     def _get_publish_datetime_from_contest(self, problem):
-        contest_problem = ContestProblem.objects.filter(problem=problem) \
-            .select_related('contest') \
-            .order_by('contest__end_time', 'order') \
+        contest_problem = (
+            ContestProblem.objects.filter(problem_id=problem.id)
+            .select_related('contest')
+            .order_by('contest__end_time', 'order')
             .first()
+        )
 
-        if not contest_problem:
+        if contest_problem is None:
             return None
 
-        contest = contest_problem.contest
+        end_dt = timezone.localtime(contest_problem.contest.end_time)
 
-        contest_date = timezone.localtime(contest.start_time).date()
-        contest_end_time = timezone.localtime(contest.end_time).time()
-
-        base_dt = datetime.combine(contest_date, contest_end_time)
-        base_dt = timezone.make_aware(base_dt, timezone.get_current_timezone())
-
-        return base_dt + timedelta(seconds=contest_problem.order)
+        return end_dt + timedelta(seconds=contest_problem.order)
 
     @admin.display(description=_('Mark problems as private'))
     def make_private(self, request, queryset):
