@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from operator import attrgetter
 
 from django import forms
@@ -10,7 +11,8 @@ from django.utils.html import format_html
 from django.utils.translation import gettext, gettext_lazy as _, ngettext
 from reversion.admin import VersionAdmin
 
-from judge.models import LanguageLimit, Problem, ProblemClarification, ProblemTranslation, Profile, Solution
+from judge.models import ContestProblem, LanguageLimit, Problem, ProblemClarification, \
+    ProblemTranslation, Profile, Solution
 from judge.utils.views import NoBatchDeleteMixin
 from judge.widgets import AdminHeavySelect2MultipleWidget, AdminHeavySelect2Widget, AdminMartorWidget, \
     AdminSelect2MultipleWidget, AdminSelect2Widget, CheckboxSelectMultipleWithSelectAll
@@ -183,15 +185,59 @@ class ProblemAdmin(NoBatchDeleteMixin, VersionAdmin):
         from judge.tasks import rescore_problem
         transaction.on_commit(rescore_problem.s(problem_id, publicy_changed).delay)
 
-    @admin.display(description=_('Mark problems as public and set publish date to now'))
+    @admin.display(description=_('Mark problems as public and update publish date'))
     def make_public_and_update_publish_date(self, request, queryset):
-        count = queryset.update(is_public=True, date=timezone.now())
-        for problem_id in queryset.values_list('id', flat=True):
-            self._rescore(request, problem_id, True)
+        count = 0
 
-        self.message_user(request, ngettext('%d problem successfully marked as public.',
-                                            '%d problems successfully marked as public.',
-                                            count) % count)
+        for problem in queryset:
+            publish_dt = self._get_publish_datetime_from_contest(problem)
+
+            if publish_dt is None:
+                publish_dt = timezone.now()
+
+            changed = False
+
+            if not problem.is_public:
+                problem.is_public = True
+                changed = True
+
+            if problem.date != publish_dt:
+                problem.date = publish_dt
+                changed = True
+
+            if changed:
+                problem.save(update_fields=['is_public', 'date'])
+                count += 1
+
+            self._rescore(request, problem.id, True)
+
+        self.message_user(
+            request,
+            ngettext(
+                '%d problem successfully marked as public.',
+                '%d problems successfully marked as public.',
+                count,
+            ) % count,
+        )
+
+    def _get_publish_datetime_from_contest(self, problem):
+        contest_problem = ContestProblem.objects.filter(problem=problem) \
+            .select_related('contest') \
+            .order_by('contest__end_time', 'order') \
+            .first()
+
+        if not contest_problem:
+            return None
+
+        contest = contest_problem.contest
+
+        contest_date = timezone.localtime(contest.start_time).date()
+        contest_end_time = timezone.localtime(contest.end_time).time()
+
+        base_dt = datetime.combine(contest_date, contest_end_time)
+        base_dt = timezone.make_aware(base_dt, timezone.get_current_timezone())
+
+        return base_dt + timedelta(seconds=contest_problem.order)
 
     @admin.display(description=_('Mark problems as private'))
     def make_private(self, request, queryset):
