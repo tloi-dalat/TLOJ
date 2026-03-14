@@ -1474,12 +1474,10 @@ class ContestProblemMakePublic(LoginRequiredMixin, ContestMixin, SingleObjectMix
             # - users only need write permissions for **private** problems
             # This is not a bug! It improves the UX since a lot of users include
             # public problems in their contests.
-            if problem.is_public:
-                continue
             if not problem.is_editable_by(request.user):
                 raise PermissionDenied(_('You do not have permission to edit this problem.'))
             problem.is_public = True
-            problem.date = timezone.now()
+            problem.date = timezone.localtime(contest.end_time) + timedelta(seconds=contest_problem.order)
             problem.save(update_fields=['is_public', 'date'])
             rescore_problem.delay(problem.id, True)
 
