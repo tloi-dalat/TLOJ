@@ -29,7 +29,7 @@ from reversion import revisions
 from judge.comments import CommentedDetailView
 from judge.forms import LanguageLimitFormSet, ProblemCloneForm, ProblemEditForm, ProblemEditTypeGroupForm, \
     ProblemImportPolygonForm, ProblemImportPolygonStatementFormSet, ProblemSubmitForm, ProposeProblemSolutionFormSet
-from judge.models import ContestSubmission, Judge, Language, Problem, ProblemGroup, \
+from judge.models import ContestProblem, ContestSubmission, Judge, Language, Problem, ProblemGroup, \
     ProblemTranslation, ProblemType, RuntimeVersion, Solution, Submission, SubmissionSource
 from judge.tasks import on_new_problem
 from judge.template_context import misc_config
@@ -446,6 +446,22 @@ class ProblemDetail(ProblemMixin, SolvedProblemMixin, ProblemSubmitMixin, Commen
             submit_context = self.get_submit_context()
             context.update(submit_context)
             context['no_judges'] = not context['form'].fields['language'].queryset if context.get('form') else True
+
+        from_contests = (
+            ContestProblem.objects
+            .filter(problem=self.object)
+            .select_related('contest')
+            .order_by('-contest__start_time', 'contest__key')
+        )
+
+        accessible_contests = []
+        for c in from_contests:
+            contest = c.contest
+            if contest.is_accessible_by(user):
+                accessible_contests.append(contest)
+
+        context['from_contests'] = accessible_contests[:3]
+        context['from_contests_more_count'] = max(len(accessible_contests) - 3, 0)
 
         return context
 

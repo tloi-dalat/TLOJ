@@ -39,7 +39,7 @@
             min-width: 12.5em;
         }
 
-        #problem-types, #allowed-langs, #available-judges {
+        #from-contests, #problem-types, #allowed-langs, #available-judges {
             padding-top: 1em;
         }
 
@@ -409,6 +409,20 @@
             <i class="fa fa-pencil-square-o fa-fw"></i><span
                 class="pi-name">{{ _('Problem source:') }}</span>
             <div class="pi-value authors-value">{{ problem.source }}</div>
+        </div>
+    {% endif %}
+
+    {% if from_contests %}
+        <div id="from-contests">
+            <i class="fa fa-chevron-right fa-fw"></i>{{ _('Contests:') }}
+        </div>
+        <div class="toggled">
+            {% for contest in from_contests %}
+                <a href="{{ contest.get_absolute_url() }}">{{ contest.key }}</a>{% if not loop.last %}, {% endif %}
+            {% endfor %}
+            {% if from_contests_more_count %}
+                {{ _(' and ') }}{{ from_contests_more_count }}{{ _(' more') }}
+            {% endif %}
         </div>
     {% endif %}
 
