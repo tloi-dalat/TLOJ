@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-04 20:00+0000\n"
+"POT-Creation-Date: 2026-03-15 18:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2269,7 +2269,7 @@ msgstr ""
 msgid "Edit problems with full markup"
 msgstr ""
 
-#: judge/models/problem.py:630 templates/problem/problem.html:292
+#: judge/models/problem.py:630 templates/problem/problem.html:320
 msgid "Clone problem"
 msgstr ""
 
@@ -2437,11 +2437,11 @@ msgstr ""
 msgid "generator file"
 msgstr ""
 
-#: judge/models/problem_data.py:63 judge/models/problem_data.py:155
+#: judge/models/problem_data.py:63 judge/models/problem_data.py:156
 msgid "output prefix length"
 msgstr ""
 
-#: judge/models/problem_data.py:64 judge/models/problem_data.py:156
+#: judge/models/problem_data.py:64 judge/models/problem_data.py:157
 msgid "output limit length"
 msgstr ""
 
@@ -2449,7 +2449,7 @@ msgstr ""
 msgid "init.yml generation feedback"
 msgstr ""
 
-#: judge/models/problem_data.py:66 judge/models/problem_data.py:157
+#: judge/models/problem_data.py:66 judge/models/problem_data.py:158
 msgid "checker"
 msgstr ""
 
@@ -2465,11 +2465,11 @@ msgstr ""
 msgid "disable bigInteger / bigDecimal"
 msgstr ""
 
-#: judge/models/problem_data.py:70 judge/models/problem_data.py:158
+#: judge/models/problem_data.py:70 judge/models/problem_data.py:159
 msgid "checker arguments"
 msgstr ""
 
-#: judge/models/problem_data.py:71 judge/models/problem_data.py:159
+#: judge/models/problem_data.py:71 judge/models/problem_data.py:160
 msgid "Checker arguments as a JSON object."
 msgstr ""
 
@@ -2543,6 +2543,10 @@ msgstr ""
 
 #: judge/models/problem_data.py:154
 msgid "case is pretest?"
+msgstr ""
+
+#: judge/models/problem_data.py:155
+msgid "case is example?"
 msgstr ""
 
 #: judge/models/profile.py:41
@@ -3669,8 +3673,8 @@ msgstr ""
 
 #: judge/views/blog.py:394 judge/views/contests.py:1275
 #: judge/views/organization.py:395 judge/views/organization.py:699
-#: judge/views/organization.py:723 judge/views/problem.py:912
-#: judge/views/problem.py:952 judge/views/tag.py:182
+#: judge/views/organization.py:723 judge/views/problem.py:928
+#: judge/views/problem.py:968 judge/views/tag.py:182
 msgid "Created on site"
 msgstr ""
 
@@ -3692,7 +3696,7 @@ msgstr ""
 
 #: judge/views/blog.py:441 judge/views/comment.py:142
 #: judge/views/contests.py:1344 judge/views/organization.py:438
-#: judge/views/problem.py:1103
+#: judge/views/problem.py:1119
 msgid "Edited from site"
 msgstr ""
 
@@ -3945,7 +3949,7 @@ msgstr ""
 msgid "You do not have permission to edit this contest."
 msgstr ""
 
-#: judge/views/contests.py:1480
+#: judge/views/contests.py:1478
 msgid "You do not have permission to edit this problem."
 msgstr ""
 
@@ -4210,71 +4214,71 @@ msgid ""
 "organization to buy more credit."
 msgstr ""
 
-#: judge/views/problem.py:536
+#: judge/views/problem.py:552
 msgid "Problem list"
 msgstr ""
 
-#: judge/views/problem.py:739
+#: judge/views/problem.py:755
 msgid "Suggested problem list"
 msgstr ""
 
-#: judge/views/problem.py:781 judge/views/problem.py:789
+#: judge/views/problem.py:797 judge/views/problem.py:805
 #, python-format
 msgid "Submit to %s"
 msgstr ""
 
-#: judge/views/problem.py:821
+#: judge/views/problem.py:837
 msgid "You are not allowed to submit to this problem."
 msgstr ""
 
-#: judge/views/problem.py:842
+#: judge/views/problem.py:858
 msgid "Clone Problem"
 msgstr ""
 
-#: judge/views/problem.py:870
+#: judge/views/problem.py:886
 #, python-format
 msgid "Cloned problem from %s"
 msgstr ""
 
-#: judge/views/problem.py:893 judge/views/problem.py:896
+#: judge/views/problem.py:909 judge/views/problem.py:912
 msgid "Creating new problem"
 msgstr ""
 
-#: judge/views/problem.py:938 judge/views/problem.py:941
+#: judge/views/problem.py:954 judge/views/problem.py:957
 msgid "Suggesting new problem"
 msgstr ""
 
-#: judge/views/problem.py:960 templates/problem/suggest.html:18
+#: judge/views/problem.py:976 templates/problem/suggest.html:18
 msgid "Import problem from Codeforces Polygon package"
 msgstr ""
 
-#: judge/views/problem.py:1015
+#: judge/views/problem.py:1031
 msgid "Failed to import problem"
 msgstr ""
 
-#: judge/views/problem.py:1023 templates/problem/editor.html:100
+#: judge/views/problem.py:1039 templates/problem/editor.html:100
 msgid "Update problem from Codeforces Polygon package"
 msgstr ""
 
-#: judge/views/problem.py:1047 judge/views/problem.py:1125
+#: judge/views/problem.py:1063 judge/views/problem.py:1141
 #, python-brace-format
 msgid "Editing problem {0}"
 msgstr ""
 
-#: judge/views/problem.py:1050
+#: judge/views/problem.py:1066
 #, python-format
 msgid "Editing problem %s"
 msgstr ""
 
-#: judge/views/problem.py:1114
+#: judge/views/problem.py:1130
 msgid "Can't edit problem"
 msgstr ""
 
-#: judge/views/problem.py:1115
+#: judge/views/problem.py:1131
 msgid "You are not allowed to edit this problem."
 msgstr ""
 
-#: judge/views/problem.py:1135
+#: judge/views/problem.py:1151
 msgid "Edited types/group from site"
 msgstr ""
 
@@ -4478,7 +4482,7 @@ msgid "Comparing submission %(first)s with %(second)s"
 msgstr ""
 
 #: judge/views/submission.py:351 judge/views/submission.py:352
-#: templates/problem/problem.html:244 templates/problem/problem.html:253
+#: templates/problem/problem.html:272 templates/problem/problem.html:281
 msgid "All submissions"
 msgstr ""
 
@@ -5298,7 +5302,7 @@ msgstr ""
 msgid "Post!"
 msgstr ""
 
-#: templates/comments/list.html:3 templates/problem/problem.html:478
+#: templates/comments/list.html:3 templates/problem/problem.html:527
 #: templates/user/prepare-data.html:98 templates/user/user-tabs.html:13
 msgid "Comments"
 msgstr ""
@@ -5436,17 +5440,17 @@ msgid "Submit"
 msgstr ""
 
 #: templates/contest/contest-all-problems.html:43
-#: templates/problem/problem.html:309 templates/problem/raw.html:62
+#: templates/problem/problem.html:337 templates/problem/raw.html:95
 msgid "Time limit:"
 msgstr ""
 
 #: templates/contest/contest-all-problems.html:44
-#: templates/problem/problem.html:321 templates/problem/raw.html:71
+#: templates/problem/problem.html:349 templates/problem/raw.html:104
 msgid "Memory limit:"
 msgstr ""
 
 #: templates/contest/contest-all-problems.html:45
-#: templates/problem/problem.html:299
+#: templates/problem/problem.html:327
 msgid "Points:"
 msgstr ""
 
@@ -5747,7 +5751,7 @@ msgid "Add an announcement"
 msgstr ""
 
 #: templates/contest/contest.html:311 templates/problem/comments.html:24
-#: templates/problem/problem.html:493
+#: templates/problem/problem.html:542
 msgid "Clarifications"
 msgstr ""
 
@@ -5847,8 +5851,11 @@ msgstr ""
 
 #: templates/contest/list.html:197 templates/contest/list.html:237
 #: templates/contest/list.html:277 templates/contest/list.html:327
+#: templates/problem/problem.html:452
 msgid "Contest"
-msgstr ""
+msgid_plural "Contests"
+msgstr[0] ""
+msgstr[1] ""
 
 #: templates/contest/list.html:212
 #, python-format
@@ -6434,7 +6441,7 @@ msgstr ""
 msgid "Comments for"
 msgstr ""
 
-#: templates/problem/comments.html:35 templates/problem/problem.html:504
+#: templates/problem/comments.html:35 templates/problem/problem.html:553
 msgid "No clarifications have been made at this time."
 msgstr ""
 
@@ -6601,7 +6608,7 @@ msgid ""
 "bannable offence."
 msgstr ""
 
-#: templates/problem/editorial.html:30 templates/problem/problem.html:360
+#: templates/problem/editorial.html:30 templates/problem/problem.html:388
 msgid "Author:"
 msgid_plural "Authors:"
 msgstr[0] ""
@@ -6762,128 +6769,136 @@ msgstr ""
 msgid "Suggest"
 msgstr ""
 
-#: templates/problem/problem.html:211
+#: templates/problem/problem.html:239
 msgid "View as PDF"
 msgstr ""
 
-#: templates/problem/problem.html:220 templates/problem/problem.html:230
-#: templates/problem/problem.html:235
+#: templates/problem/problem.html:248 templates/problem/problem.html:258
+#: templates/problem/problem.html:263
 msgid "Submit solution"
 msgstr ""
 
-#: templates/problem/problem.html:223
+#: templates/problem/problem.html:251
 #, python-format
 msgid "%(counter)s submission left"
 msgid_plural "%(counter)s submissions left"
 msgstr[0] ""
 msgstr[1] ""
 
-#: templates/problem/problem.html:231
+#: templates/problem/problem.html:259
 msgid "0 submissions left"
 msgstr ""
 
-#: templates/problem/problem.html:242 templates/problem/problem.html:250
+#: templates/problem/problem.html:270 templates/problem/problem.html:278
 msgid "My submissions"
 msgstr ""
 
-#: templates/problem/problem.html:245 templates/problem/problem.html:254
+#: templates/problem/problem.html:273 templates/problem/problem.html:282
 msgid "Best submissions"
 msgstr ""
 
-#: templates/problem/problem.html:258
+#: templates/problem/problem.html:286
 msgid "Read editorial"
 msgstr ""
 
-#: templates/problem/problem.html:263
+#: templates/problem/problem.html:291
 msgid "Manage tickets"
 msgstr ""
 
-#: templates/problem/problem.html:267
+#: templates/problem/problem.html:295
 msgid "Edit problem"
 msgstr ""
 
-#: templates/problem/problem.html:269
+#: templates/problem/problem.html:297
 msgid "Edit test data"
 msgstr ""
 
-#: templates/problem/problem.html:274
+#: templates/problem/problem.html:302
 msgid "My tickets"
 msgstr ""
 
-#: templates/problem/problem.html:281
+#: templates/problem/problem.html:309
 msgid "Edit type group"
 msgstr ""
 
-#: templates/problem/problem.html:286
+#: templates/problem/problem.html:314
 msgid "Manage submissions"
 msgstr ""
 
-#: templates/problem/problem.html:302 templates/problem/problem.html:304
+#: templates/problem/problem.html:330 templates/problem/problem.html:332
 msgid "(partial)"
 msgstr ""
 
-#: templates/problem/problem.html:334 templates/problem/problem.html:343
+#: templates/problem/problem.html:362 templates/problem/problem.html:371
 #: templates/submission/status-testcases.html:135
 msgid "Input:"
 msgstr ""
 
-#: templates/problem/problem.html:338 templates/problem/problem.html:347
+#: templates/problem/problem.html:366 templates/problem/problem.html:375
 msgid "Output:"
 msgstr ""
 
-#: templates/problem/problem.html:371
+#: templates/problem/problem.html:399
 msgid "Suggester:"
 msgstr ""
 
-#: templates/problem/problem.html:382
+#: templates/problem/problem.html:410
 msgid "Problem source:"
 msgstr ""
 
-#: templates/problem/problem.html:391
+#: templates/problem/problem.html:419
 msgid "Problem type"
 msgid_plural "Problem types"
 msgstr[0] ""
 msgstr[1] ""
 
-#: templates/problem/problem.html:404
+#: templates/problem/problem.html:432
 msgid "Allowed languages"
 msgstr ""
 
-#: templates/problem/problem.html:412
+#: templates/problem/problem.html:440
 #, python-format
 msgid "No %(lang)s judge online"
 msgstr ""
 
-#: templates/problem/problem.html:423
+#: templates/problem/problem.html:463
+msgid " and "
+msgstr ""
+
+#: templates/problem/problem.html:463
+msgid " more"
+msgstr ""
+
+#: templates/problem/problem.html:472
 msgid "Judge:"
 msgid_plural "Judges:"
 msgstr[0] ""
 msgstr[1] ""
 
-#: templates/problem/problem.html:440
+#: templates/problem/problem.html:489
 msgid "none available"
 msgstr ""
 
-#: templates/problem/problem.html:452
+#: templates/problem/problem.html:501
 msgid "This problem is only a suggestion!"
 msgstr ""
 
-#: templates/problem/problem.html:454
+#: templates/problem/problem.html:503
 msgid ""
 "This problem cannot be accessed by normal users until it is approved by an "
 "admin or staff. Please make sure that all the data for this problem is "
 "correct."
 msgstr ""
 
-#: templates/problem/problem.html:464
+#: templates/problem/problem.html:513
 msgid "Request clarification"
 msgstr ""
 
-#: templates/problem/problem.html:466
+#: templates/problem/problem.html:515
 msgid "Report an issue"
 msgstr ""
 
-#: templates/problem/problem.html:476
+#: templates/problem/problem.html:525
 msgid "Submit Solution"
 msgstr ""
 
