@@ -449,11 +449,10 @@
     {% if from_contests %}
         <div id="from-contests">
             <div class="toggle open unselectable">
-                <i class="fa fa-chevron-right fa-fw"></i>
-                {% trans trimmed count=from_contests|length %}
-                    Contest
-                    {% pluralize count %}
-                    Contests
+                <i class="fa fa-chevron-right fa-fw"></i>{% trans trimmed count=from_contests|length %}
+                Contest
+                {% pluralize count %}
+                Contests
                 {% endtrans %}
             </div>
             <div class="toggled">
