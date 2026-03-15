@@ -135,7 +135,7 @@ msgstr "Bài"
 #: judge/admin/contest.py:67 templates/contest/contest.html:187
 #: templates/contest/edit.html:109 templates/contest/edit.html:116
 msgid "Problems"
-msgstr "Bài"
+msgstr "Danh sách bài"
 
 #: judge/admin/contest.py:78 judge/admin/submission.py:249
 #: templates/admin/judge/submission/change_form.html:14
@@ -6074,7 +6074,9 @@ msgstr "Các kỳ thi đang tham gia"
 #: templates/contest/list.html:277 templates/contest/list.html:327
 #: templates/problem/problem.html:452
 msgid "Contest"
-msgstr "Kỳ thi"
+msgid_plural "Contests"
+msgstr[0] "Kỳ thi"
+msgstr[1] "Các kỳ thi"
 
 #: templates/contest/list.html:212
 #, python-format
