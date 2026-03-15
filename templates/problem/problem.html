@@ -39,7 +39,7 @@
             min-width: 12.5em;
         }
 
-        #problem-types, #allowed-langs, #available-judges {
+        #problem-types, #allowed-langs, #available-judges, #from-contests {
             padding-top: 1em;
         }
 
@@ -445,6 +445,28 @@
             </div>
         </div>
     {% endif %}
+
+    {% if from_contests %}
+        <div id="from-contests">
+            <div class="toggle open unselectable">
+                <i class="fa fa-chevron-right fa-fw"></i>
+                {% trans trimmed count=from_contests|length %}
+                    Contest
+                    {% pluralize count %}
+                    Contests
+                {% endtrans %}
+            </div>
+            <div class="toggled">
+                {% for contest in from_contests %}
+                    <a href="{{ contest.get_absolute_url() }}">{{ contest.key }}</a>{% if not loop.last %}, {% endif %}
+                {% endfor %}
+                {% if from_contests_more_count %}
+                    {{ _(' and ') }}{{ from_contests_more_count }}{{ _(' more') }}
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+
     {% if problem.is_editable_by(request.user) %}
         <div id="available-judges">
             <i class="fa fa-database fa-fw"></i><span
