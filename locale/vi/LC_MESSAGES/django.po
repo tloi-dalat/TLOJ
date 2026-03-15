@@ -6073,11 +6073,8 @@ msgstr "Các kỳ thi đang tham gia"
 #: templates/contest/list.html:197 templates/contest/list.html:237
 #: templates/contest/list.html:277 templates/contest/list.html:327
 #: templates/problem/problem.html:452
-#, fuzzy
-#| msgid "Contest"
 msgid "Contest"
-msgid_plural "Contests"
-msgstr[0] "Kỳ thi"
+msgstr "Kỳ thi"
 
 #: templates/contest/list.html:212
 #, python-format
