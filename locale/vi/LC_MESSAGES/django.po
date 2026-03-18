@@ -7394,8 +7394,8 @@ msgid "Activate your %(SITE_NAME)s account"
 msgstr "Kích hoạt tài khoản %(SITE_NAME)s"
 
 #: templates/registration/login.html:9
-msgid "Invalid username or password."
-msgstr "Tên người dùng hoặc mật khẩu không hợp lệ."
+msgid "Invalid username, email or password."
+msgstr "Tên người dùng, email hoặc mật khẩu không hợp lệ."
 
 #: templates/registration/login.html:14
 msgid ""
@@ -8778,3 +8778,7 @@ msgstr "Phiên bản của trình chấm"
 
 msgid "Maximum single-case runtime:"
 msgstr "Thời gian chạy test lâu nhất:"
+
+#: judge/forms.py:525
+msgid "Username or Email"
+msgstr "Tên đăng nhập hoặc Email"
