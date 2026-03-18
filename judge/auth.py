@@ -4,6 +4,7 @@ from django.db.models import Q
 
 User = get_user_model()
 
+
 class EmailOrUsernameModelBackend(ModelBackend):
     """
     Authentication backend that allows users to log in using either their
@@ -21,7 +22,6 @@ class EmailOrUsernameModelBackend(ModelBackend):
             user = User.objects.filter(username__iexact=username).first()
             if not user:
                 return None
-        
         if user.check_password(password) and self.user_can_authenticate(user):
             return user
         return None
