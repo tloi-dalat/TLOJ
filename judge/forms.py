@@ -522,15 +522,17 @@ class SocialAuthMixin:
 class CustomAuthenticationForm(AuthenticationForm, SocialAuthMixin):
     def __init__(self, *args, **kwargs):
         super(CustomAuthenticationForm, self).__init__(*args, **kwargs)
-        self.fields['username'].widget.attrs.update({'placeholder': _('Username')})
+        self.fields['username'].widget.attrs.update({'placeholder': _('Username or Email')})
         self.fields['password'].widget.attrs.update({'placeholder': _('Password')})
 
     def clean(self):
         username = self.cleaned_data.get('username')
         try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
+            # Try to fetch user by username or email for the banned check
+            user = User.objects.get(Q(username__iexact=username) | Q(email__iexact=username))
+        except (User.DoesNotExist, User.MultipleObjectsReturned):
             user = None
+
         if user is not None:
             self.confirm_login_allowed(user)
         return super(CustomAuthenticationForm, self).clean()
