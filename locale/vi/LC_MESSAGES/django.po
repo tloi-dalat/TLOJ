@@ -26,7 +26,7 @@ msgid "Problem Setter"
 msgstr ""
 
 #: dmoj/settings.py:74
-msgid "Bedao Team"
+msgid "TLOI Team"
 msgstr ""
 
 #: dmoj/settings.py:75
