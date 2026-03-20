@@ -457,7 +457,7 @@
             </div>
             <div class="toggled">
                 {% for contest in from_contests %}
-                    <a href="{{ contest.get_absolute_url() }}">{{ contest.key }}</a>{% if not loop.last %}, {% endif %}
+                    <a href="{{ contest.get_absolute_url() }}">{{ contest.name }}</a>{% if not loop.last %}, {% endif %}
                 {% endfor %}
                 {% if from_contests_more_count %}
                     {{ _(' and ') }}{{ from_contests_more_count }}{{ _(' more') }}
