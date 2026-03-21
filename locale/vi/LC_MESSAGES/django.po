@@ -8778,3 +8778,16 @@ msgstr "Phiên bản của trình chấm"
 
 msgid "Maximum single-case runtime:"
 msgstr "Thời gian chạy test lâu nhất:"
+
+msgid "You have successfully registered for an account. We have sent a confirmation email to the address you provided."
+msgstr "Bạn đã đăng ký tài khoản thành công. Chúng mình đã gửi một email xác nhận đến địa chỉ bạn đã cung cấp."
+
+msgid "Please check your inbox (and your spam folder) to activate your account."
+msgstr "Vui lòng kiểm tra hộp thư đến (và cả hộp thư rác) để kích hoạt tài khoản của bạn."
+
+msgid "If you encounter any issues during the activation process, feel free to reach out to us at our official Fanpage: "
+msgstr "Nếu bạn gặp bất kỳ vấn đề gì trong quá trình kích hoạt, đừng ngần ngại liên hệ với chúng mình qua Fanpage chính thức: "
+
+msgid "If you have any issues resetting your password, feel free to reach out to us at our official Fanpage: "
+msgstr "Nếu bạn gặp vấn đề trong việc đặt lại mật khẩu, đừng ngần ngại liên hệ với chúng mình qua Fanpage chính thức: "
+
