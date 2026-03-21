@@ -6,7 +6,7 @@
             {% csrf_token %}
             {% if form.errors %}
                 <div id="form-errors" style="max-width: fit-content;">
-                    <p class="error">{{ _('Invalid username or password.') }}</p>
+                    <p class="error">{{ _('Invalid username, email or password.') }}</p>
                     {% for error in form.non_field_errors() %}
                         <p class="error">{{error}}</p>
                     {% endfor %}

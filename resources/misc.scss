@@ -55,6 +55,22 @@
     justify-content: center;
     align-content: center;
     padding-top: 5%;
+
+    .form-area {
+        min-width: 275px;
+        max-width: 100%;
+
+        input[type="text"],
+        input[type="password"],
+        input[type="email"] {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        table {
+            width: 100%;
+        }
+    }
 }
 
 .grayed {
