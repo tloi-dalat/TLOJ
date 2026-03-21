@@ -1,4 +1,5 @@
 import json
+from multiprocessing import context
 import os
 from collections import namedtuple
 from itertools import groupby
@@ -241,7 +242,8 @@ class SubmissionStatus(SubmissionDetailBase):
         context = super(SubmissionStatus, self).get_context_data(**kwargs)
         submission = self.object
 
-        context['batches'], statuses, test_case_count = group_test_cases(submission.test_cases.all())
+        test_cases = sorted(submission.test_cases.all(), key=lambda c: getattr(c, 'case_position', c.case))
+        context['batches'], statuses, test_case_count = group_test_cases(test_cases)
 
         context['feedback_limit'] = min(3, test_case_count - 1)
         # In case the submission is in an on-going contest, we don't want to show any feedback.

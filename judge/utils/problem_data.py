@@ -93,13 +93,11 @@ def get_problem_testcases_data(problem):
     # TODO:
     # - Support manually managed problems
     # - Support pretest
-    order = 0
     for case in problem.cases.all().order_by('order'):
         try:
             if not case.input_file:
                 continue
-            order += 1
-            testcases_data[order] = get_testcase_data(archive, case)
+            testcases_data[case.order] = get_testcase_data(archive, case)
         except Exception:
             return {}
 
@@ -255,6 +253,7 @@ class ProblemDataCompiler(object):
                     data['checker'] = make_checker(case)
                 else:
                     case.checker_args = ''
+                data['case_position'] = case.order
                 case.save(update_fields=('checker_args', 'is_pretest'))
                 (batch['batched'] if batch else cases).append(data)
             elif case.type == 'S':
