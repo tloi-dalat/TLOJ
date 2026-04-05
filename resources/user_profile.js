@@ -123,4 +123,3 @@ function init_submission_table($, submission_activity, language_code) {
 }
 
 window.init_submission_table = init_submission_table;
-
