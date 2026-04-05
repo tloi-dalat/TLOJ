@@ -52,7 +52,9 @@ function init_submission_table($, submission_activity, language_code) {
         }
         var days = [];
         for (var day = start_day, day_num = 1; day <= end_day; day.setDate(day.getDate() + 1), day_num++) {
-            var isodate = day.toISOString().split('T')[0];
+            var isodate = day.getFullYear() + '-' +
+                String(day.getMonth() + 1).padStart(2, '0') + '-' +
+                String(day.getDate()).padStart(2, '0');
             days.push({
                 date: new Date(day),
                 weekday: day.getDay(),
@@ -121,3 +123,4 @@ function init_submission_table($, submission_activity, language_code) {
 }
 
 window.init_submission_table = init_submission_table;
+
