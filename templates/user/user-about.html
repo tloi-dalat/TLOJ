@@ -10,7 +10,7 @@
 
 {% block user_content %}
     <div class="content-description">
-        {% with orgs=user.organizations.all() %}
+        {% with orgs=user.organizations.filter(is_unlisted=False) %}
             {% if orgs %}
                 <div style="margin: 0; line-height: 1.4;"><b>{{ _('From') }}</b></div>
                 <ul style="margin: 0; padding-left: 20px;">
