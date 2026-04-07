@@ -7775,7 +7775,7 @@ msgstr "Huỷ"
 
 #: templates/status/oj-status.html:76 templates/user/user-about.html:15
 msgid "From"
-msgstr "Từ"
+msgstr "Đến từ"
 
 #: templates/status/oj-status.html:77
 msgid "To"
