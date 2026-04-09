@@ -668,7 +668,9 @@ def user_contributor_redirect(request):
     except KeyError:
         raise Http404()
     user = get_object_or_404(Profile, user__username=username)
-    rank = Profile.objects.filter(is_unlisted=False, user__is_active=True, contribution_points__gt=user.contribution_points).count()
+    rank = Profile.objects.filter(
+        is_unlisted=False, user__is_active=True, contribution_points__gt=user.contribution_points,
+    ).count()
     rank += Profile.objects.filter(
         is_unlisted=False, user__is_active=True, contribution_points__exact=user.contribution_points, id__lt=user.id,
     ).count()
