@@ -574,7 +574,7 @@ class UserList(QueryStringSortMixin, InfinitePaginationMixin, DiggPaginatorMixin
     default_sort = '-rating'
 
     def get_queryset(self):
-        return (Profile.objects.filter(is_unlisted=False, user__is_active=True).order_by(self.order, 'id')
+        return (Profile.objects.filter(is_unlisted=False).order_by(self.order, 'id')
                 .prefetch_related(Prefetch('user', queryset=User.objects.only('username', 'first_name')))
                 .prefetch_related(Prefetch('organizations',
                                   queryset=Organization.objects.filter(is_unlisted=False).only('name', 'id', 'slug')))
@@ -609,7 +609,7 @@ class ContribList(QueryStringSortMixin, DiggPaginatorMixin, TitleMixin, ListView
     default_sort = '-contribution_points'
 
     def get_queryset(self):
-        return (Profile.objects.filter(is_unlisted=False, user__is_active=True).order_by(self.order, 'id')
+        return (Profile.objects.filter(is_unlisted=False).order_by(self.order, 'id')
                 .prefetch_related(Prefetch('user', queryset=User.objects.only('username', 'first_name')))
                 .prefetch_related(Prefetch('organizations',
                                   queryset=Organization.objects.filter(is_unlisted=False).only('name', 'id', 'slug')))
@@ -652,11 +652,11 @@ def user_ranking_redirect(request):
     user = get_object_or_404(Profile, user__username=username)
     # Assume using MySQL. NULL is considered smaller than any non-NULL value.
     if user.rating is None:
-        rank = Profile.objects.filter(is_unlisted=False, user__is_active=True, rating__isnull=False).count()
+        rank = Profile.objects.filter(is_unlisted=False, rating__isnull=False).count()
     else:
-        rank = Profile.objects.filter(is_unlisted=False, user__is_active=True, rating__gt=user.rating).count()
+        rank = Profile.objects.filter(is_unlisted=False, rating__gt=user.rating).count()
     rank += Profile.objects.filter(
-        is_unlisted=False, user__is_active=True, rating__exact=user.rating, id__lt=user.id,
+        is_unlisted=False, rating__exact=user.rating, id__lt=user.id,
     ).count()
     page = rank // UserList.paginate_by
     return HttpResponseRedirect('%s%s#!%s' % (reverse('user_list'), '?page=%d' % (page + 1) if page else '', username))
@@ -668,11 +668,9 @@ def user_contributor_redirect(request):
     except KeyError:
         raise Http404()
     user = get_object_or_404(Profile, user__username=username)
-    rank = Profile.objects.filter(
-        is_unlisted=False, user__is_active=True, contribution_points__gt=user.contribution_points,
-    ).count()
+    rank = Profile.objects.filter(is_unlisted=False, contribution_points__gt=user.contribution_points).count()
     rank += Profile.objects.filter(
-        is_unlisted=False, user__is_active=True, contribution_points__exact=user.contribution_points, id__lt=user.id,
+        is_unlisted=False, contribution_points__exact=user.contribution_points, id__lt=user.id,
     ).count()
     page = rank // ContribList.paginate_by
     return HttpResponseRedirect('%s%s#!%s' % (reverse('contributors_list'), '?page=%d' % (page + 1) if page else '',
