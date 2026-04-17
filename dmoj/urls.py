@@ -26,6 +26,7 @@ from judge.views.select2 import AssigneeSelect2View, CommentSelect2View, Contest
     ContestUserSearchSelect2View, OrganizationSelect2View, OrganizationUserSearchSelect2View, \
     OrganizationUserSelect2View, ProblemSelect2View, TagGroupSelect2View, TagSelect2View, TicketUserSelect2View, \
     UserSearchSelect2View, UserSelect2View
+from judge.views.graph_editor import GraphEditorView
 from judge.views.widgets import martor_image_uploader
 from martor.views import markdown_search_user
 
@@ -347,6 +348,10 @@ urlpatterns = [
         path('/edit', blog.BlogPostEdit.as_view(), name='blog_post_edit'),
         path('/delete', blog.BlogPostDelete.as_view(), name='blog_post_delete'),
         path('/', lambda _, id, slug: HttpResponsePermanentRedirect(reverse('blog_post', args=[id, slug]))),
+    ])),
+
+    path('tools/', include([
+        path('graph-editor', GraphEditorView.as_view(), name='graph_editor'),
     ])),
 
     path('license/<str:key>', license.LicenseDetail.as_view(), name='license'),

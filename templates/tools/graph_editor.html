@@ -1,0 +1,1251 @@
+{% extends "base.html" %}
+{% block title_row %}{% endblock %}
+
+{% block media %}
+<style>
+  html,
+  body.ge-page {
+    overflow: hidden;
+  }
+
+  #ge-page {
+    --ge-bg: #f4f6fb;
+    --ge-panel: #ffffff;
+    --ge-panel-alt: #f9fbff;
+    --ge-border: #d8dee9;
+    --ge-border-strong: #c4ccda;
+    --ge-text: #1f2937;
+    --ge-text-soft: #5b6474;
+    --ge-text-faint: #7b8596;
+    --ge-primary: #3b82f6;
+    --ge-primary-hover: #2563eb;
+    --ge-primary-soft: rgba(59, 130, 246, 0.12);
+    --ge-danger: #ef4444;
+    --ge-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    --ge-canvas-bg: linear-gradient(180deg, #ffffff 0%, #f6f8fd 100%);
+    --ge-badge-bg: rgba(255, 255, 255, 0.88);
+    --ge-badge-text: #4b5563;
+    --ge-range-accent: #3b82f6;
+
+    display: grid;
+    grid-template-columns: minmax(18rem, 21rem) minmax(0, 1fr);
+    gap: 1rem;
+    height: calc(100vh - 10.5rem);
+    min-height: 34rem;
+    max-height: calc(100vh - 10.5rem);
+    overflow: hidden;
+    padding: 0.25rem 0 0.5rem;
+    color: var(--ge-text);
+  }
+
+  #ge-page.ge-theme-dark {
+    --ge-bg: #151922;
+    --ge-panel: #1c2230;
+    --ge-panel-alt: #202839;
+    --ge-border: #313b4f;
+    --ge-border-strong: #44506a;
+    --ge-text: #e5ecf5;
+    --ge-text-soft: #b6c0d0;
+    --ge-text-faint: #8792a6;
+    --ge-primary: #60a5fa;
+    --ge-primary-hover: #3b82f6;
+    --ge-primary-soft: rgba(96, 165, 250, 0.16);
+    --ge-danger: #f87171;
+    --ge-shadow: 0 16px 36px rgba(0, 0, 0, 0.3);
+    --ge-canvas-bg: linear-gradient(180deg, #0f1420 0%, #141b29 100%);
+    --ge-badge-bg: rgba(20, 27, 41, 0.86);
+    --ge-badge-text: #c6d0de;
+    --ge-range-accent: #60a5fa;
+  }
+
+  #ge-sidebar {
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    gap: 0.9rem;
+    min-height: 0;
+  }
+
+  .ge-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    min-height: 0;
+    padding: 0.95rem 1rem;
+    border: 1px solid var(--ge-border);
+    border-radius: 0.85rem;
+    background: linear-gradient(180deg, var(--ge-panel) 0%, var(--ge-panel-alt) 100%);
+    box-shadow: var(--ge-shadow);
+  }
+
+  .ge-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  .ge-card__title {
+    margin: 0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ge-text-faint);
+  }
+
+  #ge-status {
+    font-size: 0.78rem;
+    line-height: 1.45;
+  }
+
+  .ge-option-list {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .ge-option {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 0;
+    color: var(--ge-text);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .ge-option span {
+    min-width: 0;
+    flex: 1 1 auto;
+    line-height: 1.35;
+  }
+
+  .ge-option input {
+    margin: 0;
+    accent-color: var(--ge-primary);
+  }
+
+  .ge-input-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-height: 0;
+    flex: 1 1 auto;
+  }
+
+  #ge-input {
+    width: 100%;
+    min-height: 10rem;
+    height: 100%;
+    box-sizing: border-box;
+    resize: none;
+    padding: 0.8rem 0.9rem;
+    border: 1px solid var(--ge-border);
+    border-radius: 0.75rem;
+    background: var(--ge-panel);
+    color: var(--ge-text);
+    font: 0.86rem/1.5 Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+    box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+  }
+
+  #ge-input:focus {
+    outline: none;
+    border-color: var(--ge-primary);
+    box-shadow: 0 0 0 0.2rem var(--ge-primary-soft);
+  }
+
+  #ge-status {
+    min-height: 1.2rem;
+    color: var(--ge-text-faint);
+  }
+
+  #ge-status.is-error {
+    color: var(--ge-danger);
+  }
+
+  .ge-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    flex-wrap: wrap;
+  }
+
+  .ge-button {
+    appearance: none;
+    border: 1px solid var(--ge-border);
+    border-radius: 0.65rem;
+    background: var(--ge-panel);
+    color: var(--ge-text);
+    padding: 0.5rem 0.8rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+  }
+
+  .ge-button:hover {
+    border-color: var(--ge-border-strong);
+    background: var(--ge-panel-alt);
+  }
+
+  .ge-button:active {
+    transform: translateY(1px);
+  }
+
+  .ge-button--primary {
+    background: var(--ge-primary);
+    border-color: var(--ge-primary);
+    color: #fff;
+  }
+
+  .ge-button--primary:hover {
+    background: var(--ge-primary-hover);
+    border-color: var(--ge-primary-hover);
+  }
+
+  .ge-slider-group {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .ge-slider {
+    display: grid;
+    gap: 0.3rem;
+  }
+
+  .ge-slider__label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--ge-text);
+  }
+
+  .ge-slider__value {
+    color: var(--ge-text-faint);
+    font-weight: 700;
+    min-width: 2.5rem;
+    text-align: right;
+  }
+
+  .ge-slider input[type='range'] {
+    width: 100%;
+    margin: 0;
+    accent-color: var(--ge-range-accent);
+  }
+
+  #ge-canvas-panel {
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    border: 1px solid var(--ge-border);
+    border-radius: 1rem;
+    background: var(--ge-canvas-bg);
+    box-shadow: var(--ge-shadow);
+  }
+
+  #ge-canvas,
+  #ge-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  #ge-overlay {
+    cursor: default;
+  }
+
+
+  @media (max-width: 1100px) {
+    #ge-page {
+      grid-template-columns: minmax(16.5rem, 19rem) minmax(0, 1fr);
+      gap: 0.75rem;
+    }
+
+    .ge-card {
+      padding: 0.85rem 0.9rem;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block body %}
+<div id="ge-page">
+  <aside id="ge-sidebar">
+    <section class="ge-card">
+      <div class="ge-card__header">
+        <h4 class="ge-card__title">Graph type</h4>
+      </div>
+      <div class="ge-option-list">
+        <label class="ge-option">
+          <input type="radio" name="ge-type" value="undirected" checked>
+          <span>Undirected</span>
+        </label>
+        <label class="ge-option">
+          <input type="radio" name="ge-type" value="directed">
+          <span>Directed</span>
+        </label>
+      </div>
+    </section>
+
+    <section class="ge-card">
+      <div class="ge-card__header">
+        <h4 class="ge-card__title">Options</h4>
+      </div>
+      <div class="ge-option-list">
+        <label class="ge-option">
+          <input type="checkbox" id="ge-tree">
+          <span>Tree mode (layer layout)</span>
+        </label>
+        <label class="ge-option">
+          <input type="checkbox" id="ge-lock">
+          <span>Lock all nodes</span>
+        </label>
+        <label class="ge-option">
+          <input type="checkbox" id="ge-ephys" checked>
+          <span>Edge physics (bend around nodes)</span>
+        </label>
+      </div>
+    </section>
+
+    <section class="ge-card">
+      <div class="ge-card__header">
+        <h4 class="ge-card__title">Adjacency list</h4>
+              </div>
+      <div class="ge-input-wrap">
+        <textarea id="ge-input" placeholder="1 2&#10;1 3&#10;2 4&#10;3 4"></textarea>
+        <div id="ge-status"></div>
+        <div class="ge-actions">
+          <button class="ge-button ge-button--primary" id="ge-fit" type="button">Fit graph</button>
+          <button class="ge-button" id="ge-clear" type="button">Clear</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="ge-card">
+      <div class="ge-card__header">
+        <h4 class="ge-card__title">Physics</h4>
+      </div>
+      <div class="ge-slider-group">
+        <label class="ge-slider" for="ge-elen">
+          <span class="ge-slider__label">
+            <span>Edge length</span>
+            <span class="ge-slider__value" id="ge-elen-value">80</span>
+          </span>
+          <input type="range" id="ge-elen" min="20" max="300" value="80">
+        </label>
+        <label class="ge-slider" for="ge-tension">
+          <span class="ge-slider__label">
+            <span>Tension</span>
+            <span class="ge-slider__value" id="ge-tension-value">1.6</span>
+          </span>
+          <input type="range" id="ge-tension" min="10" max="40" value="16">
+        </label>
+        <label class="ge-slider" for="ge-repulsion">
+          <span class="ge-slider__label">
+            <span>Repulsion</span>
+            <span class="ge-slider__value" id="ge-repulsion-value">0.0</span>
+          </span>
+          <input type="range" id="ge-repulsion" min="0" max="30" value="0">
+        </label>
+      </div>
+    </section>
+  </aside>
+
+  <section id="ge-canvas-panel" aria-label="Graph canvas">
+    <canvas id="ge-canvas"></canvas>
+    <canvas id="ge-overlay"></canvas>
+  </section>
+</div>
+{% endblock %}
+
+{% block bodyend %}
+<script>
+(function () {
+'use strict';
+
+// Match this page's layout needs without changing the shared base template.
+document.body.classList.add('ge-page');
+window.addEventListener('beforeunload', function () {
+  document.body.classList.remove('ge-page');
+});
+
+const NODE_FRICTION = 0.05;
+const CANVAS_FIELD_DIST = 50;
+const FPS = 90;
+const NODE_RADIUS = 16;
+const EDGE_LABEL_SEPARATION = 14;
+const CENTERING_STRENGTH = 0.00085;
+
+let canvasW = 0;
+let canvasH = 0;
+let nodes = [];
+let nodeMap = new Map();
+let adj = new Map();
+let adjSet = new Map();
+let edges = [];
+let edgeLabels = new Map();
+let edgeCurvMap = new Map();
+let edgeToPos = new Map();
+
+let directed = false;
+let treeMode = false;
+let lockMode = false;
+let edgePhysics = true;
+
+let nodeDist = 112;
+let tension = 1.6;
+let nodeRepulsion = 0.0;
+
+let layerMap = null;
+let mousePos = { x: 0, y: 0 };
+let dragNode = null;
+let animId = null;
+
+const pageEl = document.getElementById('ge-page');
+const wrap = document.getElementById('ge-canvas-panel');
+const canvas = document.getElementById('ge-canvas');
+const overlay = document.getElementById('ge-overlay');
+const ctx = canvas.getContext('2d');
+const statusEl = document.getElementById('ge-status');
+const inputEl = document.getElementById('ge-input');
+const treeCb = document.getElementById('ge-tree');
+const lockCb = document.getElementById('ge-lock');
+const ePhysCb = document.getElementById('ge-ephys');
+const fitBtn = document.getElementById('ge-fit');
+const clearBtn = document.getElementById('ge-clear');
+const elenSldr = document.getElementById('ge-elen');
+const tensSldr = document.getElementById('ge-tension');
+const repSldr = document.getElementById('ge-repulsion');
+const edgeLengthValue = document.getElementById('ge-elen-value');
+const tensionValue = document.getElementById('ge-tension-value');
+const repulsionValue = document.getElementById('ge-repulsion-value');
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(value, max));
+}
+
+function dist2D(a, b) {
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+function pointToSegmentDistance(a, b, p) {
+  const abx = b.x - a.x;
+  const aby = b.y - a.y;
+  const ab2 = abx * abx + aby * aby;
+  if (!ab2) {
+    return dist2D(a, p);
+  }
+  let t = ((p.x - a.x) * abx + (p.y - a.y) * aby) / ab2;
+  t = clamp(t, 0, 1);
+  const proj = { x: a.x + abx * t, y: a.y + aby * t };
+  return dist2D(proj, p);
+}
+
+function isPointProjOutsideLine(a, b, p) {
+  const abx = b.x - a.x;
+  const aby = b.y - a.y;
+  const ab2 = abx * abx + aby * aby;
+  if (!ab2) {
+    return true;
+  }
+  const t = ((p.x - a.x) * abx + (p.y - a.y) * aby) / ab2;
+  return t < 0 || t > 1;
+}
+
+function readRgb(color) {
+  const match = color && color.match(/\d+/g);
+  if (!match || match.length < 3) {
+    return null;
+  }
+  return match.slice(0, 3).map(Number);
+}
+
+function syncThemeClass() {
+  pageEl.classList.toggle('ge-theme-dark', isDark());
+}
+
+function isDark() {
+  const doc = document.documentElement;
+  const body = document.body;
+  if (doc.dataset.theme === 'dark' || body.dataset.theme === 'dark') {
+    return true;
+  }
+  if (
+    body.classList.contains('dark-mode') ||
+    body.classList.contains('theme-dark') ||
+    body.classList.contains('judge-dark')
+  ) {
+    return true;
+  }
+
+  const rgb = readRgb(getComputedStyle(body).backgroundColor) || readRgb(getComputedStyle(doc).backgroundColor);
+  if (rgb) {
+    const luminance = 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
+    return luminance < 140;
+  }
+
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+function displayLabel(raw) {
+  return raw;
+}
+
+function getIdealCurvature(index) {
+  let radius = Math.floor((index + 1) / 2);
+  if (index % 2 === 1) {
+    radius *= -1;
+  }
+  return radius;
+}
+
+function randCoord() {
+  return {
+    x: canvasW / 4 + Math.random() * canvasW / 2,
+    y: canvasH / 4 + Math.random() * canvasH / 2,
+  };
+}
+
+function setStatus(message, isError) {
+  statusEl.textContent = message || '';
+  statusEl.classList.toggle('is-error', Boolean(isError));
+}
+
+function updateSliderLabels() {
+  edgeLengthValue.textContent = elenSldr.value;
+  tensionValue.textContent = (parseInt(tensSldr.value, 10) / 10).toFixed(1);
+  repulsionValue.textContent = (parseInt(repSldr.value, 10) / 10).toFixed(1);
+}
+
+function parseInput(text) {
+  const lines = text.trim().split('\n')
+    .map(function (line) {
+      return line.trim().split(/\s+/).filter(Boolean);
+    })
+    .filter(function (parts) {
+      return parts.length > 0;
+    });
+
+  const newNodes = [];
+  const newAdj = new Map();
+  const newEdges = [];
+  const newLabels = new Map();
+  const baseEdgeCount = new Map();
+
+  function addNode(node) {
+    if (!newAdj.has(node)) {
+      newNodes.push(node);
+      newAdj.set(node, []);
+    }
+  }
+
+  lines.forEach(function (parts) {
+    if (parts.length === 1) {
+      addNode(parts[0]);
+      return;
+    }
+
+    if (parts.length >= 2) {
+      const u = parts[0];
+      const v = parts[1];
+      const w = parts[2] || null;
+
+      if (u === v) {
+        addNode(u);
+        return;
+      }
+
+      addNode(u);
+      addNode(v);
+
+      if (!newAdj.get(u).includes(v)) {
+        newAdj.get(u).push(v);
+      }
+
+      const base = u <= v ? u + ' ' + v : v + ' ' + u;
+      const nextIndex = baseEdgeCount.has(base) ? baseEdgeCount.get(base) + 1 : 0;
+      baseEdgeCount.set(base, nextIndex);
+
+      const edgeKey = u + ' ' + v + ' ' + nextIndex;
+      newEdges.push(edgeKey);
+      if (w !== null) {
+        newLabels.set(edgeKey, w);
+      }
+    }
+  });
+
+  return {
+    nodes: newNodes,
+    adj: newAdj,
+    edges: newEdges,
+    edgeLabels: newLabels,
+    edgeToPos: baseEdgeCount,
+  };
+}
+
+function buildLayers(nodesList, adjMap) {
+  const combined = new Map();
+  nodesList.forEach(function (node) {
+    combined.set(node, []);
+  });
+
+  adjMap.forEach(function (neighbors, u) {
+    neighbors.forEach(function (v) {
+      if (!combined.get(u).includes(v)) {
+        combined.get(u).push(v);
+      }
+      if (!combined.has(v)) {
+        combined.set(v, []);
+      }
+      if (!combined.get(v).includes(u)) {
+        combined.get(v).push(u);
+      }
+    });
+  });
+
+  const layers = new Map();
+  const seen = new Set();
+
+  function findMax(node, depth) {
+    seen.add(node);
+    let maxDepth = depth;
+    (combined.get(node) || []).forEach(function (nextNode) {
+      if (!seen.has(nextNode)) {
+        maxDepth = Math.max(maxDepth, findMax(nextNode, depth + 1));
+      }
+    });
+    return maxDepth;
+  }
+
+  function assign(node, depth, maxDepth) {
+    seen.add(node);
+    layers.set(node, [depth, maxDepth]);
+    (combined.get(node) || []).forEach(function (nextNode) {
+      if (!seen.has(nextNode)) {
+        assign(nextNode, depth + 1, maxDepth);
+      }
+    });
+  }
+
+  nodesList.forEach(function (node) {
+    if (!layers.has(node)) {
+      seen.clear();
+      const maxDepth = findMax(node, 1);
+      seen.clear();
+      assign(node, 1, maxDepth);
+    }
+  });
+
+  return layers;
+}
+
+function applyGraph(parsed) {
+  const oldNodeMap = new Map(nodeMap);
+
+  nodes = parsed.nodes;
+  adj = parsed.adj;
+  edges = parsed.edges;
+  edgeLabels = parsed.edgeLabels;
+  edgeToPos = parsed.edgeToPos;
+
+  nodeMap.clear();
+  nodes.forEach(function (node) {
+    if (oldNodeMap.has(node)) {
+      nodeMap.set(node, oldNodeMap.get(node));
+    } else {
+      const coord = randCoord();
+      nodeMap.set(node, {
+        pos: { x: coord.x, y: coord.y },
+        vel: { x: 0, y: 0 },
+      });
+    }
+  });
+
+  adjSet.clear();
+  nodes.forEach(function (node) {
+    adjSet.set(node, new Set(adj.get(node) || []));
+  });
+
+  edgeCurvMap.clear();
+  layerMap = treeMode ? buildLayers(nodes, adj) : null;
+
+  setStatus(nodes.length + ' nodes · ' + edges.length + ' edges', false);
+}
+
+function updateVelocities() {
+  let centerOfMass = { x: canvasW / 2, y: canvasH / 2 };
+
+  if (nodes.length) {
+    centerOfMass = nodes.reduce(function (acc, node) {
+      const pos = nodeMap.get(node).pos;
+      acc.x += pos.x;
+      acc.y += pos.y;
+      return acc;
+    }, { x: 0, y: 0 });
+
+    centerOfMass.x /= nodes.length;
+    centerOfMass.y /= nodes.length;
+  }
+
+  const centerDx = canvasW / 2 - centerOfMass.x;
+  const centerDy = canvasH / 2 - centerOfMass.y;
+
+  nodes.forEach(function (u) {
+    const uNode = nodeMap.get(u);
+    const uPos = uNode.pos;
+
+    nodes.forEach(function (v) {
+      if (v === u) {
+        return;
+      }
+
+      const vPos = nodeMap.get(v).pos;
+      const distance = Math.max(dist2D(uPos, vPos), 10);
+      let acceleration = 150000 / (2 * Math.pow(distance, 4.5 - nodeRepulsion));
+
+      const isEdge = adjSet.get(u).has(v) || adjSet.get(v).has(u);
+      if (isEdge) {
+        acceleration = Math.pow(Math.abs(distance - nodeDist), tension) / 100000;
+        if (distance >= nodeDist) {
+          acceleration *= -1;
+        }
+      }
+
+      const ax = vPos.x - uPos.x;
+      const ay = vPos.y - uPos.y;
+
+      uNode.vel = {
+        x: clamp((uNode.vel.x - acceleration * ax) * (1 - NODE_FRICTION), -100, 100),
+        y: clamp((uNode.vel.y - acceleration * ay) * (1 - NODE_FRICTION), -100, 100),
+      };
+    });
+
+    const borderXSign = canvasW / 2 - uPos.x >= 0 ? 1 : -1;
+    const borderYSign = canvasH / 2 - uPos.y >= 0 ? 1 : -1;
+    let borderAx = 0;
+    let borderAy = 0;
+
+    if (Math.min(uPos.x, canvasW - uPos.x) <= CANVAS_FIELD_DIST) {
+      borderAx = Math.pow(canvasW / 2 - uPos.x, 2) * borderXSign / 500000;
+    }
+    if (Math.min(uPos.y, canvasH - uPos.y) <= CANVAS_FIELD_DIST) {
+      borderAy = Math.pow(canvasH / 2 - uPos.y, 2) * borderYSign / 500000;
+    }
+
+    uNode.vel = {
+      x: clamp((uNode.vel.x + borderAx) * (1 - NODE_FRICTION), -100, 100),
+      y: clamp((uNode.vel.y + borderAy) * (1 - NODE_FRICTION), -100, 100),
+    };
+
+    uNode.vel = {
+      x: clamp((uNode.vel.x + centerDx * CENTERING_STRENGTH) * (1 - NODE_FRICTION * 0.2), -100, 100),
+      y: clamp((uNode.vel.y + centerDy * CENTERING_STRENGTH) * (1 - NODE_FRICTION * 0.2), -100, 100),
+    };
+
+    if (layerMap && layerMap.has(u)) {
+      const layerData = layerMap.get(u);
+      const depth = layerData[0];
+      const maxDepth = layerData[1];
+      let layerHeight = (nodeDist * 4) / 5;
+      if (maxDepth * layerHeight >= canvasH - 2 * CANVAS_FIELD_DIST) {
+        layerHeight = (canvasH - 2 * CANVAS_FIELD_DIST) / maxDepth;
+      }
+
+      const yTarget = CANVAS_FIELD_DIST + (depth - 0.5) * layerHeight;
+      let ay = Math.pow(Math.abs(uPos.y - yTarget), 1.75) / 100;
+      if (uPos.y > yTarget) {
+        ay *= -1;
+      }
+
+      uNode.vel = {
+        x: uNode.vel.x,
+        y: clamp((uNode.vel.y + ay) * (1 - NODE_FRICTION), -100, 100),
+      };
+    }
+
+    uNode.pos = {
+      x: uPos.x + uNode.vel.x,
+      y: uPos.y + uNode.vel.y,
+    };
+  });
+
+  nodes.forEach(function (node) {
+    const current = nodeMap.get(node);
+    current.pos.x = clamp(current.pos.x, NODE_RADIUS, canvasW - NODE_RADIUS);
+    current.pos.y = clamp(current.pos.y, NODE_RADIUS, canvasH - NODE_RADIUS);
+  });
+}
+
+function getCurveControlPoints(u, v, radius) {
+  let px = u.y - v.y;
+  let py = v.x - u.x;
+  const shouldFlip = radius < 0;
+  px *= 0.5 * (shouldFlip ? -1 : 1) * Math.abs(radius);
+  py *= 0.5 * (shouldFlip ? -1 : 1) * Math.abs(radius);
+
+  return {
+    p0c: { x: u.x + px, y: u.y + py },
+    p1c: { x: v.x + px, y: v.y + py },
+  };
+}
+
+function getBezierPoint(u, c1, c2, v, t) {
+  const tc = 1 - t;
+  return {
+    x: tc * tc * tc * u.x + 3 * tc * tc * t * c1.x + 3 * tc * t * t * c2.x + t * t * t * v.x,
+    y: tc * tc * tc * u.y + 3 * tc * tc * t * c1.y + 3 * tc * t * t * c2.y + t * t * t * v.y,
+  };
+}
+
+function getBezierTangent(u, c1, c2, v, t) {
+  const tc = 1 - t;
+  return {
+    x: 3 * tc * tc * (c1.x - u.x) + 6 * tc * t * (c2.x - c1.x) + 3 * t * t * (v.x - c2.x),
+    y: 3 * tc * tc * (c1.y - u.y) + 6 * tc * t * (c2.y - c1.y) + 3 * t * t * (v.y - c2.y),
+  };
+}
+
+function getUpperNormal(tangent) {
+  const length = Math.max(Math.hypot(tangent.x, tangent.y), 1e-6);
+  const normalA = { x: -tangent.y / length, y: tangent.x / length };
+  const normalB = { x: tangent.y / length, y: -tangent.x / length };
+
+  if (normalA.y < normalB.y) {
+    return normalA;
+  }
+  return normalB;
+}
+
+function drawLine(u, v, idealR, edgeKey, nodePositions, thickness, color) {
+  if (!edgeCurvMap.has(edgeKey)) {
+    edgeCurvMap.set(edgeKey, idealR);
+  }
+
+  let radius = edgeCurvMap.get(edgeKey);
+  const steps = 10;
+  const flexLimit = 1.5;
+
+  function mid(a, b) {
+    return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+  }
+
+  let controls = getCurveControlPoints(u, v, radius);
+  const nodeContrib = new Map();
+  let previousPoint = u;
+
+  for (let i = 1; i <= steps; i++) {
+    const point = getBezierPoint(u, controls.p0c, controls.p1c, v, i / steps);
+
+    if (edgePhysics && i >= 2 && i <= 9) {
+      const midpoint = mid(previousPoint, point);
+      const baseDir = { x: point.x - previousPoint.x, y: point.y - previousPoint.y };
+
+      nodePositions.forEach(function (pos) {
+        if (isPointProjOutsideLine(u, v, pos)) {
+          return;
+        }
+
+        const local = { x: pos.x - previousPoint.x, y: pos.y - previousPoint.y };
+        const sign = baseDir.x * local.y - baseDir.y * local.x > 0 ? 1 : -1;
+        const distance = dist2D(pos, midpoint);
+        const current = nodeContrib.get(pos);
+
+        if (current === undefined || distance < Math.abs(current)) {
+          nodeContrib.set(pos, sign * distance);
+        }
+      });
+    }
+
+    previousPoint = point;
+  }
+
+  nodeContrib.forEach(function (contrib) {
+    let value = 100 / Math.pow(Math.abs(contrib), 1.9);
+    value = clamp(value, -0.3, 0.3);
+    radius += (contrib > 0 ? -1 : 1) * value;
+  });
+
+  radius -= (radius - idealR) / 10;
+  radius = clamp(radius, idealR - flexLimit, idealR + flexLimit);
+  edgeCurvMap.set(edgeKey, radius);
+  controls = getCurveControlPoints(u, v, radius);
+
+  ctx.lineWidth = 2 * thickness;
+  ctx.strokeStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(u.x, u.y);
+  ctx.bezierCurveTo(controls.p0c.x, controls.p0c.y, controls.p1c.x, controls.p1c.y, v.x, v.y);
+  ctx.stroke();
+
+  return {
+    radius: radius,
+    controls: controls,
+  };
+}
+
+function drawArrow(u, v, curveData, thickness, nodeRadius, color) {
+  const t = 0.985;
+  const tipPoint = getBezierPoint(u, curveData.controls.p0c, curveData.controls.p1c, v, t);
+  const tangent = getBezierTangent(u, curveData.controls.p0c, curveData.controls.p1c, v, t);
+  const tangentLength = Math.max(Math.hypot(tangent.x, tangent.y), 1e-6);
+  const ux = tangent.x / tangentLength;
+  const uy = tangent.y / tangentLength;
+  const tipX = tipPoint.x - ux * (nodeRadius - 1);
+  const tipY = tipPoint.y - uy * (nodeRadius - 1);
+  const arrowLength = nodeRadius * 0.9;
+  const arrowHalfWidth = nodeRadius * 0.38;
+
+  ctx.fillStyle = color;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.5 * thickness;
+  ctx.beginPath();
+  ctx.moveTo(tipX, tipY);
+  ctx.lineTo(
+    tipX - ux * arrowLength + (-uy) * arrowHalfWidth,
+    tipY - uy * arrowLength + ux * arrowHalfWidth
+  );
+  ctx.lineTo(
+    tipX - ux * arrowLength - (-uy) * arrowHalfWidth,
+    tipY - uy * arrowLength - ux * arrowHalfWidth
+  );
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+}
+
+function drawEdgeLabel(u, v, curveData, label, thickness, color) {
+  const labelPoint = getBezierPoint(u, curveData.controls.p0c, curveData.controls.p1c, v, 0.5);
+  const tangent = getBezierTangent(u, curveData.controls.p0c, curveData.controls.p1c, v, 0.5);
+  const normal = getUpperNormal(tangent);
+  const labelX = labelPoint.x + normal.x * EDGE_LABEL_SEPARATION;
+  const labelY = labelPoint.y + normal.y * EDGE_LABEL_SEPARATION;
+
+  ctx.lineWidth = 2 * thickness;
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'center';
+  ctx.font = '13px Menlo, Monaco, Consolas, monospace';
+  ctx.fillStyle = color;
+  ctx.fillText(label, labelX, labelY);
+}
+
+function renderEdges() {
+  const edgeColor = isDark() ? 'hsl(0, 0%, 96%)' : 'hsl(0, 0%, 10%)';
+  const labelColor = edgeColor;
+  const borderWidth = 1.5;
+  const activeKeys = new Set();
+
+  edges.forEach(function (edge) {
+    const parts = edge.split(' ');
+    const from = parts[0];
+    const to = parts[1];
+    const edgeIndex = parseInt(parts[2], 10);
+    const reverse = from > to;
+    const edgeBase = from + ' ' + to;
+    const reverseEdge = to + ' ' + from + ' ' + edgeIndex;
+    const maxIndex = edgeToPos.get(edgeBase);
+    const idealR = getIdealCurvature(edgeIndex);
+    const edgeKey = edgeBase + ' ' + edgeIndex;
+
+    let start = nodeMap.get(from).pos;
+    let end = nodeMap.get(to).pos;
+    if (reverse) {
+      const temp = start;
+      start = end;
+      end = temp;
+    }
+
+    const otherNodes = [];
+    if (edgePhysics) {
+      nodes.forEach(function (node) {
+        if (node !== from && node !== to) {
+          otherNodes.push(nodeMap.get(node).pos);
+        }
+      });
+    }
+
+    activeKeys.add(edgeKey);
+    const curveData = drawLine(start, end, idealR, edgeKey, otherNodes, borderWidth, edgeColor);
+
+    if (directed) {
+      drawArrow(start, end, curveData, borderWidth, NODE_RADIUS, edgeColor);
+    }
+
+    if (edgeLabels.has(edge)) {
+      if (!edgeLabels.has(reverseEdge)) {
+        drawEdgeLabel(start, end, curveData, edgeLabels.get(edge), borderWidth, labelColor);
+      } else if (edge < reverseEdge) {
+        drawEdgeLabel(start, end, curveData, edgeLabels.get(edge), borderWidth, labelColor);
+      } else {
+        drawEdgeLabel(start, end, curveData, edgeLabels.get(edge), borderWidth, labelColor);
+      }
+    }
+  });
+
+  Array.from(edgeCurvMap.keys()).forEach(function (key) {
+    if (!activeKeys.has(key)) {
+      edgeCurvMap.delete(key);
+    }
+  });
+}
+
+function renderNodes() {
+  const borderWidth = 1.5;
+  const stroke = isDark() ? 'hsl(0, 0%, 96%)' : 'hsl(0, 0%, 10%)';
+  const textColor = isDark() ? 'hsl(0, 0%, 96%)' : 'hsl(0, 0%, 10%)';
+
+  nodes.forEach(function (node) {
+    const pos = nodeMap.get(node).pos;
+
+    ctx.lineWidth = 2 * borderWidth;
+    ctx.strokeStyle = stroke;
+
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, NODE_RADIUS - borderWidth, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, NODE_RADIUS - borderWidth, 0, 2 * Math.PI);
+    ctx.stroke();
+
+    ctx.font = '15px Menlo, Monaco, Consolas, monospace';
+    ctx.fillStyle = textColor;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+    ctx.fillText(displayLabel(node), pos.x, pos.y + 1);
+  });
+}
+
+function render() {
+  ctx.clearRect(0, 0, canvasW + 20, canvasH + 20);
+
+  if (dragNode) {
+    const current = nodeMap.get(dragNode);
+    current.pos.x = clamp(mousePos.x, NODE_RADIUS, canvasW - NODE_RADIUS);
+    current.pos.y = clamp(mousePos.y, NODE_RADIUS, canvasH - NODE_RADIUS);
+  }
+
+  renderEdges();
+  renderNodes();
+
+  if (!lockMode) {
+    updateVelocities();
+  }
+}
+
+function startLoop() {
+  if (animId) {
+    clearInterval(animId);
+  }
+  animId = setInterval(function () {
+    requestAnimationFrame(render);
+  }, 1000 / FPS);
+}
+
+function resizeCanvas() {
+  const width = wrap.clientWidth;
+  const height = wrap.clientHeight;
+  canvas.width = overlay.width = width;
+  canvas.height = overlay.height = height;
+  canvas.style.width = overlay.style.width = width + 'px';
+  canvas.style.height = overlay.style.height = height + 'px';
+  canvasW = width;
+  canvasH = height;
+}
+
+function fitNodes() {
+  if (!nodes.length) {
+    return;
+  }
+
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+
+  nodes.forEach(function (node) {
+    const pos = nodeMap.get(node).pos;
+    minX = Math.min(minX, pos.x);
+    minY = Math.min(minY, pos.y);
+    maxX = Math.max(maxX, pos.x);
+    maxY = Math.max(maxY, pos.y);
+  });
+
+  const padding = 60;
+  const scaleX = (canvasW - 2 * padding) / Math.max(maxX - minX, 1);
+  const scaleY = (canvasH - 2 * padding) / Math.max(maxY - minY, 1);
+  const scale = Math.min(scaleX, scaleY, 1);
+  const offsetX = (canvasW - (maxX - minX) * scale) / 2 - minX * scale;
+  const offsetY = (canvasH - (maxY - minY) * scale) / 2 - minY * scale;
+
+  nodes.forEach(function (node) {
+    const current = nodeMap.get(node);
+    current.pos.x = current.pos.x * scale + offsetX;
+    current.pos.y = current.pos.y * scale + offsetY;
+    current.vel = { x: 0, y: 0 };
+  });
+}
+
+function clearState() {
+  nodes = [];
+  nodeMap.clear();
+  adj.clear();
+  adjSet.clear();
+  edges = [];
+  edgeLabels.clear();
+  edgeCurvMap.clear();
+  edgeToPos.clear();
+  layerMap = null;
+  setStatus('', false);
+}
+
+function drawGraph() {
+  const text = inputEl.value;
+  if (!text.trim()) {
+    clearState();
+    return;
+  }
+
+  try {
+    const parsed = parseInput(text);
+    if (!parsed.nodes.length) {
+      clearState();
+      return;
+    }
+    applyGraph(parsed);
+  } catch (error) {
+    setStatus('Parse error: ' + error.message, true);
+  }
+}
+
+function syncSettings() {
+  directed = document.querySelector('input[name="ge-type"]:checked').value === 'directed';
+  treeMode = treeCb.checked;
+  lockMode = lockCb.checked;
+  edgePhysics = ePhysCb.checked;
+  nodeDist = parseInt(elenSldr.value, 10) + 32;
+  tension = parseInt(tensSldr.value, 10) / 10;
+  nodeRepulsion = parseInt(repSldr.value, 10) / 10;
+  updateSliderLabels();
+
+  if (nodes.length) {
+    layerMap = treeMode ? buildLayers(nodes, adj) : null;
+  }
+}
+
+function getNodeAt(x, y) {
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    if (dist2D(nodeMap.get(node).pos, { x: x, y: y }) <= NODE_RADIUS) {
+      return node;
+    }
+  }
+  return null;
+}
+
+overlay.addEventListener('pointerdown', function (event) {
+  event.preventDefault();
+  mousePos = { x: event.offsetX, y: event.offsetY };
+  dragNode = getNodeAt(event.offsetX, event.offsetY);
+  if (dragNode) {
+    const current = nodeMap.get(dragNode);
+    current.vel = { x: 0, y: 0 };
+    current.pos.x = clamp(mousePos.x, NODE_RADIUS, canvasW - NODE_RADIUS);
+    current.pos.y = clamp(mousePos.y, NODE_RADIUS, canvasH - NODE_RADIUS);
+    overlay.style.cursor = 'grabbing';
+    requestAnimationFrame(render);
+  }
+});
+
+overlay.addEventListener('pointermove', function (event) {
+  event.preventDefault();
+  mousePos = { x: event.offsetX, y: event.offsetY };
+  if (dragNode) {
+    const current = nodeMap.get(dragNode);
+    current.vel = { x: 0, y: 0 };
+    current.pos.x = clamp(mousePos.x, NODE_RADIUS, canvasW - NODE_RADIUS);
+    current.pos.y = clamp(mousePos.y, NODE_RADIUS, canvasH - NODE_RADIUS);
+    requestAnimationFrame(render);
+    return;
+  }
+  overlay.style.cursor = getNodeAt(event.offsetX, event.offsetY) ? 'pointer' : 'default';
+});
+
+overlay.addEventListener('pointerup', function (event) {
+  event.preventDefault();
+  dragNode = null;
+  overlay.style.cursor = 'default';
+});
+
+overlay.addEventListener('pointerleave', function (event) {
+  event.preventDefault();
+  dragNode = null;
+  overlay.style.cursor = 'default';
+});
+
+fitBtn.addEventListener('click', fitNodes);
+clearBtn.addEventListener('click', function () {
+  inputEl.value = '';
+  clearState();
+});
+
+let autoDrawTimer = null;
+inputEl.addEventListener('input', function () {
+  clearTimeout(autoDrawTimer);
+  autoDrawTimer = setTimeout(function () {
+    syncSettings();
+    drawGraph();
+  }, 120);
+});
+
+[
+  treeCb,
+  lockCb,
+  ePhysCb,
+  elenSldr,
+  tensSldr,
+  repSldr,
+].concat(Array.prototype.slice.call(document.querySelectorAll('input[name="ge-type"]'))).forEach(function (element) {
+  element.addEventListener('change', function () {
+    syncSettings();
+    if (nodes.length || inputEl.value.trim()) {
+      drawGraph();
+    }
+  });
+  if (element.type === 'range') {
+    element.addEventListener('input', function () {
+      syncSettings();
+    });
+  }
+});
+
+window.addEventListener('resize', function () {
+  resizeCanvas();
+});
+
+resizeCanvas();
+syncSettings();
+syncThemeClass();
+drawGraph();
+startLoop();
+
+if (window.matchMedia) {
+  const darkMedia = window.matchMedia('(prefers-color-scheme: dark)');
+  if (darkMedia.addEventListener) {
+    darkMedia.addEventListener('change', syncThemeClass);
+  } else if (darkMedia.addListener) {
+    darkMedia.addListener(syncThemeClass);
+  }
+}
+
+window.addEventListener('resize', syncThemeClass);
+})();
+</script>
+{% endblock %}
