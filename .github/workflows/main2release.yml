@@ -1,0 +1,25 @@
+name: main2release
+
+on:
+  pull_request:
+    branches:
+      - release
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - edited
+
+jobs:
+  main2release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail unless PR source branch is main
+        run: |
+          echo "PR head: ${{ github.head_ref }}"
+          echo "PR base: ${{ github.base_ref }}"
+
+          if [ "${{ github.head_ref }}" != "main" ]; then
+            echo "Only PRs from main can be merged into release."
+            exit 1
+          fi
