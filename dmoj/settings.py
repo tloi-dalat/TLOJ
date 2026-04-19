@@ -71,7 +71,7 @@ VNOJ_HOMEPAGE_TOP_USERS_COUNT = 5
 VNOJ_DISPLAY_RANKS = (
     ('user', _('Normal User')),
     ('setter', _('Problem Setter')),
-    ('daor', _('Bedao Team')),
+    ('tloi', _('TLOI Team')),
     ('staff', _('Staff')),
     ('banned', _('Banned User')),
     ('admin', _('Admin')),
@@ -225,6 +225,12 @@ DMOJ_PROBLEM_MIN_MEMORY_LIMIT = 0  # kilobytes
 DMOJ_PROBLEM_MAX_MEMORY_LIMIT = 1048576  # kilobytes
 DMOJ_PROBLEM_MIN_PROBLEM_POINTS = 0
 DMOJ_PROBLEM_HOT_PROBLEM_COUNT = 7
+
+# Grace period before a soft-deleted problem is permanently removed
+VNOJ_PROBLEM_DELETION_GRACE_PERIOD = datetime.timedelta(days=7)
+# Maximum time the garbage collection task is allowed to run per invocation
+VNOJ_PROBLEM_GARBAGE_COLLECTOR_TIME_LIMIT = datetime.timedelta(hours=1)
+VNOJ_PROBLEM_GARBAGE_COLLECTOR_CRONTAB_KWARGS = {'minute': 0, 'hour': 0}
 
 DMOJ_PROBLEM_STATEMENT_DISALLOWED_CHARACTERS = {'“', '”', '‘', '’', '−', 'ﬀ', 'ﬁ', 'ﬂ', 'ﬃ', 'ﬄ'}
 DMOJ_RATING_COLORS = True

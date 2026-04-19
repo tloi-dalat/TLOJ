@@ -293,6 +293,7 @@
             </a>
         </div>
         <div><a href="{{ url('problem_edit', problem.code) }}">{{ _('Edit problem') }}</a></div>
+        <div><a href="{{ url('problem_delete', problem.code) }}?next={{ request.get_full_path()|urlencode }}">{{ _('Delete problem') }}</a></div>
         {% if not problem.is_manually_managed %}
             <div><a href="{{ url('problem_data', problem.code) }}">{{ _('Edit test data') }}</a></div>
         {% endif %}
@@ -457,7 +458,7 @@
             </div>
             <div class="toggled">
                 {% for contest in from_contests %}
-                    <a href="{{ contest.get_absolute_url() }}">{{ contest.key }}</a>{% if not loop.last %}, {% endif %}
+                    <a href="{{ contest.get_absolute_url() }}">{{ contest.name }}</a>{% if not loop.last %}, {% endif %}
                 {% endfor %}
                 {% if from_contests_more_count %}
                     {{ _(' and ') }}{{ from_contests_more_count }}{{ _(' more') }}

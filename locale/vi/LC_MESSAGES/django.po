@@ -26,7 +26,7 @@ msgid "Problem Setter"
 msgstr ""
 
 #: dmoj/settings.py:74
-msgid "Bedao Team"
+msgid "TLOI Team"
 msgstr ""
 
 #: dmoj/settings.py:75
@@ -7486,6 +7486,8 @@ msgid ""
 "shoot us a message at: "
 msgstr ""
 "Nếu bạn có vấn đề với việc đặt lại mật khẩu, hãy liên hệ với chúng mình qua: "
+msgid "If you don't see the email in your inbox, please check your spam folder."
+msgstr "Nếu bạn không thấy email trong hộp thư đến, vui lòng kiểm tra thư mục spam."
 
 #: templates/registration/password_reset_email.html:6
 #, python-format
@@ -7773,7 +7775,7 @@ msgstr "Huỷ"
 
 #: templates/status/oj-status.html:76 templates/user/user-about.html:15
 msgid "From"
-msgstr "Từ"
+msgstr "Đến từ:"
 
 #: templates/status/oj-status.html:77
 msgid "To"
