@@ -14,8 +14,9 @@ jobs:
     steps:
       - name: Install cloudflared
         run: |
-          sudo apt-get update
-          sudo apt-get install -y cloudflared
+          wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+          sudo dpkg -i cloudflared-linux-amd64.deb
+          cloudflared --version
       - name: SSH and run QA update script
         uses: appleboy/ssh-action@v1.0.3
         env:
