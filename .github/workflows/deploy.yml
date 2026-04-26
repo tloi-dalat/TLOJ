@@ -13,24 +13,26 @@ jobs:
     environment: qa
     steps:
       - name: Install cloudflared
-        run: |
-          wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
-          sudo dpkg -i cloudflared-linux-amd64.deb
-          cloudflared --version
-      - name: SSH and run QA update script
-        uses: appleboy/ssh-action@v1.0.3
+        uses: cloudflare/cloudflared-action@v1
+      - name: Run QA update script via Cloudflare Access SSH
         env:
-          CLOUDFLARE_ACCESS_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
-          CLOUDFLARE_ACCESS_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
-        with:
-          host: ${{ secrets.QA_VPS_HOST }}
-          username: ${{ secrets.QA_VPS_USER }}
-          key: ${{ secrets.QA_VPS_SSH_KEY }}
-          port: ${{ secrets.QA_VPS_PORT }}
-          script_stop: true
-          proxy_command: cloudflared access ssh --hostname %h
-          script: |
-            /home/tloi/update_tloj.sh
+          CLOUDFLARE_ACCESS_CLIENT_ID: ${{ secrets.QA_CLOUDFLARE_ACCESS_CLIENT_ID }}
+          CLOUDFLARE_ACCESS_CLIENT_SECRET: ${{ secrets.QA_CLOUDFLARE_ACCESS_CLIENT_SECRET }}
+          VPS_HOST: ${{ secrets.QA_VPS_HOST }}
+          VPS_USER: ${{ secrets.QA_VPS_USER }}
+          VPS_SSH_KEY: ${{ secrets.QA_VPS_SSH_KEY }}
+          VPS_PORT: ${{ secrets.QA_VPS_PORT }}
+        run: |
+          mkdir -p ~/.ssh
+
+          echo "$VPS_SSH_KEY" > ~/.ssh/qa_key
+          chmod 600 ~/.ssh/qa_key
+
+          cloudflared access ssh \
+            --hostname "$VPS_HOST" \
+            --url "ssh://$VPS_USER@$VPS_HOST:$VPS_PORT" \
+            --identity-file ~/.ssh/qa_key \
+            --command "/home/tloi/update_tloj.sh"
 
   deploy2prod:
     if: >
@@ -40,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: prod
     steps:
-      - name: SSH and run update script
+      - name: Run PROD update script via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
