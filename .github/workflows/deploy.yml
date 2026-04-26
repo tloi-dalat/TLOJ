@@ -1,35 +1,41 @@
 name: deploy
+
 on:
   workflow_run:
     workflows: ["build"]
     types: [completed]
+
 jobs:
-  # deploy2qa:
-  #   if: >
-  #     github.event.workflow_run.conclusion == 'success' &&
-  #     github.event.workflow_run.event == 'push' &&
-  #     github.event.workflow_run.head_branch == 'main'
-  #   runs-on: ubuntu-latest
-  #   environment: qa
-  #   steps:
-  #     - name: SSH and run QA update script
-  #       uses: appleboy/ssh-action@v1.0.3
-  #       with:
-  #         host: ${{ secrets.QA_VPS_HOST }}
-  #         username: ${{ secrets.QA_VPS_USER }}
-  #         key: ${{ secrets.QA_VPS_SSH_KEY }}
-  #         port: ${{ secrets.QA_VPS_PORT }}
-  #         script_stop: true
-  #         script: |
-  #           /home/tloi/update_tloj.sh
+  deploy2qa:
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    environment: qa
+
+    steps:
+      - name: SSH and run QA update script
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.QA_VPS_HOST }}
+          username: ${{ secrets.QA_VPS_USER }}
+          key: ${{ secrets.QA_VPS_SSH_KEY }}
+          port: ${{ secrets.QA_VPS_PORT }}
+          script_stop: true
+          script: |
+            echo "Connected to QA server"
+            /home/tloi/update_tloj.sh
+
   deploy2prod:
     if: >
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push' &&
       github.event.workflow_run.head_branch == 'release'
     runs-on: ubuntu-latest
+
     steps:
-      - name: SSH and run update script
+      - name: SSH and run PROD update script
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -38,4 +44,5 @@ jobs:
           port: ${{ secrets.VPS_PORT }}
           script_stop: true
           script: |
+            echo "Connected to PROD server"
             /home/tloi/update_tloj.sh
