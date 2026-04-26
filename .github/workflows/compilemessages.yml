@@ -1,6 +1,9 @@
 name: compilemessages
 on:
   push:
+    branches-ignore:
+      - main
+      - release
     paths:
       - 'locale/**'
   pull_request:
