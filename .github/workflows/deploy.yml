@@ -4,30 +4,40 @@ on:
     workflows: ["build"]
     types: [completed]
 jobs:
-  # deploy2qa:
-  #   if: >
-  #     github.event.workflow_run.conclusion == 'success' &&
-  #     github.event.workflow_run.event == 'push' &&
-  #     github.event.workflow_run.head_branch == 'main'
-  #   runs-on: ubuntu-latest
-  #   environment: qa
-  #   steps:
-  #     - name: SSH and run QA update script
-  #       uses: appleboy/ssh-action@v1.0.3
-  #       with:
-  #         host: ${{ secrets.QA_VPS_HOST }}
-  #         username: ${{ secrets.QA_VPS_USER }}
-  #         key: ${{ secrets.QA_VPS_SSH_KEY }}
-  #         port: ${{ secrets.QA_VPS_PORT }}
-  #         script_stop: true
-  #         script: |
-  #           /home/tloi/update_tloj.sh
+  deploy2qa:
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    environment: qa
+    steps:
+      - name: Install cloudflared
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cloudflared
+      - name: SSH and run QA update script
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          CLOUDFLARE_ACCESS_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
+          CLOUDFLARE_ACCESS_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
+        with:
+          host: ${{ secrets.QA_VPS_HOST }}
+          username: ${{ secrets.QA_VPS_USER }}
+          key: ${{ secrets.QA_VPS_SSH_KEY }}
+          port: ${{ secrets.QA_VPS_PORT }}
+          script_stop: true
+          proxy_command: cloudflared access ssh --hostname %h
+          script: |
+            /home/tloi/update_tloj.sh
+
   deploy2prod:
     if: >
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push' &&
       github.event.workflow_run.head_branch == 'release'
     runs-on: ubuntu-latest
+    environment: prod
     steps:
       - name: SSH and run update script
         uses: appleboy/ssh-action@v1.0.3
