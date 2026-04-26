@@ -1,8 +1,5 @@
 name: compilemessages
 on:
-  push:
-    paths:
-      - 'locale/**'
   pull_request:
     paths:
       - 'locale/**'
