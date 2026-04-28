@@ -17,6 +17,7 @@ from judge.sitemap import sitemaps
 from judge.views import TitledTemplateView, api, blog, comment, contests, language, license, mailgun, organization, \
     preview, problem, problem_download, problem_manage, ranked_submission, register, stats, status, submission, tag, \
     tasks, ticket, two_factor, user, widgets
+from judge.views.graph_editor import GraphEditorView, ToolsListView
 from judge.views.magazine import MagazinePage
 from judge.views.misc_config import MiscConfigEdit
 from judge.views.problem_data import ProblemDataView, ProblemSubmissionDiff, \
@@ -26,7 +27,6 @@ from judge.views.select2 import AssigneeSelect2View, CommentSelect2View, Contest
     ContestUserSearchSelect2View, OrganizationSelect2View, OrganizationUserSearchSelect2View, \
     OrganizationUserSelect2View, ProblemSelect2View, TagGroupSelect2View, TagSelect2View, TicketUserSelect2View, \
     UserSearchSelect2View, UserSelect2View
-from judge.views.graph_editor import GraphEditorView, ToolsListView
 from judge.views.widgets import martor_image_uploader
 from martor.views import markdown_search_user
 
