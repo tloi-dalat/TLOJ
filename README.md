@@ -1,4 +1,6 @@
-# TLOJ: TLOI Online Judge [![Build Status](https://github.com/tloi-dalat/TLOJ/workflows/build/badge.svg)](https://github.com/tloi-dalat/TLOJ/actions) [![AGPL License](https://img.shields.io/badge/license-AGPLv3.0-blue.svg)](http://www.gnu.org/licenses/agpl-3.0)
+# TLOJ: Thang Long Da Lat Online Judge [![Build Status](https://github.com/tloi-dalat/TLOJ/workflows/build/badge.svg)](https://github.com/tloi-dalat/TLOJ/actions) [![AGPL License](https://img.shields.io/badge/license-AGPLv3.0-blue.svg)](http://www.gnu.org/licenses/agpl-3.0)
+
+![TLOJ](/logo.png)
 
 As a fork of [VNOJ](https://github.com/VNOI-Admin/OJ), TLOJ serves as [TLOI](https://tloi.io.vn/)'s official online judge and hosts its programming contests.
 
@@ -31,7 +33,7 @@ Refer to the install documentation [here](https://vnoi-admin.github.io/vnoj-docs
 
 Take a look at [our contribution guideline](contributing.md).
 
-If you find any bug, please feel free to contact us via Discord [![Discord Chat](https://img.shields.io/discord/660930260405190688?color=%237289DA&label=Discord&logo=Discord)](https://discord.gg/TDyYVyd) or open an issue.
+If you find any bug, please feel free to contact us via [Facebook](https://fb.com/tloi.dl) or open an issue.
 
 Pull requests are welcome as well. Before you submit your PR, please check your code with [flake8](https://flake8.pycqa.org/en/latest/) and format it if needed. There's also `prettier` if you need to format JS code (in `websocket/`).
 
