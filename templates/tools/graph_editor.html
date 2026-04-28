@@ -4,248 +4,75 @@
 {% block media %}
 <style>
   html,
-  body.ge-page {
+  body.ge-active {
     overflow: hidden;
   }
 
-  #ge-page {
-    --ge-bg: #f4f6fb;
-    --ge-panel: #ffffff;
-    --ge-panel-alt: #f9fbff;
-    --ge-border: #d8dee9;
-    --ge-border-strong: #c4ccda;
-    --ge-text: #1f2937;
-    --ge-text-soft: #5b6474;
-    --ge-text-faint: #7b8596;
-    --ge-primary: #3b82f6;
-    --ge-primary-hover: #2563eb;
-    --ge-primary-soft: rgba(59, 130, 246, 0.12);
-    --ge-danger: #ef4444;
-    --ge-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
-    --ge-canvas-bg: linear-gradient(180deg, #ffffff 0%, #f6f8fd 100%);
-    --ge-badge-bg: rgba(255, 255, 255, 0.88);
-    --ge-badge-text: #4b5563;
-    --ge-range-accent: #3b82f6;
-
+  #ge-wrap {
     display: grid;
-    grid-template-columns: minmax(18rem, 21rem) minmax(0, 1fr);
-    gap: 1rem;
+    grid-template-columns: minmax(16rem, 20rem) minmax(0, 1fr);
+    gap: 0.75rem;
     height: calc(100vh - 10.5rem);
-    min-height: 34rem;
-    max-height: calc(100vh - 10.5rem);
+    min-height: 32rem;
     overflow: hidden;
     padding: 0.25rem 0 0.5rem;
-    color: var(--ge-text);
-  }
-
-  #ge-page.ge-theme-dark {
-    --ge-bg: #151922;
-    --ge-panel: #1c2230;
-    --ge-panel-alt: #202839;
-    --ge-border: #313b4f;
-    --ge-border-strong: #44506a;
-    --ge-text: #e5ecf5;
-    --ge-text-soft: #b6c0d0;
-    --ge-text-faint: #8792a6;
-    --ge-primary: #60a5fa;
-    --ge-primary-hover: #3b82f6;
-    --ge-primary-soft: rgba(96, 165, 250, 0.16);
-    --ge-danger: #f87171;
-    --ge-shadow: 0 16px 36px rgba(0, 0, 0, 0.3);
-    --ge-canvas-bg: linear-gradient(180deg, #0f1420 0%, #141b29 100%);
-    --ge-badge-bg: rgba(20, 27, 41, 0.86);
-    --ge-badge-text: #c6d0de;
-    --ge-range-accent: #60a5fa;
   }
 
   #ge-sidebar {
-    display: grid;
-    grid-template-rows: auto auto minmax(0, 1fr) auto;
-    gap: 0.9rem;
-    min-height: 0;
-  }
-
-  .ge-card {
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
     min-height: 0;
-    padding: 0.95rem 1rem;
-    border: 1px solid var(--ge-border);
-    border-radius: 0.85rem;
-    background: linear-gradient(180deg, var(--ge-panel) 0%, var(--ge-panel-alt) 100%);
-    box-shadow: var(--ge-shadow);
+    height: 100%;
+    overflow-y: auto;
   }
 
-  .ge-card__header {
+  #ge-sidebar .sidebox {
+    flex: 0 0 auto;
+    padding-bottom: 0.5em !important;
+    margin-bottom: 0.5rem;
+  }
+
+  #ge-sidebar .sidebox.ge-input-box {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 10rem;
+  }
+
+  #ge-sidebar .ge-input-box .sidebox-content {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .ge-option-row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    min-width: 0;
-  }
-
-  .ge-card__title {
-    margin: 0;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--ge-text-faint);
-  }
-
-  #ge-status {
-    font-size: 0.78rem;
-    line-height: 1.45;
-  }
-
-  .ge-option-list {
-    display: grid;
-    gap: 0.5rem;
-  }
-
-  .ge-option {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    min-width: 0;
-    color: var(--ge-text);
+    gap: 0.4rem;
+    padding: 0.15rem 0;
     cursor: pointer;
     user-select: none;
   }
 
-  .ge-option span {
-    min-width: 0;
-    flex: 1 1 auto;
-    line-height: 1.35;
-  }
-
-  .ge-option input {
-    margin: 0;
-    accent-color: var(--ge-primary);
-  }
-
-  .ge-input-wrap {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    min-height: 0;
-    flex: 1 1 auto;
-  }
-
   #ge-input {
+    flex: 1 1 auto;
     width: 100%;
-    min-height: 10rem;
-    height: 100%;
+    min-height: 6rem;
     box-sizing: border-box;
     resize: none;
-    padding: 0.8rem 0.9rem;
-    border: 1px solid var(--ge-border);
-    border-radius: 0.75rem;
-    background: var(--ge-panel);
-    color: var(--ge-text);
-    font: 0.86rem/1.5 Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
-    box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+    font-family: Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+    font-size: 0.88rem;
   }
 
-  #ge-input:focus {
-    outline: none;
-    border-color: var(--ge-primary);
-    box-shadow: 0 0 0 0.2rem var(--ge-primary-soft);
-  }
-
-  #ge-status {
-    min-height: 1.2rem;
-    color: var(--ge-text-faint);
-  }
-
-  #ge-status.is-error {
-    color: var(--ge-danger);
-  }
-
-  .ge-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.55rem;
-    flex-wrap: wrap;
-  }
-
-  .ge-button {
-    appearance: none;
-    border: 1px solid var(--ge-border);
-    border-radius: 0.65rem;
-    background: var(--ge-panel);
-    color: var(--ge-text);
-    padding: 0.5rem 0.8rem;
-    font-size: 0.82rem;
-    font-weight: 600;
-    line-height: 1.2;
-    cursor: pointer;
-    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
-  }
-
-  .ge-button:hover {
-    border-color: var(--ge-border-strong);
-    background: var(--ge-panel-alt);
-  }
-
-  .ge-button:active {
-    transform: translateY(1px);
-  }
-
-  .ge-button--primary {
-    background: var(--ge-primary);
-    border-color: var(--ge-primary);
-    color: #fff;
-  }
-
-  .ge-button--primary:hover {
-    background: var(--ge-primary-hover);
-    border-color: var(--ge-primary-hover);
-  }
-
-  .ge-slider-group {
-    display: grid;
-    gap: 0.75rem;
-  }
-
-  .ge-slider {
-    display: grid;
-    gap: 0.3rem;
-  }
-
-  .ge-slider__label {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--ge-text);
-  }
-
-  .ge-slider__value {
-    color: var(--ge-text-faint);
-    font-weight: 700;
-    min-width: 2.5rem;
-    text-align: right;
-  }
-
-  .ge-slider input[type='range'] {
-    width: 100%;
-    margin: 0;
-    accent-color: var(--ge-range-accent);
-  }
-
-  #ge-canvas-panel {
+  #ge-canvas-wrap {
     position: relative;
+    height: 100%;
     min-width: 0;
-    min-height: 0;
     overflow: hidden;
-    border: 1px solid var(--ge-border);
-    border-radius: 1rem;
-    background: var(--ge-canvas-bg);
-    box-shadow: var(--ge-shadow);
+    border: 1px solid #231f20;
+    border-radius: 4px;
+    background: #fff;
   }
 
   #ge-canvas,
@@ -260,104 +87,79 @@
     cursor: default;
   }
 
+  @media (prefers-color-scheme: dark) {
+    #ge-canvas-wrap {
+      background: #1a1a1a;
+      border-color: #d0d0d0;
+    }
+  }
 
-  @media (max-width: 1100px) {
-    #ge-page {
-      grid-template-columns: minmax(16.5rem, 19rem) minmax(0, 1fr);
-      gap: 0.75rem;
+  @media (max-width: 900px) {
+    #ge-wrap {
+      grid-template-columns: 1fr;
+      height: auto;
+      overflow: visible;
     }
 
-    .ge-card {
-      padding: 0.85rem 0.9rem;
+    #ge-sidebar {
+      height: auto;
+      overflow: visible;
+    }
+
+    #ge-sidebar .sidebox.ge-input-box {
+      min-height: 10rem;
+    }
+
+    #ge-canvas-wrap {
+      height: 60vh;
+      min-height: 280px;
     }
   }
 </style>
 {% endblock %}
 
 {% block body %}
-<div id="ge-page">
+<div id="ge-wrap">
   <aside id="ge-sidebar">
-    <section class="ge-card">
-      <div class="ge-card__header">
-        <h4 class="ge-card__title">Graph type</h4>
-      </div>
-      <div class="ge-option-list">
-        <label class="ge-option">
+
+    <div class="sidebox">
+      <h3>Graph type <i class="fa fa-share-alt" style="float:right; margin: 0.2em 0.4em 0 0;"></i></h3>
+      <div class="sidebox-content">
+        <label class="ge-option-row">
           <input type="radio" name="ge-type" value="undirected" checked>
           <span>Undirected</span>
         </label>
-        <label class="ge-option">
+        <label class="ge-option-row">
           <input type="radio" name="ge-type" value="directed">
           <span>Directed</span>
         </label>
       </div>
-    </section>
+    </div>
 
-    <section class="ge-card">
-      <div class="ge-card__header">
-        <h4 class="ge-card__title">Options</h4>
-      </div>
-      <div class="ge-option-list">
-        <label class="ge-option">
+    <div class="sidebox">
+      <h3>Options <i class="fa fa-cog" style="float:right; margin: 0.2em 0.4em 0 0;"></i></h3>
+      <div class="sidebox-content">
+        <label class="ge-option-row">
           <input type="checkbox" id="ge-tree">
           <span>Tree mode (layer layout)</span>
         </label>
-        <label class="ge-option">
+        <label class="ge-option-row">
           <input type="checkbox" id="ge-lock">
           <span>Lock all nodes</span>
         </label>
-        <label class="ge-option">
-          <input type="checkbox" id="ge-ephys" checked>
-          <span>Edge physics (bend around nodes)</span>
-        </label>
       </div>
-    </section>
+    </div>
 
-    <section class="ge-card">
-      <div class="ge-card__header">
-        <h4 class="ge-card__title">Adjacency list</h4>
-              </div>
-      <div class="ge-input-wrap">
+    <div class="sidebox ge-input-box">
+      <h3>Adjacency list <i class="fa fa-list" style="float:right; margin: 0.2em 0.4em 0 0;"></i></h3>
+      <div class="sidebox-content">
         <textarea id="ge-input" placeholder="1 2&#10;1 3&#10;2 4&#10;3 4"></textarea>
-        <div id="ge-status"></div>
-        <div class="ge-actions">
-          <button class="ge-button ge-button--primary" id="ge-fit" type="button">Fit graph</button>
-          <button class="ge-button" id="ge-clear" type="button">Clear</button>
-        </div>
       </div>
-    </section>
+    </div>
 
-    <section class="ge-card">
-      <div class="ge-card__header">
-        <h4 class="ge-card__title">Physics</h4>
-      </div>
-      <div class="ge-slider-group">
-        <label class="ge-slider" for="ge-elen">
-          <span class="ge-slider__label">
-            <span>Edge length</span>
-            <span class="ge-slider__value" id="ge-elen-value">80</span>
-          </span>
-          <input type="range" id="ge-elen" min="20" max="300" value="80">
-        </label>
-        <label class="ge-slider" for="ge-tension">
-          <span class="ge-slider__label">
-            <span>Tension</span>
-            <span class="ge-slider__value" id="ge-tension-value">1.6</span>
-          </span>
-          <input type="range" id="ge-tension" min="10" max="40" value="16">
-        </label>
-        <label class="ge-slider" for="ge-repulsion">
-          <span class="ge-slider__label">
-            <span>Repulsion</span>
-            <span class="ge-slider__value" id="ge-repulsion-value">0.0</span>
-          </span>
-          <input type="range" id="ge-repulsion" min="0" max="30" value="0">
-        </label>
-      </div>
-    </section>
   </aside>
 
-  <section id="ge-canvas-panel" aria-label="Graph canvas">
+  <section id="ge-canvas-wrap" aria-label="Graph canvas">
     <canvas id="ge-canvas"></canvas>
     <canvas id="ge-overlay"></canvas>
   </section>
@@ -369,10 +171,9 @@
 (function () {
 'use strict';
 
-// Match this page's layout needs without changing the shared base template.
-document.body.classList.add('ge-page');
+document.body.classList.add('ge-active');
 window.addEventListener('beforeunload', function () {
-  document.body.classList.remove('ge-page');
+  document.body.classList.remove('ge-active');
 });
 
 const NODE_FRICTION = 0.05;
@@ -381,6 +182,11 @@ const FPS = 90;
 const NODE_RADIUS = 16;
 const EDGE_LABEL_SEPARATION = 14;
 const CENTERING_STRENGTH = 0.00085;
+
+const nodeDist = {{ ge_node_dist }};
+const tension = {{ ge_tension }};
+const nodeRepulsion = {{ ge_node_repulsion }};
+const edgePhysics = true;
 
 let canvasW = 0;
 let canvasH = 0;
@@ -396,35 +202,20 @@ let edgeToPos = new Map();
 let directed = false;
 let treeMode = false;
 let lockMode = false;
-let edgePhysics = true;
-
-let nodeDist = 112;
-let tension = 1.6;
-let nodeRepulsion = 0.0;
 
 let layerMap = null;
 let mousePos = { x: 0, y: 0 };
 let dragNode = null;
 let animId = null;
+let dpr = window.devicePixelRatio || 1;
 
-const pageEl = document.getElementById('ge-page');
-const wrap = document.getElementById('ge-canvas-panel');
+const wrap = document.getElementById('ge-canvas-wrap');
 const canvas = document.getElementById('ge-canvas');
 const overlay = document.getElementById('ge-overlay');
 const ctx = canvas.getContext('2d');
-const statusEl = document.getElementById('ge-status');
 const inputEl = document.getElementById('ge-input');
 const treeCb = document.getElementById('ge-tree');
 const lockCb = document.getElementById('ge-lock');
-const ePhysCb = document.getElementById('ge-ephys');
-const fitBtn = document.getElementById('ge-fit');
-const clearBtn = document.getElementById('ge-clear');
-const elenSldr = document.getElementById('ge-elen');
-const tensSldr = document.getElementById('ge-tension');
-const repSldr = document.getElementById('ge-repulsion');
-const edgeLengthValue = document.getElementById('ge-elen-value');
-const tensionValue = document.getElementById('ge-tension-value');
-const repulsionValue = document.getElementById('ge-repulsion-value');
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(value, max));
@@ -432,19 +223,6 @@ function clamp(value, min, max) {
 
 function dist2D(a, b) {
   return Math.hypot(a.x - b.x, a.y - b.y);
-}
-
-function pointToSegmentDistance(a, b, p) {
-  const abx = b.x - a.x;
-  const aby = b.y - a.y;
-  const ab2 = abx * abx + aby * aby;
-  if (!ab2) {
-    return dist2D(a, p);
-  }
-  let t = ((p.x - a.x) * abx + (p.y - a.y) * aby) / ab2;
-  t = clamp(t, 0, 1);
-  const proj = { x: a.x + abx * t, y: a.y + aby * t };
-  return dist2D(proj, p);
 }
 
 function isPointProjOutsideLine(a, b, p) {
@@ -456,18 +234,6 @@ function isPointProjOutsideLine(a, b, p) {
   }
   const t = ((p.x - a.x) * abx + (p.y - a.y) * aby) / ab2;
   return t < 0 || t > 1;
-}
-
-function readRgb(color) {
-  const match = color && color.match(/\d+/g);
-  if (!match || match.length < 3) {
-    return null;
-  }
-  return match.slice(0, 3).map(Number);
-}
-
-function syncThemeClass() {
-  pageEl.classList.toggle('ge-theme-dark', isDark());
 }
 
 function isDark() {
@@ -483,18 +249,7 @@ function isDark() {
   ) {
     return true;
   }
-
-  const rgb = readRgb(getComputedStyle(body).backgroundColor) || readRgb(getComputedStyle(doc).backgroundColor);
-  if (rgb) {
-    const luminance = 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
-    return luminance < 140;
-  }
-
   return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-}
-
-function displayLabel(raw) {
-  return raw;
 }
 
 function getIdealCurvature(index) {
@@ -512,15 +267,37 @@ function randCoord() {
   };
 }
 
-function setStatus(message, isError) {
-  statusEl.textContent = message || '';
-  statusEl.classList.toggle('is-error', Boolean(isError));
-}
+function generateRandomGraph() {
+  const n = 5 + Math.floor(Math.random() * 4);
+  const edgeSet = {};
+  const lines = [];
 
-function updateSliderLabels() {
-  edgeLengthValue.textContent = elenSldr.value;
-  tensionValue.textContent = (parseInt(tensSldr.value, 10) / 10).toFixed(1);
-  repulsionValue.textContent = (parseInt(repSldr.value, 10) / 10).toFixed(1);
+  function tryEdge(u, v) {
+    if (u === v) return;
+    const key = Math.min(u, v) + ',' + Math.max(u, v);
+    if (!edgeSet[key]) {
+      edgeSet[key] = true;
+      lines.push(u + ' ' + v);
+    }
+  }
+
+  for (let i = 2; i <= n; i++) {
+    tryEdge(1 + Math.floor(Math.random() * (i - 1)), i);
+  }
+
+  const extras = Math.ceil(n / 2);
+  let attempts = extras * 5;
+  let added = 0;
+  while (added < extras && attempts > 0) {
+    attempts--;
+    const before = Object.keys(edgeSet).length;
+    tryEdge(1 + Math.floor(Math.random() * n), 1 + Math.floor(Math.random() * n));
+    if (Object.keys(edgeSet).length > before) {
+      added++;
+    }
+  }
+
+  return lines.join('\n');
 }
 
 function parseInput(text) {
@@ -674,8 +451,6 @@ function applyGraph(parsed) {
 
   edgeCurvMap.clear();
   layerMap = treeMode ? buildLayers(nodes, adj) : null;
-
-  setStatus(nodes.length + ' nodes · ' + edges.length + ' edges', false);
 }
 
 function updateVelocities() {
@@ -815,14 +590,10 @@ function getUpperNormal(tangent) {
   const length = Math.max(Math.hypot(tangent.x, tangent.y), 1e-6);
   const normalA = { x: -tangent.y / length, y: tangent.x / length };
   const normalB = { x: tangent.y / length, y: -tangent.x / length };
-
-  if (normalA.y < normalB.y) {
-    return normalA;
-  }
-  return normalB;
+  return normalA.y < normalB.y ? normalA : normalB;
 }
 
-function drawLine(u, v, idealR, edgeKey, nodePositions, thickness, color) {
+function drawLine(u, v, idealR, edgeKey, nodePositions, color) {
   if (!edgeCurvMap.has(edgeKey)) {
     edgeCurvMap.set(edgeKey, idealR);
   }
@@ -842,7 +613,7 @@ function drawLine(u, v, idealR, edgeKey, nodePositions, thickness, color) {
   for (let i = 1; i <= steps; i++) {
     const point = getBezierPoint(u, controls.p0c, controls.p1c, v, i / steps);
 
-    if (edgePhysics && i >= 2 && i <= 9) {
+    if (i >= 2 && i <= 9) {
       const midpoint = mid(previousPoint, point);
       const baseDir = { x: point.x - previousPoint.x, y: point.y - previousPoint.y };
 
@@ -876,57 +647,74 @@ function drawLine(u, v, idealR, edgeKey, nodePositions, thickness, color) {
   edgeCurvMap.set(edgeKey, radius);
   controls = getCurveControlPoints(u, v, radius);
 
-  ctx.lineWidth = 2 * thickness;
+  ctx.lineWidth = 1.5;
   ctx.strokeStyle = color;
   ctx.beginPath();
   ctx.moveTo(u.x, u.y);
   ctx.bezierCurveTo(controls.p0c.x, controls.p0c.y, controls.p1c.x, controls.p1c.y, v.x, v.y);
   ctx.stroke();
 
-  return {
-    radius: radius,
-    controls: controls,
-  };
+  return { radius: radius, controls: controls };
 }
 
-function drawArrow(u, v, curveData, thickness, nodeRadius, color) {
-  const t = 0.985;
-  const tipPoint = getBezierPoint(u, curveData.controls.p0c, curveData.controls.p1c, v, t);
-  const tangent = getBezierTangent(u, curveData.controls.p0c, curveData.controls.p1c, v, t);
-  const tangentLength = Math.max(Math.hypot(tangent.x, tangent.y), 1e-6);
-  const ux = tangent.x / tangentLength;
-  const uy = tangent.y / tangentLength;
-  const tipX = tipPoint.x - ux * (nodeRadius - 1);
-  const tipY = tipPoint.y - uy * (nodeRadius - 1);
-  const arrowLength = nodeRadius * 0.9;
-  const arrowHalfWidth = nodeRadius * 0.38;
+function findBezierBoundaryT(u, c1, c2, v, center, radius, nearEnd) {
+  let lo = nearEnd ? 0.5 : 0.0;
+  let hi = nearEnd ? 1.0 : 0.5;
+  for (let i = 0; i < 14; i++) {
+    const mid = (lo + hi) / 2;
+    const pt = getBezierPoint(u, c1, c2, v, mid);
+    const inside = Math.hypot(pt.x - center.x, pt.y - center.y) < radius;
+    if (nearEnd) {
+      if (inside) hi = mid; else lo = mid;
+    } else {
+      if (inside) lo = mid; else hi = mid;
+    }
+  }
+  return (lo + hi) / 2;
+}
 
+function drawArrow(u, v, curveData, nodeRadius, color, reversed) {
+  const c1 = curveData.controls.p0c;
+  const c2 = curveData.controls.p1c;
+
+  // Find where the bezier exits the destination node's circle
+  const center = reversed ? u : v;
+  const t = findBezierBoundaryT(u, c1, c2, v, center, nodeRadius, !reversed);
+
+  const pt = getBezierPoint(u, c1, c2, v, t);
+
+  const arrowLength = nodeRadius * 0.9;
+  const arrowHalfWidth = nodeRadius * 0.42;
+
+  // ptTip  — on the node circle boundary (tip of arrowhead, touching the node)
+  // ptBase — arrowLength further back along the bezier (base of arrowhead, where edge meets arrow)
+  const tBase = findBezierBoundaryT(u, c1, c2, v, center, nodeRadius + arrowLength, !reversed);
+  const ptBase = getBezierPoint(u, c1, c2, v, tBase);
+
+  const dx = pt.x - ptBase.x;
+  const dy = pt.y - ptBase.y;
+  const alen = Math.max(Math.hypot(dx, dy), 1e-6);
+  const ax = dx / alen;
+  const ay = dy / alen;
+
+  // Tip at node boundary, base arrowLength outside — edge line flows into the base cleanly
   ctx.fillStyle = color;
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 1.5 * thickness;
   ctx.beginPath();
-  ctx.moveTo(tipX, tipY);
-  ctx.lineTo(
-    tipX - ux * arrowLength + (-uy) * arrowHalfWidth,
-    tipY - uy * arrowLength + ux * arrowHalfWidth
-  );
-  ctx.lineTo(
-    tipX - ux * arrowLength - (-uy) * arrowHalfWidth,
-    tipY - uy * arrowLength - ux * arrowHalfWidth
-  );
+  ctx.moveTo(pt.x, pt.y);
+  ctx.lineTo(ptBase.x + (-ay) * arrowHalfWidth, ptBase.y + ax * arrowHalfWidth);
+  ctx.lineTo(ptBase.x - (-ay) * arrowHalfWidth, ptBase.y - ax * arrowHalfWidth);
   ctx.closePath();
   ctx.fill();
-  ctx.stroke();
 }
 
-function drawEdgeLabel(u, v, curveData, label, thickness, color) {
+function drawEdgeLabel(u, v, curveData, label, color) {
   const labelPoint = getBezierPoint(u, curveData.controls.p0c, curveData.controls.p1c, v, 0.5);
   const tangent = getBezierTangent(u, curveData.controls.p0c, curveData.controls.p1c, v, 0.5);
   const normal = getUpperNormal(tangent);
   const labelX = labelPoint.x + normal.x * EDGE_LABEL_SEPARATION;
   const labelY = labelPoint.y + normal.y * EDGE_LABEL_SEPARATION;
 
-  ctx.lineWidth = 2 * thickness;
+  ctx.lineWidth = 1.5;
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'center';
   ctx.font = '13px Menlo, Monaco, Consolas, monospace';
@@ -935,9 +723,8 @@ function drawEdgeLabel(u, v, curveData, label, thickness, color) {
 }
 
 function renderEdges() {
-  const edgeColor = isDark() ? 'hsl(0, 0%, 96%)' : 'hsl(0, 0%, 10%)';
-  const labelColor = edgeColor;
-  const borderWidth = 1.5;
+  const dark = isDark();
+  const edgeColor = dark ? '#e0e0e0' : '#000000';
   const activeKeys = new Set();
 
   edges.forEach(function (edge) {
@@ -948,7 +735,6 @@ function renderEdges() {
     const reverse = from > to;
     const edgeBase = from + ' ' + to;
     const reverseEdge = to + ' ' + from + ' ' + edgeIndex;
-    const maxIndex = edgeToPos.get(edgeBase);
     const idealR = getIdealCurvature(edgeIndex);
     const edgeKey = edgeBase + ' ' + edgeIndex;
 
@@ -961,28 +747,22 @@ function renderEdges() {
     }
 
     const otherNodes = [];
-    if (edgePhysics) {
-      nodes.forEach(function (node) {
-        if (node !== from && node !== to) {
-          otherNodes.push(nodeMap.get(node).pos);
-        }
-      });
-    }
+    nodes.forEach(function (node) {
+      if (node !== from && node !== to) {
+        otherNodes.push(nodeMap.get(node).pos);
+      }
+    });
 
     activeKeys.add(edgeKey);
-    const curveData = drawLine(start, end, idealR, edgeKey, otherNodes, borderWidth, edgeColor);
+    const curveData = drawLine(start, end, idealR, edgeKey, otherNodes, edgeColor);
 
     if (directed) {
-      drawArrow(start, end, curveData, borderWidth, NODE_RADIUS, edgeColor);
+      drawArrow(start, end, curveData, NODE_RADIUS, edgeColor, reverse);
     }
 
     if (edgeLabels.has(edge)) {
-      if (!edgeLabels.has(reverseEdge)) {
-        drawEdgeLabel(start, end, curveData, edgeLabels.get(edge), borderWidth, labelColor);
-      } else if (edge < reverseEdge) {
-        drawEdgeLabel(start, end, curveData, edgeLabels.get(edge), borderWidth, labelColor);
-      } else {
-        drawEdgeLabel(start, end, curveData, edgeLabels.get(edge), borderWidth, labelColor);
+      if (!edgeLabels.has(reverseEdge) || edge <= reverseEdge) {
+        drawEdgeLabel(start, end, curveData, edgeLabels.get(edge), edgeColor);
       }
     }
   });
@@ -995,36 +775,33 @@ function renderEdges() {
 }
 
 function renderNodes() {
-  const borderWidth = 1.5;
-  const stroke = isDark() ? 'hsl(0, 0%, 96%)' : 'hsl(0, 0%, 10%)';
-  const textColor = isDark() ? 'hsl(0, 0%, 96%)' : 'hsl(0, 0%, 10%)';
+  const dark = isDark();
+  const stroke = dark ? '#e0e0e0' : '#000000';
+  const fill = dark ? '#1a1a1a' : '#ffffff';
+  const textColor = dark ? '#e0e0e0' : '#000000';
 
   nodes.forEach(function (node) {
     const pos = nodeMap.get(node).pos;
 
-    ctx.lineWidth = 2 * borderWidth;
+    ctx.lineWidth = 1.5;
     ctx.strokeStyle = stroke;
+    ctx.fillStyle = fill;
 
-    ctx.globalCompositeOperation = 'destination-out';
     ctx.beginPath();
-    ctx.arc(pos.x, pos.y, NODE_RADIUS - borderWidth, 0, 2 * Math.PI);
+    ctx.arc(pos.x, pos.y, NODE_RADIUS - 0.75, 0, 2 * Math.PI);
     ctx.fill();
-    ctx.globalCompositeOperation = 'source-over';
-
-    ctx.beginPath();
-    ctx.arc(pos.x, pos.y, NODE_RADIUS - borderWidth, 0, 2 * Math.PI);
     ctx.stroke();
 
-    ctx.font = '15px Menlo, Monaco, Consolas, monospace';
+    ctx.font = '600 13px "Segoe UI", "Lucida Grande", Arial, sans-serif';
     ctx.fillStyle = textColor;
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
-    ctx.fillText(displayLabel(node), pos.x, pos.y + 1);
+    ctx.fillText(node, pos.x, pos.y + 0.5);
   });
 }
 
 function render() {
-  ctx.clearRect(0, 0, canvasW + 20, canvasH + 20);
+  ctx.clearRect(0, 0, canvasW, canvasH);
 
   if (dragNode) {
     const current = nodeMap.get(dragNode);
@@ -1050,47 +827,24 @@ function startLoop() {
 }
 
 function resizeCanvas() {
+  dpr = window.devicePixelRatio || 1;
   const width = wrap.clientWidth;
   const height = wrap.clientHeight;
-  canvas.width = overlay.width = width;
-  canvas.height = overlay.height = height;
-  canvas.style.width = overlay.style.width = width + 'px';
-  canvas.style.height = overlay.style.height = height + 'px';
+
+  canvas.width = Math.round(width * dpr);
+  canvas.height = Math.round(height * dpr);
+  overlay.width = Math.round(width * dpr);
+  overlay.height = Math.round(height * dpr);
+
+  canvas.style.width = width + 'px';
+  canvas.style.height = height + 'px';
+  overlay.style.width = width + 'px';
+  overlay.style.height = height + 'px';
+
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
   canvasW = width;
   canvasH = height;
-}
-
-function fitNodes() {
-  if (!nodes.length) {
-    return;
-  }
-
-  let minX = Infinity;
-  let minY = Infinity;
-  let maxX = -Infinity;
-  let maxY = -Infinity;
-
-  nodes.forEach(function (node) {
-    const pos = nodeMap.get(node).pos;
-    minX = Math.min(minX, pos.x);
-    minY = Math.min(minY, pos.y);
-    maxX = Math.max(maxX, pos.x);
-    maxY = Math.max(maxY, pos.y);
-  });
-
-  const padding = 60;
-  const scaleX = (canvasW - 2 * padding) / Math.max(maxX - minX, 1);
-  const scaleY = (canvasH - 2 * padding) / Math.max(maxY - minY, 1);
-  const scale = Math.min(scaleX, scaleY, 1);
-  const offsetX = (canvasW - (maxX - minX) * scale) / 2 - minX * scale;
-  const offsetY = (canvasH - (maxY - minY) * scale) / 2 - minY * scale;
-
-  nodes.forEach(function (node) {
-    const current = nodeMap.get(node);
-    current.pos.x = current.pos.x * scale + offsetX;
-    current.pos.y = current.pos.y * scale + offsetY;
-    current.vel = { x: 0, y: 0 };
-  });
 }
 
 function clearState() {
@@ -1103,7 +857,6 @@ function clearState() {
   edgeCurvMap.clear();
   edgeToPos.clear();
   layerMap = null;
-  setStatus('', false);
 }
 
 function drawGraph() {
@@ -1121,7 +874,7 @@ function drawGraph() {
     }
     applyGraph(parsed);
   } catch (error) {
-    setStatus('Parse error: ' + error.message, true);
+    // silently ignore parse errors
   }
 }
 
@@ -1129,11 +882,6 @@ function syncSettings() {
   directed = document.querySelector('input[name="ge-type"]:checked').value === 'directed';
   treeMode = treeCb.checked;
   lockMode = lockCb.checked;
-  edgePhysics = ePhysCb.checked;
-  nodeDist = parseInt(elenSldr.value, 10) + 32;
-  tension = parseInt(tensSldr.value, 10) / 10;
-  nodeRepulsion = parseInt(repSldr.value, 10) / 10;
-  updateSliderLabels();
 
   if (nodes.length) {
     layerMap = treeMode ? buildLayers(nodes, adj) : null;
@@ -1190,12 +938,6 @@ overlay.addEventListener('pointerleave', function (event) {
   overlay.style.cursor = 'default';
 });
 
-fitBtn.addEventListener('click', fitNodes);
-clearBtn.addEventListener('click', function () {
-  inputEl.value = '';
-  clearState();
-});
-
 let autoDrawTimer = null;
 inputEl.addEventListener('input', function () {
   clearTimeout(autoDrawTimer);
@@ -1205,26 +947,15 @@ inputEl.addEventListener('input', function () {
   }, 120);
 });
 
-[
-  treeCb,
-  lockCb,
-  ePhysCb,
-  elenSldr,
-  tensSldr,
-  repSldr,
-].concat(Array.prototype.slice.call(document.querySelectorAll('input[name="ge-type"]'))).forEach(function (element) {
-  element.addEventListener('change', function () {
-    syncSettings();
-    if (nodes.length || inputEl.value.trim()) {
-      drawGraph();
-    }
-  });
-  if (element.type === 'range') {
-    element.addEventListener('input', function () {
+Array.prototype.slice.call(document.querySelectorAll('input[name="ge-type"]')).concat([treeCb, lockCb])
+  .forEach(function (element) {
+    element.addEventListener('change', function () {
       syncSettings();
+      if (nodes.length || inputEl.value.trim()) {
+        drawGraph();
+      }
     });
-  }
-});
+  });
 
 window.addEventListener('resize', function () {
   resizeCanvas();
@@ -1232,20 +963,10 @@ window.addEventListener('resize', function () {
 
 resizeCanvas();
 syncSettings();
-syncThemeClass();
+inputEl.value = generateRandomGraph();
 drawGraph();
 startLoop();
 
-if (window.matchMedia) {
-  const darkMedia = window.matchMedia('(prefers-color-scheme: dark)');
-  if (darkMedia.addEventListener) {
-    darkMedia.addEventListener('change', syncThemeClass);
-  } else if (darkMedia.addListener) {
-    darkMedia.addListener(syncThemeClass);
-  }
-}
-
-window.addEventListener('resize', syncThemeClass);
 })();
 </script>
 {% endblock %}
