@@ -17,6 +17,7 @@ from judge.sitemap import sitemaps
 from judge.views import TitledTemplateView, api, blog, comment, contests, language, license, mailgun, organization, \
     preview, problem, problem_download, problem_manage, ranked_submission, register, stats, status, submission, tag, \
     tasks, ticket, two_factor, user, widgets
+from judge.views.graph_editor import GraphEditorView, ToolsListView
 from judge.views.magazine import MagazinePage
 from judge.views.misc_config import MiscConfigEdit
 from judge.views.problem_data import ProblemDataView, ProblemSubmissionDiff, \
@@ -347,6 +348,11 @@ urlpatterns = [
         path('/edit', blog.BlogPostEdit.as_view(), name='blog_post_edit'),
         path('/delete', blog.BlogPostDelete.as_view(), name='blog_post_delete'),
         path('/', lambda _, id, slug: HttpResponsePermanentRedirect(reverse('blog_post', args=[id, slug]))),
+    ])),
+
+    path('tools/', include([
+        path('', ToolsListView.as_view(), name='tools_list'),
+        path('graph-editor', GraphEditorView.as_view(), name='graph_editor'),
     ])),
 
     path('license/<str:key>', license.LicenseDetail.as_view(), name='license'),

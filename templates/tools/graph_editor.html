@@ -1,0 +1,972 @@
+{% extends "base.html" %}
+{% block title_row %}{% endblock %}
+
+{% block media %}
+<style>
+  html,
+  body.ge-active {
+    overflow: hidden;
+  }
+
+  #ge-wrap {
+    display: grid;
+    grid-template-columns: minmax(16rem, 20rem) minmax(0, 1fr);
+    gap: 0.75rem;
+    height: calc(100vh - 10.5rem);
+    min-height: 32rem;
+    overflow: hidden;
+    padding: 0.25rem 0 0.5rem;
+  }
+
+  #ge-sidebar {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
+    overflow-y: auto;
+  }
+
+  #ge-sidebar .sidebox {
+    flex: 0 0 auto;
+    padding-bottom: 0.5em !important;
+    margin-bottom: 0.5rem;
+  }
+
+  #ge-sidebar .sidebox.ge-input-box {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 10rem;
+  }
+
+  #ge-sidebar .ge-input-box .sidebox-content {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .ge-option-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.15rem 0;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  #ge-input {
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 6rem;
+    box-sizing: border-box;
+    resize: none;
+    font-family: Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+    font-size: 0.88rem;
+  }
+
+  #ge-canvas-wrap {
+    position: relative;
+    height: 100%;
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid #231f20;
+    border-radius: 4px;
+    background: #fff;
+  }
+
+  #ge-canvas,
+  #ge-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  #ge-overlay {
+    cursor: default;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    #ge-canvas-wrap {
+      background: #1a1a1a;
+      border-color: #d0d0d0;
+    }
+  }
+
+  @media (max-width: 900px) {
+    #ge-wrap {
+      grid-template-columns: 1fr;
+      height: auto;
+      overflow: visible;
+    }
+
+    #ge-sidebar {
+      height: auto;
+      overflow: visible;
+    }
+
+    #ge-sidebar .sidebox.ge-input-box {
+      min-height: 10rem;
+    }
+
+    #ge-canvas-wrap {
+      height: 60vh;
+      min-height: 280px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block body %}
+<div id="ge-wrap">
+  <aside id="ge-sidebar">
+
+    <div class="sidebox">
+      <h3>Graph type <i class="fa fa-share-alt" style="float:right; margin: 0.2em 0.4em 0 0;"></i></h3>
+      <div class="sidebox-content">
+        <label class="ge-option-row">
+          <input type="radio" name="ge-type" value="undirected" checked>
+          <span>Undirected</span>
+        </label>
+        <label class="ge-option-row">
+          <input type="radio" name="ge-type" value="directed">
+          <span>Directed</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="sidebox">
+      <h3>Options <i class="fa fa-cog" style="float:right; margin: 0.2em 0.4em 0 0;"></i></h3>
+      <div class="sidebox-content">
+        <label class="ge-option-row">
+          <input type="checkbox" id="ge-tree">
+          <span>Tree mode</span>
+        </label>
+        <label class="ge-option-row">
+          <input type="checkbox" id="ge-lock">
+          <span>Lock all nodes</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="sidebox ge-input-box">
+      <h3>Adjacency list <i class="fa fa-list" style="float:right; margin: 0.2em 0.4em 0 0;"></i></h3>
+      <div class="sidebox-content">
+        <textarea id="ge-input" placeholder="1 2&#10;1 3&#10;2 4&#10;3 4"></textarea>
+      </div>
+    </div>
+
+  </aside>
+
+  <section id="ge-canvas-wrap" aria-label="Graph canvas">
+    <canvas id="ge-canvas"></canvas>
+    <canvas id="ge-overlay"></canvas>
+  </section>
+</div>
+{% endblock %}
+
+{% block bodyend %}
+<script>
+(function () {
+'use strict';
+
+document.body.classList.add('ge-active');
+window.addEventListener('beforeunload', function () {
+  document.body.classList.remove('ge-active');
+});
+
+const NODE_FRICTION = 0.05;
+const CANVAS_FIELD_DIST = 50;
+const FPS = 90;
+const NODE_RADIUS = 16;
+const EDGE_LABEL_SEPARATION = 14;
+const CENTERING_STRENGTH = 0.00085;
+
+const nodeDist = {{ ge_node_dist }};
+const tension = {{ ge_tension }};
+const nodeRepulsion = {{ ge_node_repulsion }};
+const edgePhysics = true;
+
+let canvasW = 0;
+let canvasH = 0;
+let nodes = [];
+let nodeMap = new Map();
+let adj = new Map();
+let adjSet = new Map();
+let edges = [];
+let edgeLabels = new Map();
+let edgeCurvMap = new Map();
+let edgeToPos = new Map();
+
+let directed = false;
+let treeMode = false;
+let lockMode = false;
+
+let layerMap = null;
+let mousePos = { x: 0, y: 0 };
+let dragNode = null;
+let animId = null;
+let dpr = window.devicePixelRatio || 1;
+
+const wrap = document.getElementById('ge-canvas-wrap');
+const canvas = document.getElementById('ge-canvas');
+const overlay = document.getElementById('ge-overlay');
+const ctx = canvas.getContext('2d');
+const inputEl = document.getElementById('ge-input');
+const treeCb = document.getElementById('ge-tree');
+const lockCb = document.getElementById('ge-lock');
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(value, max));
+}
+
+function dist2D(a, b) {
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+function isPointProjOutsideLine(a, b, p) {
+  const abx = b.x - a.x;
+  const aby = b.y - a.y;
+  const ab2 = abx * abx + aby * aby;
+  if (!ab2) {
+    return true;
+  }
+  const t = ((p.x - a.x) * abx + (p.y - a.y) * aby) / ab2;
+  return t < 0 || t > 1;
+}
+
+function isDark() {
+  const doc = document.documentElement;
+  const body = document.body;
+  if (doc.dataset.theme === 'dark' || body.dataset.theme === 'dark') {
+    return true;
+  }
+  if (
+    body.classList.contains('dark-mode') ||
+    body.classList.contains('theme-dark') ||
+    body.classList.contains('judge-dark')
+  ) {
+    return true;
+  }
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+function getIdealCurvature(index) {
+  let radius = Math.floor((index + 1) / 2);
+  if (index % 2 === 1) {
+    radius *= -1;
+  }
+  return radius;
+}
+
+function randCoord() {
+  return {
+    x: canvasW / 4 + Math.random() * canvasW / 2,
+    y: canvasH / 4 + Math.random() * canvasH / 2,
+  };
+}
+
+function generateRandomGraph() {
+  const n = 5 + Math.floor(Math.random() * 4);
+  const edgeSet = {};
+  const lines = [];
+
+  function tryEdge(u, v) {
+    if (u === v) return;
+    const key = Math.min(u, v) + ',' + Math.max(u, v);
+    if (!edgeSet[key]) {
+      edgeSet[key] = true;
+      lines.push(u + ' ' + v);
+    }
+  }
+
+  for (let i = 2; i <= n; i++) {
+    tryEdge(1 + Math.floor(Math.random() * (i - 1)), i);
+  }
+
+  const extras = Math.ceil(n / 2);
+  let attempts = extras * 5;
+  let added = 0;
+  while (added < extras && attempts > 0) {
+    attempts--;
+    const before = Object.keys(edgeSet).length;
+    tryEdge(1 + Math.floor(Math.random() * n), 1 + Math.floor(Math.random() * n));
+    if (Object.keys(edgeSet).length > before) {
+      added++;
+    }
+  }
+
+  return lines.join('\n');
+}
+
+function parseInput(text) {
+  const lines = text.trim().split('\n')
+    .map(function (line) {
+      return line.trim().split(/\s+/).filter(Boolean);
+    })
+    .filter(function (parts) {
+      return parts.length > 0;
+    });
+
+  const newNodes = [];
+  const newAdj = new Map();
+  const newEdges = [];
+  const newLabels = new Map();
+  const baseEdgeCount = new Map();
+
+  function addNode(node) {
+    if (!newAdj.has(node)) {
+      newNodes.push(node);
+      newAdj.set(node, []);
+    }
+  }
+
+  lines.forEach(function (parts) {
+    if (parts.length === 1) {
+      addNode(parts[0]);
+      return;
+    }
+
+    if (parts.length >= 2) {
+      const u = parts[0];
+      const v = parts[1];
+      const w = parts[2] || null;
+
+      if (u === v) {
+        addNode(u);
+        return;
+      }
+
+      addNode(u);
+      addNode(v);
+
+      if (!newAdj.get(u).includes(v)) {
+        newAdj.get(u).push(v);
+      }
+
+      const base = u <= v ? u + ' ' + v : v + ' ' + u;
+      const nextIndex = baseEdgeCount.has(base) ? baseEdgeCount.get(base) + 1 : 0;
+      baseEdgeCount.set(base, nextIndex);
+
+      const edgeKey = u + ' ' + v + ' ' + nextIndex;
+      newEdges.push(edgeKey);
+      if (w !== null) {
+        newLabels.set(edgeKey, w);
+      }
+    }
+  });
+
+  return {
+    nodes: newNodes,
+    adj: newAdj,
+    edges: newEdges,
+    edgeLabels: newLabels,
+    edgeToPos: baseEdgeCount,
+  };
+}
+
+function buildLayers(nodesList, adjMap) {
+  const combined = new Map();
+  nodesList.forEach(function (node) {
+    combined.set(node, []);
+  });
+
+  adjMap.forEach(function (neighbors, u) {
+    neighbors.forEach(function (v) {
+      if (!combined.get(u).includes(v)) {
+        combined.get(u).push(v);
+      }
+      if (!combined.has(v)) {
+        combined.set(v, []);
+      }
+      if (!combined.get(v).includes(u)) {
+        combined.get(v).push(u);
+      }
+    });
+  });
+
+  const layers = new Map();
+  const seen = new Set();
+
+  function findMax(node, depth) {
+    seen.add(node);
+    let maxDepth = depth;
+    (combined.get(node) || []).forEach(function (nextNode) {
+      if (!seen.has(nextNode)) {
+        maxDepth = Math.max(maxDepth, findMax(nextNode, depth + 1));
+      }
+    });
+    return maxDepth;
+  }
+
+  function assign(node, depth, maxDepth) {
+    seen.add(node);
+    layers.set(node, [depth, maxDepth]);
+    (combined.get(node) || []).forEach(function (nextNode) {
+      if (!seen.has(nextNode)) {
+        assign(nextNode, depth + 1, maxDepth);
+      }
+    });
+  }
+
+  nodesList.forEach(function (node) {
+    if (!layers.has(node)) {
+      seen.clear();
+      const maxDepth = findMax(node, 1);
+      seen.clear();
+      assign(node, 1, maxDepth);
+    }
+  });
+
+  return layers;
+}
+
+function applyGraph(parsed) {
+  const oldNodeMap = new Map(nodeMap);
+
+  nodes = parsed.nodes;
+  adj = parsed.adj;
+  edges = parsed.edges;
+  edgeLabels = parsed.edgeLabels;
+  edgeToPos = parsed.edgeToPos;
+
+  nodeMap.clear();
+  nodes.forEach(function (node) {
+    if (oldNodeMap.has(node)) {
+      nodeMap.set(node, oldNodeMap.get(node));
+    } else {
+      const coord = randCoord();
+      nodeMap.set(node, {
+        pos: { x: coord.x, y: coord.y },
+        vel: { x: 0, y: 0 },
+      });
+    }
+  });
+
+  adjSet.clear();
+  nodes.forEach(function (node) {
+    adjSet.set(node, new Set(adj.get(node) || []));
+  });
+
+  edgeCurvMap.clear();
+  layerMap = treeMode ? buildLayers(nodes, adj) : null;
+}
+
+function updateVelocities() {
+  let centerOfMass = { x: canvasW / 2, y: canvasH / 2 };
+
+  if (nodes.length) {
+    centerOfMass = nodes.reduce(function (acc, node) {
+      const pos = nodeMap.get(node).pos;
+      acc.x += pos.x;
+      acc.y += pos.y;
+      return acc;
+    }, { x: 0, y: 0 });
+
+    centerOfMass.x /= nodes.length;
+    centerOfMass.y /= nodes.length;
+  }
+
+  const centerDx = canvasW / 2 - centerOfMass.x;
+  const centerDy = canvasH / 2 - centerOfMass.y;
+
+  nodes.forEach(function (u) {
+    const uNode = nodeMap.get(u);
+    const uPos = uNode.pos;
+
+    nodes.forEach(function (v) {
+      if (v === u) {
+        return;
+      }
+
+      const vPos = nodeMap.get(v).pos;
+      const distance = Math.max(dist2D(uPos, vPos), 10);
+      let acceleration = 150000 / (2 * Math.pow(distance, 4.5 - nodeRepulsion));
+
+      const isEdge = adjSet.get(u).has(v) || adjSet.get(v).has(u);
+      if (isEdge) {
+        acceleration = Math.pow(Math.abs(distance - nodeDist), tension) / 100000;
+        if (distance >= nodeDist) {
+          acceleration *= -1;
+        }
+      }
+
+      const ax = vPos.x - uPos.x;
+      const ay = vPos.y - uPos.y;
+
+      uNode.vel = {
+        x: clamp((uNode.vel.x - acceleration * ax) * (1 - NODE_FRICTION), -100, 100),
+        y: clamp((uNode.vel.y - acceleration * ay) * (1 - NODE_FRICTION), -100, 100),
+      };
+    });
+
+    const borderXSign = canvasW / 2 - uPos.x >= 0 ? 1 : -1;
+    const borderYSign = canvasH / 2 - uPos.y >= 0 ? 1 : -1;
+    let borderAx = 0;
+    let borderAy = 0;
+
+    if (Math.min(uPos.x, canvasW - uPos.x) <= CANVAS_FIELD_DIST) {
+      borderAx = Math.pow(canvasW / 2 - uPos.x, 2) * borderXSign / 500000;
+    }
+    if (Math.min(uPos.y, canvasH - uPos.y) <= CANVAS_FIELD_DIST) {
+      borderAy = Math.pow(canvasH / 2 - uPos.y, 2) * borderYSign / 500000;
+    }
+
+    uNode.vel = {
+      x: clamp((uNode.vel.x + borderAx) * (1 - NODE_FRICTION), -100, 100),
+      y: clamp((uNode.vel.y + borderAy) * (1 - NODE_FRICTION), -100, 100),
+    };
+
+    uNode.vel = {
+      x: clamp((uNode.vel.x + centerDx * CENTERING_STRENGTH) * (1 - NODE_FRICTION * 0.2), -100, 100),
+      y: clamp((uNode.vel.y + centerDy * CENTERING_STRENGTH) * (1 - NODE_FRICTION * 0.2), -100, 100),
+    };
+
+    if (layerMap && layerMap.has(u)) {
+      const layerData = layerMap.get(u);
+      const depth = layerData[0];
+      const maxDepth = layerData[1];
+      let layerHeight = (nodeDist * 4) / 5;
+      if (maxDepth * layerHeight >= canvasH - 2 * CANVAS_FIELD_DIST) {
+        layerHeight = (canvasH - 2 * CANVAS_FIELD_DIST) / maxDepth;
+      }
+
+      const yTarget = CANVAS_FIELD_DIST + (depth - 0.5) * layerHeight;
+      let ay = Math.pow(Math.abs(uPos.y - yTarget), 1.75) / 100;
+      if (uPos.y > yTarget) {
+        ay *= -1;
+      }
+
+      uNode.vel = {
+        x: uNode.vel.x,
+        y: clamp((uNode.vel.y + ay) * (1 - NODE_FRICTION), -100, 100),
+      };
+    }
+
+    uNode.pos = {
+      x: uPos.x + uNode.vel.x,
+      y: uPos.y + uNode.vel.y,
+    };
+  });
+
+  nodes.forEach(function (node) {
+    const current = nodeMap.get(node);
+    current.pos.x = clamp(current.pos.x, NODE_RADIUS, canvasW - NODE_RADIUS);
+    current.pos.y = clamp(current.pos.y, NODE_RADIUS, canvasH - NODE_RADIUS);
+  });
+}
+
+function getCurveControlPoints(u, v, radius) {
+  let px = u.y - v.y;
+  let py = v.x - u.x;
+  const shouldFlip = radius < 0;
+  px *= 0.5 * (shouldFlip ? -1 : 1) * Math.abs(radius);
+  py *= 0.5 * (shouldFlip ? -1 : 1) * Math.abs(radius);
+
+  return {
+    p0c: { x: u.x + px, y: u.y + py },
+    p1c: { x: v.x + px, y: v.y + py },
+  };
+}
+
+function getBezierPoint(u, c1, c2, v, t) {
+  const tc = 1 - t;
+  return {
+    x: tc * tc * tc * u.x + 3 * tc * tc * t * c1.x + 3 * tc * t * t * c2.x + t * t * t * v.x,
+    y: tc * tc * tc * u.y + 3 * tc * tc * t * c1.y + 3 * tc * t * t * c2.y + t * t * t * v.y,
+  };
+}
+
+function getBezierTangent(u, c1, c2, v, t) {
+  const tc = 1 - t;
+  return {
+    x: 3 * tc * tc * (c1.x - u.x) + 6 * tc * t * (c2.x - c1.x) + 3 * t * t * (v.x - c2.x),
+    y: 3 * tc * tc * (c1.y - u.y) + 6 * tc * t * (c2.y - c1.y) + 3 * t * t * (v.y - c2.y),
+  };
+}
+
+function getUpperNormal(tangent) {
+  const length = Math.max(Math.hypot(tangent.x, tangent.y), 1e-6);
+  const normalA = { x: -tangent.y / length, y: tangent.x / length };
+  const normalB = { x: tangent.y / length, y: -tangent.x / length };
+  return normalA.y < normalB.y ? normalA : normalB;
+}
+
+function drawLine(u, v, idealR, edgeKey, nodePositions, color) {
+  if (!edgeCurvMap.has(edgeKey)) {
+    edgeCurvMap.set(edgeKey, idealR);
+  }
+
+  let radius = edgeCurvMap.get(edgeKey);
+  const steps = 10;
+  const flexLimit = 1.5;
+
+  function mid(a, b) {
+    return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+  }
+
+  let controls = getCurveControlPoints(u, v, radius);
+  const nodeContrib = new Map();
+  let previousPoint = u;
+
+  for (let i = 1; i <= steps; i++) {
+    const point = getBezierPoint(u, controls.p0c, controls.p1c, v, i / steps);
+
+    if (i >= 2 && i <= 9) {
+      const midpoint = mid(previousPoint, point);
+      const baseDir = { x: point.x - previousPoint.x, y: point.y - previousPoint.y };
+
+      nodePositions.forEach(function (pos) {
+        if (isPointProjOutsideLine(u, v, pos)) {
+          return;
+        }
+
+        const local = { x: pos.x - previousPoint.x, y: pos.y - previousPoint.y };
+        const sign = baseDir.x * local.y - baseDir.y * local.x > 0 ? 1 : -1;
+        const distance = dist2D(pos, midpoint);
+        const current = nodeContrib.get(pos);
+
+        if (current === undefined || distance < Math.abs(current)) {
+          nodeContrib.set(pos, sign * distance);
+        }
+      });
+    }
+
+    previousPoint = point;
+  }
+
+  nodeContrib.forEach(function (contrib) {
+    let value = 100 / Math.pow(Math.abs(contrib), 1.9);
+    value = clamp(value, -0.3, 0.3);
+    radius += (contrib > 0 ? -1 : 1) * value;
+  });
+
+  radius -= (radius - idealR) / 10;
+  radius = clamp(radius, idealR - flexLimit, idealR + flexLimit);
+  edgeCurvMap.set(edgeKey, radius);
+  controls = getCurveControlPoints(u, v, radius);
+
+  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(u.x, u.y);
+  ctx.bezierCurveTo(controls.p0c.x, controls.p0c.y, controls.p1c.x, controls.p1c.y, v.x, v.y);
+  ctx.stroke();
+
+  return { radius: radius, controls: controls };
+}
+
+function findBezierBoundaryT(u, c1, c2, v, center, radius, nearEnd) {
+  let lo = nearEnd ? 0.5 : 0.0;
+  let hi = nearEnd ? 1.0 : 0.5;
+  for (let i = 0; i < 14; i++) {
+    const mid = (lo + hi) / 2;
+    const pt = getBezierPoint(u, c1, c2, v, mid);
+    const inside = Math.hypot(pt.x - center.x, pt.y - center.y) < radius;
+    if (nearEnd) {
+      if (inside) hi = mid; else lo = mid;
+    } else {
+      if (inside) lo = mid; else hi = mid;
+    }
+  }
+  return (lo + hi) / 2;
+}
+
+function drawArrow(u, v, curveData, nodeRadius, color, reversed) {
+  const c1 = curveData.controls.p0c;
+  const c2 = curveData.controls.p1c;
+
+  // Find where the bezier exits the destination node's circle
+  const center = reversed ? u : v;
+  const t = findBezierBoundaryT(u, c1, c2, v, center, nodeRadius, !reversed);
+
+  const pt = getBezierPoint(u, c1, c2, v, t);
+
+  const arrowLength = nodeRadius * 0.9;
+  const arrowHalfWidth = nodeRadius * 0.42;
+
+  // ptTip  — on the node circle boundary (tip of arrowhead, touching the node)
+  // ptBase — arrowLength further back along the bezier (base of arrowhead, where edge meets arrow)
+  const tBase = findBezierBoundaryT(u, c1, c2, v, center, nodeRadius + arrowLength, !reversed);
+  const ptBase = getBezierPoint(u, c1, c2, v, tBase);
+
+  const dx = pt.x - ptBase.x;
+  const dy = pt.y - ptBase.y;
+  const alen = Math.max(Math.hypot(dx, dy), 1e-6);
+  const ax = dx / alen;
+  const ay = dy / alen;
+
+  // Tip at node boundary, base arrowLength outside — edge line flows into the base cleanly
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(pt.x, pt.y);
+  ctx.lineTo(ptBase.x + (-ay) * arrowHalfWidth, ptBase.y + ax * arrowHalfWidth);
+  ctx.lineTo(ptBase.x - (-ay) * arrowHalfWidth, ptBase.y - ax * arrowHalfWidth);
+  ctx.closePath();
+  ctx.fill();
+}
+
+function drawEdgeLabel(u, v, curveData, label, color) {
+  const labelPoint = getBezierPoint(u, curveData.controls.p0c, curveData.controls.p1c, v, 0.5);
+  const tangent = getBezierTangent(u, curveData.controls.p0c, curveData.controls.p1c, v, 0.5);
+  const normal = getUpperNormal(tangent);
+  const labelX = labelPoint.x + normal.x * EDGE_LABEL_SEPARATION;
+  const labelY = labelPoint.y + normal.y * EDGE_LABEL_SEPARATION;
+
+  ctx.lineWidth = 1.5;
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'center';
+  ctx.font = '13px Menlo, Monaco, Consolas, monospace';
+  ctx.fillStyle = color;
+  ctx.fillText(label, labelX, labelY);
+}
+
+function renderEdges() {
+  const dark = isDark();
+  const edgeColor = dark ? '#e0e0e0' : '#000000';
+  const activeKeys = new Set();
+
+  edges.forEach(function (edge) {
+    const parts = edge.split(' ');
+    const from = parts[0];
+    const to = parts[1];
+    const edgeIndex = parseInt(parts[2], 10);
+    const reverse = from > to;
+    const edgeBase = from + ' ' + to;
+    const reverseEdge = to + ' ' + from + ' ' + edgeIndex;
+    const idealR = getIdealCurvature(edgeIndex);
+    const edgeKey = edgeBase + ' ' + edgeIndex;
+
+    let start = nodeMap.get(from).pos;
+    let end = nodeMap.get(to).pos;
+    if (reverse) {
+      const temp = start;
+      start = end;
+      end = temp;
+    }
+
+    const otherNodes = [];
+    nodes.forEach(function (node) {
+      if (node !== from && node !== to) {
+        otherNodes.push(nodeMap.get(node).pos);
+      }
+    });
+
+    activeKeys.add(edgeKey);
+    const curveData = drawLine(start, end, idealR, edgeKey, otherNodes, edgeColor);
+
+    if (directed) {
+      drawArrow(start, end, curveData, NODE_RADIUS, edgeColor, reverse);
+    }
+
+    if (edgeLabels.has(edge)) {
+      if (!edgeLabels.has(reverseEdge) || edge <= reverseEdge) {
+        drawEdgeLabel(start, end, curveData, edgeLabels.get(edge), edgeColor);
+      }
+    }
+  });
+
+  Array.from(edgeCurvMap.keys()).forEach(function (key) {
+    if (!activeKeys.has(key)) {
+      edgeCurvMap.delete(key);
+    }
+  });
+}
+
+function renderNodes() {
+  const dark = isDark();
+  const stroke = dark ? '#e0e0e0' : '#000000';
+  const fill = dark ? '#1a1a1a' : '#ffffff';
+  const textColor = dark ? '#e0e0e0' : '#000000';
+
+  nodes.forEach(function (node) {
+    const pos = nodeMap.get(node).pos;
+
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = stroke;
+    ctx.fillStyle = fill;
+
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, NODE_RADIUS - 0.75, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.font = '600 13px "Segoe UI", "Lucida Grande", Arial, sans-serif';
+    ctx.fillStyle = textColor;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+    ctx.fillText(node, pos.x, pos.y + 0.5);
+  });
+}
+
+function render() {
+  ctx.clearRect(0, 0, canvasW, canvasH);
+
+  if (dragNode) {
+    const current = nodeMap.get(dragNode);
+    current.pos.x = clamp(mousePos.x, NODE_RADIUS, canvasW - NODE_RADIUS);
+    current.pos.y = clamp(mousePos.y, NODE_RADIUS, canvasH - NODE_RADIUS);
+  }
+
+  renderEdges();
+  renderNodes();
+
+  if (!lockMode) {
+    updateVelocities();
+  }
+}
+
+function startLoop() {
+  if (animId) {
+    clearInterval(animId);
+  }
+  animId = setInterval(function () {
+    requestAnimationFrame(render);
+  }, 1000 / FPS);
+}
+
+function resizeCanvas() {
+  dpr = window.devicePixelRatio || 1;
+  const width = wrap.clientWidth;
+  const height = wrap.clientHeight;
+
+  canvas.width = Math.round(width * dpr);
+  canvas.height = Math.round(height * dpr);
+  overlay.width = Math.round(width * dpr);
+  overlay.height = Math.round(height * dpr);
+
+  canvas.style.width = width + 'px';
+  canvas.style.height = height + 'px';
+  overlay.style.width = width + 'px';
+  overlay.style.height = height + 'px';
+
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  canvasW = width;
+  canvasH = height;
+}
+
+function clearState() {
+  nodes = [];
+  nodeMap.clear();
+  adj.clear();
+  adjSet.clear();
+  edges = [];
+  edgeLabels.clear();
+  edgeCurvMap.clear();
+  edgeToPos.clear();
+  layerMap = null;
+}
+
+function drawGraph() {
+  const text = inputEl.value;
+  if (!text.trim()) {
+    clearState();
+    return;
+  }
+
+  try {
+    const parsed = parseInput(text);
+    if (!parsed.nodes.length) {
+      clearState();
+      return;
+    }
+    applyGraph(parsed);
+  } catch (error) {
+    // silently ignore parse errors
+  }
+}
+
+function syncSettings() {
+  directed = document.querySelector('input[name="ge-type"]:checked').value === 'directed';
+  treeMode = treeCb.checked;
+  lockMode = lockCb.checked;
+
+  if (nodes.length) {
+    layerMap = treeMode ? buildLayers(nodes, adj) : null;
+  }
+}
+
+function getNodeAt(x, y) {
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    if (dist2D(nodeMap.get(node).pos, { x: x, y: y }) <= NODE_RADIUS) {
+      return node;
+    }
+  }
+  return null;
+}
+
+overlay.addEventListener('pointerdown', function (event) {
+  event.preventDefault();
+  mousePos = { x: event.offsetX, y: event.offsetY };
+  dragNode = getNodeAt(event.offsetX, event.offsetY);
+  if (dragNode) {
+    const current = nodeMap.get(dragNode);
+    current.vel = { x: 0, y: 0 };
+    current.pos.x = clamp(mousePos.x, NODE_RADIUS, canvasW - NODE_RADIUS);
+    current.pos.y = clamp(mousePos.y, NODE_RADIUS, canvasH - NODE_RADIUS);
+    overlay.style.cursor = 'grabbing';
+    requestAnimationFrame(render);
+  }
+});
+
+overlay.addEventListener('pointermove', function (event) {
+  event.preventDefault();
+  mousePos = { x: event.offsetX, y: event.offsetY };
+  if (dragNode) {
+    const current = nodeMap.get(dragNode);
+    current.vel = { x: 0, y: 0 };
+    current.pos.x = clamp(mousePos.x, NODE_RADIUS, canvasW - NODE_RADIUS);
+    current.pos.y = clamp(mousePos.y, NODE_RADIUS, canvasH - NODE_RADIUS);
+    requestAnimationFrame(render);
+    return;
+  }
+  overlay.style.cursor = getNodeAt(event.offsetX, event.offsetY) ? 'pointer' : 'default';
+});
+
+overlay.addEventListener('pointerup', function (event) {
+  event.preventDefault();
+  dragNode = null;
+  overlay.style.cursor = 'default';
+});
+
+overlay.addEventListener('pointerleave', function (event) {
+  event.preventDefault();
+  dragNode = null;
+  overlay.style.cursor = 'default';
+});
+
+let autoDrawTimer = null;
+inputEl.addEventListener('input', function () {
+  clearTimeout(autoDrawTimer);
+  autoDrawTimer = setTimeout(function () {
+    syncSettings();
+    drawGraph();
+  }, 120);
+});
+
+Array.prototype.slice.call(document.querySelectorAll('input[name="ge-type"]')).concat([treeCb, lockCb])
+  .forEach(function (element) {
+    element.addEventListener('change', function () {
+      syncSettings();
+      if (nodes.length || inputEl.value.trim()) {
+        drawGraph();
+      }
+    });
+  });
+
+window.addEventListener('resize', function () {
+  resizeCanvas();
+});
+
+resizeCanvas();
+syncSettings();
+inputEl.value = generateRandomGraph();
+drawGraph();
+startLoop();
+
+})();
+</script>
+{% endblock %}

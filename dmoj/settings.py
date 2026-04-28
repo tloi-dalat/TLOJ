@@ -248,6 +248,11 @@ DMOJ_TOTP_TOLERANCE_HALF_MINUTES = 1
 DMOJ_SCRATCH_CODES_COUNT = 5
 DMOJ_USER_MAX_ORGANIZATION_COUNT = 3
 
+# Graph editor physics defaults
+GRAPH_EDITOR_NODE_DIST = 112     # target distance between connected nodes (pixels)
+GRAPH_EDITOR_TENSION = 1.6       # spring force exponent
+GRAPH_EDITOR_NODE_REPULSION = 0.0  # node-to-node repulsion strength
+
 # Whether to allow users to download their data
 DMOJ_USER_DATA_DOWNLOAD = False
 DMOJ_USER_DATA_CACHE = ''
