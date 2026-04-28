@@ -42,7 +42,7 @@
             "regex": "^/user",
             "parent": null,
             "lft": 1,
-            "rght": 2,
+            "rght": 4,
             "tree_id": 3,
             "level": 0
         }
@@ -61,6 +61,22 @@
             "rght": 2,
             "tree_id": 4,
             "level": 0
+        }
+    },
+    {
+        "model": "judge.navigationbar",
+        "pk": 10,
+        "fields": {
+            "order": 1,
+            "key": "org",
+            "label": "Organizations",
+            "path": "/organizations/",
+            "regex": "^/organization",
+            "parent": 3,
+            "lft": 2,
+            "rght": 3,
+            "tree_id": 3,
+            "level": 1
         }
     },
     {
