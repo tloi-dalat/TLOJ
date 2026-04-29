@@ -44,22 +44,23 @@
         <link rel="stylesheet" href="{{ FONTAWESOME_CSS }}">
     {% endif %}
     {% compress css %}
-        {# TODO: once dark mode support is better, enable for all users by deleting the else branch #}
-        {% if perms.judge.test_site %}
-            {% if PREFERRED_STYLE_CSS is not none %}
-                <link rel="stylesheet" href="{{ static(PREFERRED_STYLE_CSS) }}">
-            {% else %}
-                <link rel="stylesheet" href="{{ static(LIGHT_STYLE_CSS) }}">
-                <link rel="stylesheet" href="{{ static(DARK_STYLE_CSS) }}" media="(prefers-color-scheme: dark)">
-            {% endif %}
-        {% else %}
-            <link rel="stylesheet" href="{{ static(LIGHT_STYLE_CSS) }}">
-        {% endif %}
+        <link rel="stylesheet" href="{{ static(LIGHT_STYLE_CSS) }}">
+        <link rel="stylesheet" href="{{ static(DARK_STYLE_CSS) }}" id="dark-theme-style"
+              media="{% if SITE_THEME_NAME == 'dark' %}all{% elif SITE_THEME_NAME == 'light' %}not all{% else %}(prefers-color-scheme: dark){% endif %}">
         {% if INLINE_FONTAWESOME %}<link rel="stylesheet" href="{{ static('libs/fontawesome/font-awesome.css') }}">{% endif %}
         <link rel="stylesheet" href="{{ static('source_sans_pro.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ static('libs/clipboard/tooltip.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ static('libs/select2/select2.css') }}">
     {% endcompress %}
+    <script>
+        (function() {
+            var theme = localStorage.getItem('theme') || '{{ SITE_THEME_NAME }}';
+            var darkStyle = document.getElementById('dark-theme-style');
+            if (darkStyle && theme !== 'auto') {
+                darkStyle.media = (theme === 'dark') ? 'all' : 'not all';
+            }
+        })();
+    </script>
     <link rel="canonical"
           href="{{ DMOJ_SCHEME }}://{{ DMOJ_CANONICAL|default(site.domain) }}{{ request.get_full_path() }}">
     {% if request.user.is_impersonate %}
@@ -205,7 +206,16 @@
         </style>
     </noscript>
 </head>
-<body{% if perms.judge.test_site %} data-theme="{{ SITE_THEME_NAME }}"{% endif %}>
+<body data-theme="{{ SITE_THEME_NAME }}">
+<script>
+    (function() {
+        var theme = localStorage.getItem('theme') || '{{ SITE_THEME_NAME }}';
+        if (theme === 'auto') {
+            theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.body.setAttribute('data-theme', theme);
+    })();
+</script>
 <svg width="0" height="0" style="display: block">
     <defs>
         <clipPath id="rating-clip"><circle cx="8" cy="8" r="7"/></clipPath>
@@ -258,6 +268,9 @@
                     </span>
                 </a>
             {% endif %}
+            <a id="theme-toggle" href="javascript:void(0)" title="{{ _('Toggle Dark/Light Mode') }}" style="margin-right: 15px; margin-top: 4px; vertical-align: middle;">
+                <i class="fa fa-moon-o" id="theme-icon" style="font-size: 1.3em;"></i>
+            </a>
             <a href=
                 {% if request.resolver_match.view_name == "problem_detail" and problem %}
                     "{{ url('new_problem_ticket', problem.code) }}"
