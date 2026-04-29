@@ -2,6 +2,7 @@
 .vscode
 .sass-cache
 .python-version
+.claude
 *.sqlite3
 *.py[co]
 *.mo

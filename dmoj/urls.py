@@ -350,10 +350,8 @@ urlpatterns = [
         path('/', lambda _, id, slug: HttpResponsePermanentRedirect(reverse('blog_post', args=[id, slug]))),
     ])),
 
-    path('tools/', include([
-        path('', ToolsListView.as_view(), name='tools_list'),
-        path('graph-editor', GraphEditorView.as_view(), name='graph_editor'),
-    ])),
+    path('tools/', ToolsListView.as_view(), name='tools_list'),
+    path('tool/graph-editor', GraphEditorView.as_view(), name='graph_editor'),
 
     path('license/<str:key>', license.LicenseDetail.as_view(), name='license'),
 
