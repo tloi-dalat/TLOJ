@@ -87,9 +87,12 @@
     cursor: default;
   }
 
+  body[data-theme="dark"] #ge-canvas-wrap {
+    border-color: #d0d0d0;
+  }
+
   @media (prefers-color-scheme: dark) {
-    #ge-canvas-wrap {
-      background: #1a1a1a;
+    body[data-theme="auto"] #ge-canvas-wrap {
       border-color: #d0d0d0;
     }
   }
@@ -239,17 +242,13 @@ function isPointProjOutsideLine(a, b, p) {
 function isDark() {
   const doc = document.documentElement;
   const body = document.body;
-  if (doc.dataset.theme === 'dark' || body.dataset.theme === 'dark') {
-    return true;
-  }
-  if (
-    body.classList.contains('dark-mode') ||
-    body.classList.contains('theme-dark') ||
-    body.classList.contains('judge-dark')
-  ) {
-    return true;
-  }
-  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const theme = doc.dataset.theme || body.dataset.theme;
+  if (theme === 'light') return false;
+  if (theme === 'dark') return true;
+  if (body.classList.contains('dark-mode') || body.classList.contains('theme-dark') || body.classList.contains('judge-dark')) return true;
+  // Only follow OS preference when theme is explicitly 'auto'.
+  // No data-theme means a non-test user who always gets the light CSS.
+  return theme === 'auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
 }
 
 function getIdealCurvature(index) {
@@ -722,9 +721,8 @@ function drawEdgeLabel(u, v, curveData, label, color) {
   ctx.fillText(label, labelX, labelY);
 }
 
-function renderEdges() {
-  const dark = isDark();
-  const edgeColor = dark ? '#e0e0e0' : '#000000';
+function renderEdges(dark) {
+  const edgeColor = dark ? '#e0e0e0' : '#231f20';
   const activeKeys = new Set();
 
   edges.forEach(function (edge) {
@@ -774,11 +772,10 @@ function renderEdges() {
   });
 }
 
-function renderNodes() {
-  const dark = isDark();
-  const stroke = dark ? '#e0e0e0' : '#000000';
-  const fill = dark ? '#1a1a1a' : '#ffffff';
-  const textColor = dark ? '#e0e0e0' : '#000000';
+function renderNodes(dark) {
+  const stroke = dark ? '#e0e0e0' : '#231f20';
+  const fill = dark ? '#181818' : '#ffffff';
+  const textColor = dark ? '#e0e0e0' : '#231f20';
 
   nodes.forEach(function (node) {
     const pos = nodeMap.get(node).pos;
@@ -801,7 +798,9 @@ function renderNodes() {
 }
 
 function render() {
-  ctx.clearRect(0, 0, canvasW, canvasH);
+  const dark = isDark();
+  ctx.fillStyle = dark ? '#181818' : '#ffffff';
+  ctx.fillRect(0, 0, canvasW, canvasH);
 
   if (dragNode) {
     const current = nodeMap.get(dragNode);
@@ -809,8 +808,8 @@ function render() {
     current.pos.y = clamp(mousePos.y, NODE_RADIUS, canvasH - NODE_RADIUS);
   }
 
-  renderEdges();
-  renderNodes();
+  renderEdges(dark);
+  renderNodes(dark);
 
   if (!lockMode) {
     updateVelocities();
