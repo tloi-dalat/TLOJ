@@ -99,6 +99,23 @@ def site_theme(request):
     }
 
 
+def graph_config(request):
+    return {
+        'GRAPH_CONFIG': {
+            'nodeRadius': getattr(settings, 'GRAPH_NODE_RADIUS', 16),
+            'edgeLabelSeparation': getattr(settings, 'GRAPH_EDGE_LABEL_SEPARATION', 14),
+            'nodeFriction': getattr(settings, 'GRAPH_NODE_FRICTION', 0.05),
+            'canvasFieldDist': getattr(settings, 'GRAPH_CANVAS_FIELD_DIST', 50),
+            'centeringStrength': getattr(settings, 'GRAPH_CENTERING_STRENGTH', 0.00085),
+            'nodeDist': getattr(settings, 'GRAPH_NODE_DIST', 112),
+            'tension': getattr(settings, 'GRAPH_TENSION', 1.6),
+            'nodeRepulsion': getattr(settings, 'GRAPH_NODE_REPULSION', 0.0),
+            'nodeThickness': getattr(settings, 'GRAPH_NODE_THICKNESS', 1.5),
+            'edgeThickness': getattr(settings, 'GRAPH_EDGE_THICKNESS', 1.5),
+        },
+    }
+
+
 def math_setting(request):
     caniuse = CanIUse(request.headers.get('user-agent', ''))
 
