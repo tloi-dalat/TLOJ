@@ -248,10 +248,17 @@ DMOJ_TOTP_TOLERANCE_HALF_MINUTES = 1
 DMOJ_SCRATCH_CODES_COUNT = 5
 DMOJ_USER_MAX_ORGANIZATION_COUNT = 3
 
-# Graph editor physics defaults
-GRAPH_EDITOR_NODE_DIST = 112     # target distance between connected nodes (pixels)
-GRAPH_EDITOR_TENSION = 1.6       # spring force exponent
-GRAPH_EDITOR_NODE_REPULSION = 0.0  # node-to-node repulsion strength
+# Graph editor constants
+GRAPH_NODE_RADIUS = 20
+GRAPH_EDGE_LABEL_SEPARATION = 10
+GRAPH_NODE_FRICTION = 0.05
+GRAPH_CANVAS_FIELD_DIST = 50
+GRAPH_CENTERING_STRENGTH = 0.00085
+GRAPH_NODE_DIST = 150
+GRAPH_TENSION = 1.6
+GRAPH_NODE_REPULSION = 0.0
+GRAPH_NODE_THICKNESS = 2.0
+GRAPH_EDGE_THICKNESS = 2.0
 
 # Whether to allow users to download their data
 DMOJ_USER_DATA_DOWNLOAD = False
@@ -535,6 +542,7 @@ TEMPLATES = [
                 'judge.template_context.site_theme',
                 'judge.template_context.misc_config',
                 'judge.template_context.math_setting',
+                'judge.template_context.graph_config',
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
             ],

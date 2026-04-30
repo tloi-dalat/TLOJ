@@ -2,6 +2,8 @@
 
 {% block content_js_media %}
     {% include "comments/media-js.html" %}
+    {% include "graph-core-config.html" %}
+    <script type="text/javascript" src="{{ static('graph-core.js') }}"></script>
     <script type="text/javascript" src="{{ static('graph-viewer.js') }}"></script>
 {% endblock %}
 
