@@ -24,11 +24,11 @@ from .. import registry
 logger = logging.getLogger('judge.html')
 
 _GRAPH_FENCE_RE = re.compile(
-    r'(`{3,})[ \t]*graph((?:[ \t]+\w+)*)[ \t]*\n(.*?)\n\1[ \t]*(?:\n|$)',
+    r'(`{3,})[ \t]*(graph|tree)((?:[ \t]+\w+)*)[ \t]*\n(.*?)\n\1[ \t]*(?:\n|$)',
     re.DOTALL,
 )
 _GRAPH_BLOCK_RE = re.compile(
-    r'<pre><code class="language-graph((?:-\w+)*)">(.*?)</code></pre>',
+    r'<pre><code class="language-(graph|tree)((?:-\w+)*)">(.*?)</code></pre>',
     re.DOTALL,
 )
 
@@ -36,10 +36,11 @@ _GRAPH_BLOCK_RE = re.compile(
 def _preprocess_graph_fences(text):
     text = text.replace('\r\n', '\n').replace('\r', '\n')
     def replace_fence(m):
-        flags = m.group(2).strip()
+        kind = m.group(2)
+        flags = m.group(3).strip()
         suffix = ('-' + '-'.join(flags.split())) if flags else ''
-        return '\n<pre><code class="language-graph{}">{}</code></pre>\n'.format(
-            suffix, _html_module.escape(m.group(3))
+        return '\n<pre><code class="language-{}{}">{}</code></pre>\n'.format(
+            kind, suffix, _html_module.escape(m.group(4))
         )
     return _GRAPH_FENCE_RE.sub(replace_fence, text)
 
@@ -48,16 +49,17 @@ def _postprocess_graph_blocks(html_str):
     counter = [0]
 
     def replace_block(m):
-        flags_suffix = m.group(1)
+        kind = m.group(1)
+        flags_suffix = m.group(2)
         flags = set(flags_suffix.strip('-').split('-')) if flags_suffix else set()
         flags.discard('')
 
-        raw_content = _html_module.unescape(m.group(2))
+        raw_content = _html_module.unescape(m.group(3))
 
         payload = _json_module.dumps({
             'edges': raw_content,
             'directed': 'directed' in flags,
-            'weighted': 'weighted' in flags,
+            'tree': kind == 'tree',
         })
 
         attr_val = base64.b64encode(payload.encode('utf-8')).decode('ascii')

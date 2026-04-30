@@ -61,7 +61,7 @@ class GraphViewer {
     this.layerMap = null;
 
     this.directed = false;
-    this.weighted = false;
+    this.tree = false;
 
     this.canvasW = 0;
     this.canvasH = 0;
@@ -70,6 +70,9 @@ class GraphViewer {
     this.dragNode = null;
     this.mousePos = { x: 0, y: 0 };
     this.animId = null;
+
+    this.wrap.style.border = 'none';
+    this.wrap.style.borderRadius = '0';
 
     this.overlay = document.createElement('canvas');
     this.overlay.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;';
@@ -90,7 +93,7 @@ class GraphViewer {
     try {
       const data = JSON.parse(atob(this.canvas.dataset.graphB64) || '{}');
       this.directed = !!data.directed;
-      this.weighted = !!data.weighted;
+      this.tree = !!data.tree;
       const text = (data.edges || '').trim();
       if (!text) return;
       const parsed = this.parseInput(text);
@@ -176,7 +179,50 @@ class GraphViewer {
     this.adjSet.clear();
     this.nodes.forEach(node => this.adjSet.set(node, new Set(this.adj.get(node) || [])));
     this.edgeCurvMap.clear();
-    this.layerMap = null;
+    this.layerMap = this.tree ? this.buildLayers() : null;
+  }
+
+  buildLayers() {
+    const combined = new Map();
+    this.nodes.forEach(node => combined.set(node, []));
+    this.adj.forEach((neighbors, u) => {
+      neighbors.forEach(v => {
+        if (!combined.get(u).includes(v)) combined.get(u).push(v);
+        if (!combined.has(v)) combined.set(v, []);
+        if (!combined.get(v).includes(u)) combined.get(v).push(u);
+      });
+    });
+
+    const layers = new Map();
+    const seen = new Set();
+
+    function findMax(node, depth) {
+      seen.add(node);
+      let max = depth;
+      (combined.get(node) || []).forEach(next => {
+        if (!seen.has(next)) max = Math.max(max, findMax(next, depth + 1));
+      });
+      return max;
+    }
+
+    function assign(node, depth, maxDepth) {
+      seen.add(node);
+      layers.set(node, [depth, maxDepth]);
+      (combined.get(node) || []).forEach(next => {
+        if (!seen.has(next)) assign(next, depth + 1, maxDepth);
+      });
+    }
+
+    this.nodes.forEach(node => {
+      if (!layers.has(node)) {
+        seen.clear();
+        const maxDepth = findMax(node, 1);
+        seen.clear();
+        assign(node, 1, maxDepth);
+      }
+    });
+
+    return layers;
   }
 
   updateVelocities() {
@@ -230,6 +276,19 @@ class GraphViewer {
         x: clamp((uNode.vel.x + centerDx * CENTERING_STRENGTH) * (1 - NODE_FRICTION * 0.2), -100, 100),
         y: clamp((uNode.vel.y + centerDy * CENTERING_STRENGTH) * (1 - NODE_FRICTION * 0.2), -100, 100),
       };
+
+      if (this.layerMap && this.layerMap.has(u)) {
+        const [depth, maxDepth] = this.layerMap.get(u);
+        let layerHeight = (NODE_DIST * 4) / 5;
+        if (maxDepth * layerHeight >= canvasH - 2 * CANVAS_FIELD_DIST) {
+          layerHeight = (canvasH - 2 * CANVAS_FIELD_DIST) / maxDepth;
+        }
+        const yTarget = CANVAS_FIELD_DIST + (depth - 0.5) * layerHeight;
+        let ay = Math.pow(Math.abs(uPos.y - yTarget), 1.75) / 100;
+        if (uPos.y > yTarget) ay *= -1;
+        uNode.vel.y = clamp((uNode.vel.y + ay) * (1 - NODE_FRICTION), -100, 100);
+      }
+
       uNode.pos = { x: uPos.x + uNode.vel.x, y: uPos.y + uNode.vel.y };
     });
 
@@ -581,10 +640,37 @@ class GraphViewer {
   }
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-  document.querySelectorAll('.graph-viewer-canvas').forEach(function (el) {
-    new GraphViewer(el);
+function initGraphViewers(root) {
+  root.querySelectorAll('.graph-viewer-canvas').forEach(function (el) {
+    if (!el._graphViewer) {
+      el._graphViewer = new GraphViewer(el);
+    }
   });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  initGraphViewers(document);
+
+  // MutationObserver for dynamically injected content
+  new MutationObserver(function (mutations) {
+    mutations.forEach(function (m) {
+      m.addedNodes.forEach(function (node) {
+        if (node.nodeType !== 1) return;
+        if (node.classList.contains('graph-viewer-canvas')) {
+          if (!node._graphViewer) node._graphViewer = new GraphViewer(node);
+        } else {
+          initGraphViewers(node);
+        }
+      });
+    });
+  }).observe(document.body, { childList: true, subtree: true });
+
+  // Martor preview hook (more reliable for the problem editor preview pane)
+  if (typeof $ !== 'undefined') {
+    $(document).on('martor:preview', function (e, $tab) {
+      initGraphViewers($tab[0]);
+    });
+  }
 });
 
 }());
