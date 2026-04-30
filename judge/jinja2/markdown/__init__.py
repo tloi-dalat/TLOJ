@@ -1,3 +1,6 @@
+import base64
+import html as _html_module
+import json as _json_module
 import logging
 import re
 from html.parser import HTMLParser
@@ -19,6 +22,56 @@ from .bleach_whitelist import all_styles, mathml_attrs, mathml_tags
 from .. import registry
 
 logger = logging.getLogger('judge.html')
+
+_GRAPH_FENCE_RE = re.compile(
+    r'(`{3,})[ \t]*graph((?:[ \t]+\w+)*)[ \t]*\n(.*?)\n\1[ \t]*(?:\n|$)',
+    re.DOTALL,
+)
+_GRAPH_BLOCK_RE = re.compile(
+    r'<pre><code class="language-graph((?:-\w+)*)">(.*?)</code></pre>',
+    re.DOTALL,
+)
+
+
+def _preprocess_graph_fences(text):
+    text = text.replace('\r\n', '\n').replace('\r', '\n')
+    def replace_fence(m):
+        flags = m.group(2).strip()
+        suffix = ('-' + '-'.join(flags.split())) if flags else ''
+        return '\n<pre><code class="language-graph{}">{}</code></pre>\n'.format(
+            suffix, _html_module.escape(m.group(3))
+        )
+    return _GRAPH_FENCE_RE.sub(replace_fence, text)
+
+
+def _postprocess_graph_blocks(html_str):
+    counter = [0]
+
+    def replace_block(m):
+        flags_suffix = m.group(1)
+        flags = set(flags_suffix.strip('-').split('-')) if flags_suffix else set()
+        flags.discard('')
+
+        raw_content = _html_module.unescape(m.group(2))
+
+        payload = _json_module.dumps({
+            'edges': raw_content,
+            'directed': 'directed' in flags,
+            'weighted': 'weighted' in flags,
+        })
+
+        attr_val = base64.b64encode(payload.encode('utf-8')).decode('ascii')
+
+        idx = counter[0]
+        counter[0] += 1
+
+        return (
+            '<div class="graph-viewer-wrap" id="graph-viewer-{}">'
+            '<canvas class="graph-viewer-canvas" data-graph-b64="{}"></canvas>'
+            '</div>'
+        ).format(idx, attr_val)
+
+    return _GRAPH_BLOCK_RE.sub(replace_block, html_str)
 
 NOFOLLOW_WHITELIST = settings.NOFOLLOW_EXCLUDED
 
@@ -96,6 +149,9 @@ def markdown(text, style, math_engine=None, lazy_load=False, strip_paragraphs=Fa
     else:
         safe_mode = None
 
+    if safe_mode is None:
+        text = _preprocess_graph_fences(text)
+
     extras = ['latex', 'spoiler', 'fenced-code-blocks', 'cuddled-lists', 'tables', 'strike']
     if styles.get('nofollow', True):
         extras.append('nofollow')
@@ -122,4 +178,6 @@ def markdown(text, style, math_engine=None, lazy_load=False, strip_paragraphs=Fa
         result = fragment_tree_to_str(tree)
     if bleach_params:
         result = get_cleaner(style, bleach_params).clean(result)
+    if safe_mode is None:
+        result = _postprocess_graph_blocks(result)
     return Markup(result)
