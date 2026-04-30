@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.utils.translation import gettext as _
 from django.views.generic import TemplateView
 
@@ -15,4 +14,3 @@ class ToolsListView(TitleMixin, TemplateView):
 class GraphEditorView(TitleMixin, TemplateView):
     template_name = 'tools/graph_editor.html'
     title = _('Graph Editor')
-
