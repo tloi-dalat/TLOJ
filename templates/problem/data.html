@@ -53,6 +53,43 @@
                 });
             });
 
+            function get_batch_children($start) {
+                return $start.nextUntil('tr[data-type=E], tr[data-type=S], tr[data-type=""]').filter('tr[data-type=C]');
+            }
+
+            function get_batch_start_for_case($case) {
+                var $prevs = $case.prevAll('tr[data-type=S], tr[data-type=E]');
+                if (!$prevs.length) return $();
+                var $nearest = $($prevs.get(0));
+                return $nearest.attr('data-type') == 'S' ? $nearest : $();
+            }
+
+            function sync_batch_start_pretest($start) {
+                if (!$start.length) return;
+
+                var $children = get_batch_children($start);
+                if (!$children.length) return;
+
+                var all_checked = true;
+                $children.each(function () {
+                    var checked = $(this).find('input[id$=pretest]').prop('checked');
+                    if (!checked) {
+                        all_checked = false;
+                        return false;
+                    }
+                });
+
+                $start.find('input[id$=pretest]').prop('checked', all_checked);
+            }
+
+            function set_batch_children_pretest($start, checked) {
+                var $children = get_batch_children($start);
+                $children.each(function () {
+                    $(this).find('input[id$=pretest]').prop('checked', checked);
+                });
+                $start.find('input[id$=pretest]').prop('checked', checked);
+}
+
             var order = 0;
 
             function handle_table_reorder() {
@@ -60,7 +97,8 @@
                 $table.find('tbody:first tr').each(function () {
                     switch ($(this).attr('data-type')) {
                         case 'C':
-                            $(this).find('input[id$=points], input[id$=pretest]').toggle(!in_batch);
+                            $(this).find('input[id$=points]').toggle(!in_batch);
+                            $(this).find('input[id$=pretest]').toggle(true);
                             break;
                         case 'S':
                             in_batch = true;
@@ -68,6 +106,10 @@
                         case 'E':
                             in_batch = false;
                     }
+                });
+
+                $table.find('tbody:first tr[data-type=S]').each(function () {
+                    sync_batch_start_pretest($(this));
                 });
             }
 
@@ -289,6 +331,8 @@
                             $opts.toggle(val == 'S');
                             $files.siblings('.select2').hide();
                             $checker.toggle(val == 'S');
+                            $tr.find('input[id$=points]').toggle(val == 'S');
+                            $tr.find('input[id$=pretest]').toggle(val == 'S');
                             break;
                         default:
                             $opts.toggle(val == 'C');
@@ -296,11 +340,33 @@
                             $checker.toggle(val == 'C');
                             var $prevs = $tr.prevAll('tr[data-type=S], tr[data-type=E]');
                             disabled = $prevs.length && $prevs.get(0).getAttribute('data-type') == 'S';
-                            $tr.find('input[id$=points], input[id$=pretest]').toggle(val == 'C' && !disabled);
+                            $tr.find('input[id$=points]').toggle(val == 'C' && !disabled);
+                            $tr.find('input[id$=pretest]').toggle(val == 'C');
                     }
                     $tr.attr('data-type', val).nextUntil('tr[data-type=S], tr[data-type=E], tr[data-type=""]')
-                        .find('input[id$=points], input[id$=pretest]').toggle(!disabled);
+                        .find('input[id$=points]').toggle(!disabled);
                 }).change();
+
+                var $pretest = $tr.find('input[id$=pretest]');
+                $pretest.off('change.batchpretest').on('change.batchpretest', function () {
+                    var rowType = $tr.attr('data-type');
+
+                    if (rowType == 'S') {
+                        set_batch_children_pretest($tr, $(this).prop('checked'));
+                        return;
+                    }
+
+                    if (rowType == 'C') {
+                        var $batchStart = get_batch_start_for_case($tr);
+                        if (!$batchStart.length) return;
+
+                        if (!$(this).prop('checked')) {
+                            $batchStart.find('input[id$=pretest]').prop('checked', false);
+                        } else {
+                            sync_batch_start_pretest($batchStart);
+                        }
+                    }
+                });
 
                 var tooltip_classes = 'tooltipped tooltipped-s';
                 $tr.find('a.edit-generator-args').mouseover(function () {
