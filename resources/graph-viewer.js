@@ -112,23 +112,27 @@ class GraphViewer {
   }
 
   resizeCanvas() {
-    this.dpr = window.devicePixelRatio || 1;
-    const width = this.wrap.clientWidth;
-    const height = this.wrap.clientHeight;
+    const dpr = window.devicePixelRatio || 1;
+    const width = Math.max(1, this.wrap.clientWidth);
+    const height = Math.max(1, this.wrap.clientHeight);
 
-    this.canvas.width = Math.round(width * this.dpr);
-    this.canvas.height = Math.round(height * this.dpr);
-    this.overlay.width = Math.round(width * this.dpr);
-    this.overlay.height = Math.round(height * this.dpr);
+    if (this.canvasW === width && this.canvasH === height && this.dpr === dpr) {
+      return;
+    }
 
-    this.canvas.style.width = width + 'px';
-    this.canvas.style.height = height + 'px';
-    this.overlay.style.width = width + 'px';
-    this.overlay.style.height = height + 'px';
-
-    this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    this.dpr = dpr;
     this.canvasW = width;
     this.canvasH = height;
+
+    const bitmapW = Math.round(width * dpr);
+    const bitmapH = Math.round(height * dpr);
+
+    this.canvas.width = bitmapW;
+    this.canvas.height = bitmapH;
+    this.overlay.width = bitmapW;
+    this.overlay.height = bitmapH;
+
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
   getNodeAt(x, y) {
