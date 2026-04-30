@@ -316,24 +316,24 @@ function startLoop() {
 }
 
 function resizeCanvas() {
-  dpr = window.devicePixelRatio || 1;
-  const width = wrap.clientWidth;
-  const height = wrap.clientHeight;
+  const nextDpr = window.devicePixelRatio || 1;
+  const width = Math.max(1, wrap.clientWidth);
+  const height = Math.max(1, wrap.clientHeight);
+
+  if (canvasW === width && canvasH === height && dpr === nextDpr) {
+    return;
+  }
+
+  dpr = nextDpr;
+  canvasW = width;
+  canvasH = height;
 
   canvas.width = Math.round(width * dpr);
   canvas.height = Math.round(height * dpr);
   overlay.width = Math.round(width * dpr);
   overlay.height = Math.round(height * dpr);
 
-  canvas.style.width = width + 'px';
-  canvas.style.height = height + 'px';
-  overlay.style.width = width + 'px';
-  overlay.style.height = height + 'px';
-
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-  canvasW = width;
-  canvasH = height;
 }
 
 function clearState() {
