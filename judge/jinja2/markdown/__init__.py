@@ -35,13 +35,15 @@ _GRAPH_BLOCK_RE = re.compile(
 
 def _preprocess_graph_fences(text):
     text = text.replace('\r\n', '\n').replace('\r', '\n')
+
     def replace_fence(m):
         kind = m.group(2)
         flags = m.group(3).strip()
         suffix = ('-' + '-'.join(flags.split())) if flags else ''
         return '\n<pre><code class="language-{}{}">{}</code></pre>\n'.format(
-            kind, suffix, _html_module.escape(m.group(4))
+            kind, suffix, _html_module.escape(m.group(4)),
         )
+
     return _GRAPH_FENCE_RE.sub(replace_fence, text)
 
 
@@ -74,6 +76,7 @@ def _postprocess_graph_blocks(html_str):
         ).format(idx, attr_val)
 
     return _GRAPH_BLOCK_RE.sub(replace_block, html_str)
+
 
 NOFOLLOW_WHITELIST = settings.NOFOLLOW_EXCLUDED
 
