@@ -324,3 +324,39 @@ $(function () {
         e.stopPropagation();
     } );
 });
+
+$(function() {
+    var $themeToggle = $('#theme-toggle');
+    var $themeIcon = $('#theme-icon');
+    var $darkStyle = $('#dark-theme-style');
+
+    if ($themeToggle.length) {
+        function updateThemeDisplay(theme) {
+            if (theme === 'dark') {
+                $darkStyle.attr('media', 'all');
+                $themeIcon.removeClass('fa-moon-o').addClass('fa-sun-o');
+            } else {
+                $darkStyle.attr('media', 'not all');
+                $themeIcon.removeClass('fa-sun-o').addClass('fa-moon-o');
+            }
+            $('body').attr('data-theme', theme);
+        }
+
+        var currentTheme = localStorage.getItem('theme') || document.body.getAttribute('data-theme');
+        if (currentTheme === 'auto') {
+            currentTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        updateThemeDisplay(currentTheme);
+
+        $themeToggle.click(function() {
+            var theme = localStorage.getItem('theme') || document.body.getAttribute('data-theme');
+            if (theme === 'auto') {
+                theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            
+            var newTheme = (theme === 'dark') ? 'light' : 'dark';
+            localStorage.setItem('theme', newTheme);
+            updateThemeDisplay(newTheme);
+        });
+    }
+});
