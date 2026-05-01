@@ -68,9 +68,10 @@ class ContestResolverViewTestCase(CommonDataMixin, TestCase):
         # Alice has a frozen submission
         alice_sub = Submission.objects.create(
             user=alice.profile, problem=problem, language=lang,
-            date=contest.start_time + timezone.timedelta(minutes=10),
             status='AC', result='AC',
         )
+        Submission.objects.filter(id=alice_sub.id).update(date=contest.start_time + timezone.timedelta(minutes=10))
+
         ContestSubmission.objects.create(
             submission=alice_sub, problem=contest_problem,
             participation=alice_participation, points=100,
