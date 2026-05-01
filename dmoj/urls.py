@@ -23,7 +23,7 @@ from judge.views.misc_config import MiscConfigEdit
 from judge.views.problem_data import ProblemDataView, ProblemSubmissionDiff, \
     problem_data_file, problem_init_view
 from judge.views.register import ActivationView, RegistrationView
-from judge.views.resolver_tool import ResolverToolView
+from judge.views.resolver import ResolverToolView, ResolverView
 from judge.views.select2 import AssigneeSelect2View, CommentSelect2View, ContestSelect2View, \
     ContestUserSearchSelect2View, OrganizationSelect2View, OrganizationUserSearchSelect2View, \
     OrganizationUserSelect2View, ProblemSelect2View, TagGroupSelect2View, TagSelect2View, TicketUserSelect2View, \
@@ -357,6 +357,7 @@ urlpatterns = [
     path('tools/', ToolsListView.as_view(), name='tools_list'),
     path('tool/graph-editor', GraphEditorView.as_view(), name='graph_editor'),
     path('tool/resolver', ResolverToolView.as_view(), name='resolver_tool'),
+    path('tool/resolver/view', ResolverView.as_view(), name='resolver-view'),
 
     path('license/<str:key>', license.LicenseDetail.as_view(), name='license'),
 

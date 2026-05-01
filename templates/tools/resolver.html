@@ -51,26 +51,6 @@
             </div>
         </div>
     </div>
-
-    <div id="splash-screen" class="screen-tool hidden">
-        <div class="center-tool">
-            <h1 class="title" id="contest-name"></h1>
-            <div class="gap"></div>
-            <h2 id="splash-pending" class="subtitle"></h2>
-            <div class="gap"></div>
-            <p class="subtitle" id="splash-instruction"></p>
-        </div>
-    </div>
-
-    <div id="output-screen" class="screen-tool hidden">
-        <div class="resolver-header">
-            <div class="header-rank">#</div>
-            <div class="header-name">CONTESTANT</div>
-            <div class="header-score">SCORE</div>
-            <div class="header-time">TIME</div>
-        </div>
-        <div id="standings" class="standings-tool"></div>
-    </div>
 </div>
 
 <style>
@@ -81,9 +61,6 @@
     .screen-tool {
         width: 100%;
         padding: 20px 0;
-    }
-    .screen-tool.hidden {
-        display: none;
     }
     .form-container {
         max-width: 900px;
@@ -130,14 +107,19 @@
     .btn-start:hover {
         background: #218838;
     }
-    .center-tool {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        min-height: 70vh;
-    }
 </style>
 
 <script src="{{ static('resolver.js') }}"></script>
+<script>
+    window.startContest = function() {
+        const text = document.getElementById("json-data").value;
+        try {
+            JSON.parse(text); // Validate
+            sessionStorage.setItem('resolver_data', text);
+            window.location.href = "{{ url('resolver-view') }}";
+        } catch (e) { 
+            alert("Invalid JSON: " + e.message); 
+        }
+    };
+</script>
 {% endblock %}

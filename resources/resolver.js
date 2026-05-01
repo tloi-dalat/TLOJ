@@ -267,9 +267,16 @@
         else if (key === 'r') location.reload();
     });
 
+    window.processContest = processContest;
+
     document.addEventListener('DOMContentLoaded', () => {
-        if (window.resolverConfig && window.resolverConfig.dataUrl) {
-            fetch(window.resolverConfig.dataUrl, { credentials: 'same-origin' }).then(r => r.json()).then(processContest);
+        if (window.resolverConfig) {
+            if (window.resolverConfig.dataUrl) {
+                fetch(window.resolverConfig.dataUrl, { credentials: 'same-origin' }).then(r => r.json()).then(processContest);
+            } else if (window.resolverConfig.loadFromSession) {
+                const data = sessionStorage.getItem('resolver_data');
+                if (data) processContest(JSON.parse(data));
+            }
         }
     });
 })();
