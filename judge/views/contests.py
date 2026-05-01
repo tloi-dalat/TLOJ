@@ -16,7 +16,7 @@ from django.db import IntegrityError
 from django.db.models import BooleanField, Case, Count, F, FloatField, IntegerField, Max, Min, Q, Sum, Value, When
 from django.db.models.expressions import CombinedExpression
 from django.db.models.query import Prefetch
-from django.http import Http404, HttpResponse, HttpResponseForbidden, HttpResponseRedirect
+from django.http import Http404, HttpResponse, HttpResponseForbidden, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.defaultfilters import date as date_filter, floatformat
 from django.template.loader import get_template
@@ -48,6 +48,7 @@ from judge.utils.infinite_paginator import InfinitePaginationMixin
 from judge.utils.opengraph import generate_opengraph
 from judge.utils.problems import _get_result_data, user_attempted_ids, user_completed_ids
 from judge.utils.ranker import ranker
+from judge.utils.resolver import build_resolver_payload, supports_resolver
 from judge.utils.stats import get_bar_chart, get_pie_chart, get_stacked_bar_chart
 from judge.utils.views import SingleObjectFormView, TitleMixin, \
     add_file_response, generic_message, paginate_query_context
@@ -55,7 +56,8 @@ from judge.utils.views import SingleObjectFormView, TitleMixin, \
 __all__ = ['ContestList', 'ContestDetail', 'ContestRanking', 'ContestJoin', 'ContestLeave', 'ContestCalendar',
            'ContestClone', 'ContestStats', 'ContestMossView', 'ContestMossDelete',
            'ContestParticipationList', 'ContestParticipationDisqualify', 'get_contest_ranking_list',
-           'base_contest_ranking_list', 'ContestProblemMakePublic']
+           'base_contest_ranking_list', 'ContestProblemMakePublic', 'ContestResolverView',
+           'ContestResolverDataView']
 
 
 def _find_contest(request, key, private_check=True):
@@ -231,7 +233,21 @@ class ContestMixin(object):
             context['logo_override_image'] = self.object.organization.logo_override_image
 
         context['is_ICPC_format'] = (self.object.format.name == ICPCContestFormat.name)
+        context['can_access_resolver'] = self.can_access_resolver()
+        context['resolver_enabled'] = self.resolver_enabled()
         return context
+
+    def resolver_enabled(self):
+        return self.object.ended and not self.object.csv_ranking and supports_resolver(self.object)
+
+    def has_valid_ranking_access_code(self):
+        ranking_access_code = self.object.ranking_access_code
+        return bool(ranking_access_code and ranking_access_code == self.request.GET.get('code'))
+
+    def can_access_resolver(self):
+        return self.resolver_enabled() and (
+            self.request.user.is_staff or self.request.user.is_superuser
+        )
 
     def get_object(self, queryset=None):
         contest = super(ContestMixin, self).get_object(queryset)
@@ -1102,6 +1118,105 @@ class ContestOfficialRanking(ContestRankingBase):
             return redirect(self.object.csv_ranking)
 
         return super().get(request, *args, **kwargs)
+
+
+class ContestResolverMixin(ContestMixin):
+    tab = 'resolver'
+
+    def get_title(self):
+        return _('%s Resolver') % self.object.name
+
+    def get_content_title(self):
+        return self.object.name
+
+    def get_access_denied_response(self):
+        return generic_message(
+            self.request,
+            _('Permission denied'),
+            _('You do not have permission to access the resolver for this contest.'),
+            status=403,
+        )
+
+    def validate_resolver_access(self):
+        if not self.object.ended and not self.can_edit and not self.object.frozen_last_minutes:
+            return generic_message(
+                self.request,
+                _('Resolver unavailable'),
+                _('The resolver is only available after the contest ends.'),
+                status=403,
+            )
+        if self.object.csv_ranking:
+            return generic_message(
+                self.request,
+                _('Resolver unavailable'),
+                _('This contest uses an official CSV ranking, so a reliable resolver replay is unavailable.'),
+                status=409,
+            )
+        if not supports_resolver(self.object):
+            return generic_message(
+                self.request,
+                _('Resolver unavailable'),
+                _('Resolver replay is currently only supported for ICPC and VNOJ contests.'),
+                status=404,
+            )
+        if (self.object.can_see_full_scoreboard(self.request.user) or
+                self.has_valid_ranking_access_code() or self.can_edit):
+            return None
+        return self.get_access_denied_response()
+
+
+class ContestResolverView(ContestResolverMixin, TitleMixin, DetailView):
+    template_name = 'contest/resolver.html'
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        denial = self.validate_resolver_access()
+        if denial is not None:
+            return denial
+        context = self.get_context_data(object=self.object)
+        return self.render_to_response(context)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        query_string = self.request.GET.urlencode()
+        resolver_data_url = reverse('contest_resolver_data', args=[self.object.key])
+        if query_string:
+            resolver_data_url = f'{resolver_data_url}?{query_string}'
+        context['resolver_data_url'] = resolver_data_url
+        context['debug_mode'] = settings.DEBUG
+        return context
+
+
+class ContestResolverDataView(ContestResolverMixin, SingleObjectMixin, View):
+    def get_access_denied_response(self):
+        return JsonResponse({
+            'error': _('You do not have permission to access the resolver for this contest.'),
+        }, status=403)
+
+    def validate_resolver_access(self):
+        if not self.object.ended and not self.can_edit and not self.object.frozen_last_minutes:
+            return JsonResponse({
+                'error': _('The resolver is only available after the contest ends.'),
+            }, status=403)
+        if self.object.csv_ranking:
+            return JsonResponse({
+                'error': _('This contest uses an official CSV ranking, so a reliable resolver replay is unavailable.'),
+            }, status=409)
+        if not supports_resolver(self.object):
+            return JsonResponse({
+                'error': _('Resolver replay is currently only supported for ICPC and VNOJ contests.'),
+            }, status=404)
+        if (self.object.can_see_full_scoreboard(self.request.user) or
+                self.has_valid_ranking_access_code() or self.can_edit):
+            return None
+        return self.get_access_denied_response()
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        denial = self.validate_resolver_access()
+        if denial is not None:
+            return denial
+        return JsonResponse(build_resolver_payload(self.object))
 
 
 class ContestParticipationList(LoginRequiredMixin, ContestRankingBase):

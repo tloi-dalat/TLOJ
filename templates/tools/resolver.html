@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div id="resolver-tool">
+    <div id="input-screen" class="screen-tool">
+        <div class="form-container">
+            <h2 class="title-tool">{{ _('Resolver Tool') }}</h2>
+            <div class="gap"></div>
+            
+            <div class="form-area full">
+                <div class="form-component">
+                    <label>{{ _('Input Mode') }}</label>
+                    <select id="option" onchange="changeOption()">
+                        <option value="json">{{ _('JSON Data') }}</option>
+                        <option value="cf">{{ _('Codeforces API') }}</option>
+                    </select>
+                </div>
+
+                <div id="input-json" class="input-mode">
+                    <div class="form-component">
+                        <label>{{ _('JSON File') }}</label>
+                        <input type="file" id="file" accept=".json" onchange="readJSON()">
+                    </div>
+                </div>
+
+                <div id="input-cf" class="input-mode" style="display: none;">
+                    <div class="form-component">
+                        <label>{{ _('Contest ID') }}</label>
+                        <input type="text" id="contestId" placeholder="e.g. 1234">
+                    </div>
+                    <div class="input-container">
+                        <div class="form-component">
+                            <label>{{ _('API Key') }}</label>
+                            <input type="text" id="apiKey">
+                        </div>
+                        <div class="form-component">
+                            <label>{{ _('API Secret') }}</label>
+                            <input type="password" id="apiSecret">
+                        </div>
+                    </div>
+                    <button class="resolver-btn-action" onclick="fetchContest()">{{ _('Fetch from Codeforces') }}</button>
+                </div>
+
+                <div class="form-component">
+                    <label>{{ _('JSON Content') }}</label>
+                    <textarea id="json-data" placeholder='{ "contest": { ... }, "problems": [], "contestants": [], "submissions": [] }'></textarea>
+                </div>
+
+                <div class="gap"></div>
+                <button class="btn-start" onclick="startContest()">{{ _('Start Resolver') }}</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="splash-screen" class="screen-tool hidden">
+        <div class="center-tool">
+            <h1 class="title" id="contest-name"></h1>
+            <div class="gap"></div>
+            <h2 id="splash-pending" class="subtitle"></h2>
+            <div class="gap"></div>
+            <p class="subtitle" id="splash-instruction"></p>
+        </div>
+    </div>
+
+    <div id="output-screen" class="screen-tool hidden">
+        <div class="resolver-header">
+            <div class="header-rank">#</div>
+            <div class="header-name">CONTESTANT</div>
+            <div class="header-score">SCORE</div>
+            <div class="header-time">TIME</div>
+        </div>
+        <div id="standings" class="standings-tool"></div>
+    </div>
+</div>
+
+<style>
+    #resolver-tool {
+        min-height: 80vh;
+        position: relative;
+    }
+    .screen-tool {
+        width: 100%;
+        padding: 20px 0;
+    }
+    .screen-tool.hidden {
+        display: none;
+    }
+    .form-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    .title-tool {
+        margin: 0 0 10px 0;
+        font-weight: bold;
+    }
+    .form-component {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        margin-bottom: 15px;
+    }
+    .input-container {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    .input-container > * { flex: 1; margin-bottom: 0; }
+    textarea {
+        height: 300px;
+        width: 100%;
+        font-family: monospace;
+        resize: vertical;
+    }
+    .resolver-btn-action {
+        padding: 8px 16px;
+        cursor: pointer;
+        margin-bottom: 10px;
+    }
+    .btn-start {
+        background: #28a745;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        font-size: 1.2rem;
+        padding: 15px;
+        width: 100%;
+        cursor: pointer;
+        font-weight: bold;
+    }
+    .btn-start:hover {
+        background: #218838;
+    }
+    .center-tool {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 70vh;
+    }
+</style>
+
+<script src="{{ static('resolver.js') }}"></script>
+{% endblock %}

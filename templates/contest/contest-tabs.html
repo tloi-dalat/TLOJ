@@ -1,6 +1,10 @@
 {% extends "tabs-base.html" %}
 
 {% block tabs %}
+    {% set resolver_url = url('contest_resolver', contest.key) %}
+    {% if request.GET.get('code') %}
+        {% set resolver_url = resolver_url ~ '?code=' ~ request.GET.get('code') %}
+    {% endif %}
     {{ make_tab('detail', 'fa-info-circle', url('contest_view', contest.key), _('Info')) }}
     {% if contest.can_see_full_submission_list(request.user) %}
         {{ make_tab('stats', 'fa-pie-chart', url('contest_stats', contest.key), _('Statistics')) }}
@@ -9,6 +13,9 @@
     {% if contest.start_time <= now or perms.judge.see_private_contest %}
         {% if contest.can_see_own_scoreboard(request.user) %}
             {{ make_tab('ranking', 'fa-bar-chart', url('contest_ranking', contest.key), _('Rankings')) }}
+            {% if can_access_resolver %}
+                {{ make_tab('resolver', 'fa-play-circle', url('contest_resolver', contest.key), _('Resolver')) }}
+            {% endif %}
             {% if contest.csv_ranking %}
                 {{ make_tab('official_ranking', 'fa-bar-chart', url('contest_official_ranking', contest.key), _('Official Rankings')) }}
             {% endif %}
@@ -17,6 +24,9 @@
             {% endif %}
         {% else %}
             {{ make_tab('ranking', 'fa-bar-chart', None, _('Hidden Rankings')) }}
+            {% if can_access_resolver %}
+                {{ make_tab('resolver', 'fa-play-circle', resolver_url, _('Resolver')) }}
+            {% endif %}
         {% endif %}
         {{ make_tab('submissions', 'fa-bar-chart', url('contest_all_submissions', contest.key), _('Submissions')) }}
     {% endif %}
