@@ -109,7 +109,6 @@ body.dark-theme {
 
 .standings, .standings-tool {
     background-color: var(--resolver-bg);
-    background-image: repeating-linear-gradient(180deg, var(--resolver-sub-bg) 0px, var(--resolver-sub-bg) 58px, var(--resolver-bg) 58px, var(--resolver-bg) 116px);
     height: calc(100vh - 45px);
     overflow-y: auto;
     position: relative;
@@ -135,9 +134,14 @@ body.dark-theme {
     display: flex;
     align-items: center;
     height: 58px;
-    background: transparent;
+    background-color: var(--resolver-bg);
     transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s;
     will-change: transform;
+    overflow: hidden;
+}
+
+.rank-box:nth-child(even) {
+    background-color: var(--resolver-sub-bg);
 }
 
 .rank-box.up { background-color: #1f8f3a !important; color: #fff !important; }
@@ -167,6 +171,7 @@ body.dark-theme {
     justify-content: center;
     flex: 1;
     overflow: hidden;
+    min-width: 0; /* Cho phép flex item co lại dưới nội dung của nó */
 }
 
 .name {
@@ -179,7 +184,11 @@ body.dark-theme {
     margin-bottom: 2px;
 }
 
-.problem-points { display: flex; gap: 6px; }
+.problem-points { 
+    display: flex; 
+    gap: 6px; 
+    overflow: hidden; /* Ngăn chặn overflow ngang khi zoom */
+}
 
 .point-box {
     flex: 1;
