@@ -19,7 +19,6 @@ from lxml import etree as ET
 
 from judge.models import Language, Problem, ProblemData, ProblemGroup, ProblemTestCase, ProblemTranslation, \
     ProblemType, Profile, Solution
-from judge.utils.problem_data import ProblemDataCompiler
 from judge.views.widgets import django_uploader
 
 __all__ = ['ImportPolygonError', 'PolygonImporter']
@@ -915,10 +914,4 @@ class PolygonImporter:
             last_case.save()
 
         self.log('Generating init.yml')
-        ProblemDataCompiler.generate(
-            problem=problem,
-            data=problem_data,
-            cases=problem.cases.order_by('order'),
-            files=zipfile.ZipFile(problem_data.zipfile.path).namelist(),
-        )
         assert problem_data.feedback == '', problem_data.feedback

@@ -251,16 +251,6 @@
                 href: "/custom_checkers"
             }).appendTo($checker.parent());
 
-            var $file_test = $('#id_problem-data-zipfile');
-            $("<br>").appendTo($file_test.parent());
-            $("<input/>", {
-                type: "submit",
-                value: {{ _('Please press this button if you have just updated the zip data')|htmltojs }},
-                class: "button",
-                style: "display: inherit",
-                id: "submit-button",
-            }).appendTo($file_test.parent());
-
             function swap_row($a, $b) {
                 var $a_order = $a.find('input[id$=order]'), $b_order = $b.find('input[id$=order]');
                 var order = $a_order.val();
@@ -577,8 +567,10 @@
                 reader.onload = function(ev) {
                     JSZip.loadAsync(ev.target.result).then(function(zip) {
                         let all_files = Object.keys(zip.files).sort();
-                        // ignore macos stupid files
-                        window.valid_files = all_files.filter(file => !file.startsWith('__MACOSX/') && !file.startsWith('._') && !file.startsWith('.DS_Store'));
+                        window.valid_files = all_files.filter(file => {
+                            let filename = file.split('/').pop();
+                            return filename && !filename.startsWith('.') && !file.startsWith('__MACOSX/');
+                        });
 
                         fill_testcases();
                     }).catch(function(err) {

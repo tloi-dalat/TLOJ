@@ -1,5 +1,6 @@
 import errno
 import os
+import zipfile
 from typing import Optional
 
 from django.conf import settings
@@ -14,9 +15,10 @@ from registration.signals import user_registered
 
 from judge.caching import finished_submission
 from judge.models import BlogPost, Comment, Contest, ContestAnnouncement, ContestProblem, ContestSubmission, \
-    EFFECTIVE_MATH_ENGINES, Judge, Language, License, MiscConfig, Organization, Problem, Profile, Submission, \
-    WebAuthnCredential
+    EFFECTIVE_MATH_ENGINES, Judge, Language, License, MiscConfig, Organization, Problem, ProblemData, ProblemTestCase, \
+    Profile, Submission, WebAuthnCredential
 from judge.tasks import on_new_comment
+from judge.utils.problem_data import ProblemDataCompiler
 from judge.views.register import RegistrationView
 
 
@@ -211,3 +213,42 @@ def registration_user_registered(sender, user, request, **kwargs):
         with transaction.atomic():
             user.save()
             profile.save()
+
+
+@receiver(post_save, sender=ProblemData)
+@receiver(post_save, sender=ProblemTestCase)
+def problem_data_update(sender, instance, **kwargs):
+    if sender == ProblemData:
+        data = instance
+        problem = data.problem
+    else:
+        problem = instance.dataset
+        try:
+            data = problem.data_files
+        except ProblemData.DoesNotExist:
+            return
+
+    def generate():
+        if hasattr(data, '_auto_generating'):
+            return
+
+        data._auto_generating = True
+        try:
+            files = []
+            if data.zipfile:
+                try:
+                    with zipfile.ZipFile(data.zipfile) as archive:
+                        files = archive.namelist()
+                except Exception:
+                    pass
+
+            ProblemDataCompiler.generate(
+                problem=problem,
+                data=data,
+                cases=problem.cases.order_by('order'),
+                files=files,
+            )
+        finally:
+            del data._auto_generating
+
+    transaction.on_commit(generate)
