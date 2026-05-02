@@ -13,6 +13,7 @@
     --resolver-header-bg: #000;
     --resolver-pending-text: #666;
     --resolver-highlight: #5782d9;
+    --resolver-avatar-gap: 15px;
     --rating-none: #aaa;
     --rating-newbie: #988f81;
     --rating-pupil: #72ff72;
@@ -193,7 +194,7 @@ body {
 .user-info {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: var(--resolver-avatar-gap);
     padding-left: 10px;
 }
 
@@ -229,7 +230,8 @@ body {
 .problem-points { 
     display: flex; 
     gap: 6px; 
-    width: 100%;
+    width: calc(100% + min(52px, calc(var(--resolver-row-height) - 18px)) + var(--resolver-avatar-gap));
+    margin-left: calc(-1 * (min(52px, calc(var(--resolver-row-height) - 18px)) + var(--resolver-avatar-gap)));
     overflow: hidden;
 }
 
