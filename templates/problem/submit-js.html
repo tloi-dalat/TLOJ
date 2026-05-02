@@ -3,6 +3,17 @@
 {% compress js %}
     <script type="text/javascript">
         $(function () {
+            var last_lang = localStorage.getItem('last_selected_language');
+            if (last_lang) {
+                if ($('#id_language option[value="' + last_lang + '"]').length) {
+                    $('#id_language').val(last_lang);
+                }
+            }
+
+            $('#id_language').change(function () {
+                localStorage.setItem('last_selected_language', $(this).val());
+            });
+
             function format(state) {
                 if (!state.id) return state.text; // optgroup
                 return state.text;
