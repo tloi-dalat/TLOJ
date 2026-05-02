@@ -58,6 +58,8 @@ class ContestResolverViewTestCase(CommonDataMixin, TestCase):
 
         alice = create_user(username='resolver_alice')
         bob = create_user(username='resolver_bob')
+        alice.profile.rating = 2200
+        alice.profile.save(update_fields=['rating'])
 
         alice_participation = create_contest_participation(contest=contest, user=alice.profile)
         create_contest_participation(contest=contest, user=bob.profile)
@@ -65,7 +67,6 @@ class ContestResolverViewTestCase(CommonDataMixin, TestCase):
         from judge.models import Language
         lang = Language.objects.first()
 
-        # Alice has a frozen submission
         alice_sub = Submission.objects.create(
             user=alice.profile, problem=problem, language=lang,
             status='AC', result='AC',
@@ -81,6 +82,8 @@ class ContestResolverViewTestCase(CommonDataMixin, TestCase):
         contestant_names = [c['name'] for c in payload['contestants']]
         self.assertIn('resolver_alice', contestant_names)
         self.assertIn('resolver_bob', contestant_names)
+        alice_payload = next(c for c in payload['contestants'] if c['name'] == 'resolver_alice')
+        self.assertEqual(alice_payload['rank'], 'rate-candidate-master')
         self.assertEqual(len(payload['submissions']), 1)
         self.assertEqual(payload['submissions'][0]['name'], 'resolver_alice')
         self.assertEqual(payload['submissions'][0]['submitMinutes'], 10)

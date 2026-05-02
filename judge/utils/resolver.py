@@ -2,7 +2,7 @@ from django.db.models import Prefetch
 
 from judge.jinja2.gravatar import gravatar
 from judge.models import ContestParticipation, ContestSubmission, Organization
-from judge.ratings import rating_name
+from judge.ratings import rating_class
 
 
 def supports_resolver(contest):
@@ -43,6 +43,7 @@ def build_resolver_payload(contest, show_virtual=False):
             'problemIndex': label,
             'submitMinutes': submit_minutes,
             'points': float(cs.points or 0),
+            'verdict': cs.submission.result or cs.submission.status,
         })
 
     data = {
@@ -62,7 +63,7 @@ def build_resolver_payload(contest, show_virtual=False):
             {
                 'name': p.user.display_name or p.user.username,
                 'logo': gravatar(p.user.user.email, size=64),
-                'rank': rating_name(p.user.rating).lower() if p.user.rating is not None else 'newbie',
+                'rank': rating_class(p.user.rating) if p.user.rating is not None else 'rate-newbie',
             } for p in participations
         ],
         'submissions': submissions_data,
