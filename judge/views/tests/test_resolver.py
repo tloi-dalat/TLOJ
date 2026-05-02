@@ -58,7 +58,7 @@ class ContestResolverViewTestCase(CommonDataMixin, TestCase):
 
         alice = create_user(username='resolver_alice')
         bob = create_user(username='resolver_bob')
-        alice.profile.rating = 2200
+        alice.profile.rating = 2100
         alice.profile.save(update_fields=['rating'])
 
         alice_participation = create_contest_participation(contest=contest, user=alice.profile)
