@@ -251,4 +251,23 @@ def problem_data_update(sender, instance, **kwargs):
         finally:
             del data._auto_generating
 
-    transaction.on_commit(generate)
+    connection = transaction.get_connection()
+    pending_problems = getattr(connection, '_problem_data_generate_pending', None)
+    if pending_problems is None:
+        pending_problems = set()
+        connection._problem_data_generate_pending = pending_problems
+
+    if problem.pk in pending_problems:
+        return
+
+    pending_problems.add(problem.pk)
+
+    def generate_once():
+        try:
+            generate()
+        finally:
+            pending_problems.discard(problem.pk)
+            if not pending_problems and hasattr(connection, '_problem_data_generate_pending'):
+                del connection._problem_data_generate_pending
+
+    transaction.on_commit(generate_once)

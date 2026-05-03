@@ -8,6 +8,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.forms import BaseModelFormSet, CharField, ChoiceField, HiddenInput, ModelForm, NumberInput, Select, \
     formset_factory
 from django.http import Http404, HttpResponse, HttpResponseRedirect
@@ -252,12 +253,13 @@ class ProblemDataView(TitleMixin, ProblemManagerMixin):
         data_form.zip_valid = valid_files is not False
         cases_formset = self.get_case_formset(valid_files, post=True)
         if self.check_valid(data_form, cases_formset):
-            data_form.save()
-            for case in cases_formset.save(commit=False):
-                case.dataset_id = problem.id
-                case.save()
-            for case in cases_formset.deleted_objects:
-                case.delete()
+            with transaction.atomic():
+                data_form.save()
+                for case in cases_formset.save(commit=False):
+                    case.dataset_id = problem.id
+                    case.save()
+                for case in cases_formset.deleted_objects:
+                    case.delete()
             return HttpResponseRedirect(request.get_full_path())
         return self.render_to_response(self.get_context_data(data_form=data_form, cases_formset=cases_formset,
                                                              valid_files=valid_files))
