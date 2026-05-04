@@ -6,38 +6,47 @@
     <title>Resolver - {{ contest.name }}</title>
     <link rel="icon" type="image/png" href="{{ static('icons/favicon.ico') }}">
     <link rel="stylesheet" href="{{ static('resolver.css') }}">
-    <script>
-        window.resolverConfig = {
-            dataUrl: {{ resolver_data_url|tojson }},
-            labels: {
-                failed: {{ _('Failed to load resolver data.')|tojson }},
-                pendingSubmissions: {{ _('pending submissions')|tojson }},
-                pressEnter: {{ _('Press ENTER to start')|tojson }},
-            },
-        };
-    </script>
-    <script src="{{ static('resolver.js') }}"></script>
 </head>
 <body>
+    <div id="input-screen" class="screen hidden">
+        <!-- Hidden config elements so loadConfig() doesn't throw -->
+        <input type="hidden" id="config-score-decimals" value="0">
+        <input type="hidden" id="config-time-decimals" value="0">
+        <input type="hidden" id="config-anim-per-row" value="700">
+        <input type="hidden" id="config-auto-delay" value="500">
+        <textarea id="json-data" style="display:none"></textarea>
+    </div>
+
     <div id="splash-screen" class="screen">
         <div class="center">
-            <h1 class="title" id="splash-title">{{ contest.name }}</h1>
+            <h1 class="title" id="contest-name">{{ contest.name }}</h1>
             <div class="gap"></div>
-            <div class="subtitle" id="splash-pending"></div>
+            <div class="subtitle" id="pending-count">Loading data...</div>
             <div class="gap"></div>
-            <div class="subtitle small" id="splash-instruction"></div>
+            <div class="subtitle small">Press Enter to start</div>
         </div>
     </div>
 
     <div id="output-screen" class="screen hidden">
         <div id="header" class="header">
-            <div class="header-rank">#</div>
-            <div class="header-name">CONTESTANT</div>
+            <div class="header-rank">RANK</div>
+            <div class="header-logo"></div>
+            <div class="header-name">NAME</div>
             <div class="header-score">SCORE</div>
             <div class="header-time">TIME</div>
         </div>
-        <div id="standings" class="standings">
-        </div>
+        <div id="standings" class="standings"></div>
     </div>
+
+    <script src="{{ static('resolver.js') }}"></script>
+    <script>
+        fetch('{{ resolver_data_url|safe }}')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('json-data').value = JSON.stringify(data);
+                startContest();
+                document.getElementById('splash-screen').classList.remove("hidden");
+            });
+    </script>
 </body>
 </html>
