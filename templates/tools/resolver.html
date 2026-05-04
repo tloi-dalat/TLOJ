@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Resolver Tool') }}{% endblock %}
+
+{% block body %}
+<div id="resolver-tool-container">
+    <div class="resolver-card">
+        <div class="tabs">
+            <ul>
+                <li class="tab active" id="li-json"><a href="javascript:void(0)" onclick="switchTab('json')">{{ _('JSON Input') }}</a></li>
+                <li class="tab" id="li-cf"><a href="javascript:void(0)" onclick="switchTab('cf')">{{ _('Codeforces API') }}</a></li>
+            </ul>
+        </div>
+
+        <div id="tab-json" class="tab-content active">
+            <div class="form-group">
+                <label>{{ _('Upload JSON File') }}</label>
+                <input type="file" id="file" accept=".json" onchange="readJSON()">
+            </div>
+        </div>
+
+        <div id="tab-cf" class="tab-content" style="display: none;">
+            <div class="form-group">
+                <label for="contestId">{{ _('Contest ID') }}</label>
+                <input type="text" id="contestId" placeholder="e.g. 1234">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="apiKey">{{ _('API Key') }}</label>
+                    <input type="text" id="apiKey">
+                </div>
+                <div class="form-group">
+                    <label for="apiSecret">{{ _('API Secret') }}</label>
+                    <input type="password" id="apiSecret">
+                </div>
+            </div>
+            <button type="button" class="button" onclick="fetchContest()">{{ _('Fetch from Codeforces') }}</button>
+            <br>
+        </div>
+
+        <div class="form-group">
+            <label for="json-data">{{ _('JSON Data') }}</label>
+            <textarea id="json-data" spellcheck="false" placeholder='{ "contest": { ... }, "problems": [], "contestants": [], "submissions": [] }' style="height: 400px; width: 100%;"></textarea>
+        </div>
+
+        <details class="config-details">
+            <summary>{{ _('Advanced Configuration') }}</summary>
+            <div class="config-grid">
+                <div class="form-group">
+                    <label for="config-score-decimals">{{ _('Score Decimals') }}</label>
+                    <input type="number" id="config-score-decimals" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="config-time-decimals">{{ _('Time Decimals') }}</label>
+                    <input type="number" id="config-time-decimals" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="config-anim-per-row">{{ _('Animation (ms/row)') }}</label>
+                    <input type="number" id="config-anim-per-row" value="700" min="200">
+                </div>
+                <div class="form-group">
+                    <label for="config-auto-delay">{{ _('Auto Delay (ms)') }}</label>
+                    <input type="number" id="config-auto-delay" value="500" min="0">
+                </div>
+            </div>
+        </details>
+
+        <div class="form-submit-group">
+            <button type="button" class="button full" onclick="handleStart()">{{ _('Start Resolver') }}</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    #resolver-tool-container {
+        max-width: 1000px;
+        margin: 10px auto;
+    }
+
+    .resolver-card {
+        background: var(--page-bg);
+        border-radius: 4px;
+        padding: 10px;
+    }
+
+    .tab-content {
+        padding: 10px 0;
+    }
+
+    .form-group {
+        margin-bottom: 1em;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 0.3em;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 10px;
+    }
+
+    .form-row .form-group {
+        flex: 1;
+    }
+
+    .config-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 10px;
+        padding-top: 10px;
+    }
+
+    .config-details summary {
+        cursor: pointer;
+        font-weight: bold;
+        padding: 5px 0;
+    }
+</style>
+
+<script src="{{ static('resolver.js') }}"></script>
+<script>
+    function switchTab(tab) {
+        document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+        
+        document.getElementById('li-' + tab).classList.add('active');
+        document.getElementById('tab-' + tab).style.display = 'block';
+    }
+
+    window.handleStart = function() {
+        const text = document.getElementById("json-data").value;
+        if (!text.trim()) {
+            alert("{{ _('Please provide JSON data.') }}");
+            return;
+        }
+        if (validateJSON()) {
+            loadConfig();
+            sessionStorage.setItem('resolver_data', text);
+            sessionStorage.setItem('resolver_config', JSON.stringify(resolverConfig));
+            window.location.href = "{{ url('resolver-view') }}";
+        }
+    };
+</script>
+{% endblock %}
+
+
+
+
+

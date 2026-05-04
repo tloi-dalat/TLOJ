@@ -1,0 +1,336 @@
+*,
+html {
+    scroll-behavior: smooth !important;
+}
+
+body {
+    font-family: "Nimbus Sans", "Helvetica", "Arial", sans-serif;
+    background: black;
+    margin: 0px;
+}
+
+body::-webkit-scrollbar {
+    display: none;
+}
+
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transition: opacity 1s ease-in-out, visibility 1s ease-in-out;
+}
+
+.screen.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.center {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+.gap {
+    height: 10px;
+}
+
+.title {
+    color: white;
+    text-align: center;
+    font-size: 3rem;
+    margin: 0px;
+}
+
+.subtitle {
+    color: white;
+    text-align: center;
+    font-size: 1rem;
+    margin: 0px;
+    font-weight: initial;
+}
+
+.form-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+    margin: 0px auto;
+    max-width: 500px;
+    width: 100%;
+}
+
+.input-container {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.input-container>* {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.form-component {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+label {
+    margin: 0px;
+    color: white;
+    font-size: 0.8rem;
+}
+
+a:link {
+    color: white;
+    text-decoration: none;
+}
+
+a:visited {
+    color: white;
+    text-decoration: none;
+}
+
+a:hover {
+    color: white;
+    text-decoration: underline;
+}
+
+a:active {
+    color: white;
+    text-decoration: underline;
+}
+
+select {
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+input {
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+textarea {
+    resize: none;
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    height: 300px;
+}
+
+.input-file::-webkit-file-upload-button {
+    display: none;
+}
+
+.input-file {
+    font-weight: bold;
+    color: black;
+    border-radius: 5px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: white;
+}
+
+.input-file:hover {
+    background: #ddd;
+}
+
+.input-file input {
+    display: none;
+}
+
+details {
+    color: white;
+}
+
+details > summary {
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.8rem;
+    list-style: none;
+    padding: 4px 0;
+}
+
+details > summary::-webkit-details-marker {
+    display: none;
+}
+
+details > summary::before {
+    content: "▸ ";
+}
+
+details[open] > summary::before {
+    content: "▾ ";
+}
+
+.config-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding-top: 8px;
+}
+
+button {
+    padding: 10px;
+    background-color: #28a745;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+.header {
+    display: flex;
+    position: fixed;
+    align-items: center;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: black;
+    color: white;
+    gap: 20px;
+    padding: 0px 20px;
+    z-index: 9999;
+    border-bottom: 1px solid white;
+    height: 36px;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.header-rank {
+    width: 40px;
+    text-align: center;
+    color: white;
+}
+
+.header-logo {
+    width: 65px;
+}
+
+.header-name {
+    flex: 1;
+    color: white;
+}
+
+.header-score {
+    color: white;
+    width: 60px;
+    text-align: center;
+}
+
+.header-time {
+    color: white;
+    width: 60px;
+    text-align: center;
+}
+
+.standings {
+    position: relative;
+    margin-top: 36px;
+    background: repeating-linear-gradient(180deg, #3c3c3c 0px, #3c3c3c 90px, #000000 90px, #000000 180px);
+    background-position: top left;
+}
+
+.rank-box {
+    position: absolute;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    height: 90px;
+    gap: 20px;
+    padding: 0px 20px;
+    background: transparent;
+}
+
+.rank {
+    font-size: 1.8rem;
+    width: 40px;
+    text-align: center;
+    color: white;
+}
+
+.logo {
+    width: 65px;
+    height: 65px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.user-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    justify-content: center;
+    height: 65px;
+    box-sizing: border-box;
+}
+
+.name {
+    font-size: 1.6rem;
+    color: white;
+    line-height: 1;
+    margin-bottom: 2px;
+}
+
+.problem-points {
+    display: flex;
+    gap: 5px;
+    width: 100%;
+}
+
+.point-box {
+    flex: 1;
+    text-align: center;
+    background-color: #282828;
+    color: white;
+    padding: 0px;
+    border-radius: 4px;
+    border: 2px solid transparent;
+    height: 26px;
+    line-height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    box-sizing: border-box;
+}
+
+.total-score {
+    font-size: 1.8rem;
+    color: white;
+    width: 60px;
+    text-align: center;
+}
+
+.total-time {
+    font-size: 1.8rem;
+    color: white;
+    width: 60px;
+    text-align: center;
+}

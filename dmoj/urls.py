@@ -17,16 +17,18 @@ from judge.sitemap import sitemaps
 from judge.views import TitledTemplateView, api, blog, comment, contests, language, license, mailgun, organization, \
     preview, problem, problem_download, problem_manage, ranked_submission, register, stats, status, submission, tag, \
     tasks, ticket, two_factor, user, widgets
-from judge.views.graph_editor import GraphEditorView, ToolsListView
+from judge.views.graph_editor import GraphEditorView
 from judge.views.magazine import MagazinePage
 from judge.views.misc_config import MiscConfigEdit
 from judge.views.problem_data import ProblemDataView, ProblemSubmissionDiff, \
     problem_data_file, problem_init_view
 from judge.views.register import ActivationView, RegistrationView
+from judge.views.resolver import ResolverToolView, ResolverView
 from judge.views.select2 import AssigneeSelect2View, CommentSelect2View, ContestSelect2View, \
     ContestUserSearchSelect2View, OrganizationSelect2View, OrganizationUserSearchSelect2View, \
     OrganizationUserSelect2View, ProblemSelect2View, TagGroupSelect2View, TagSelect2View, TicketUserSelect2View, \
     UserSearchSelect2View, UserSelect2View
+from judge.views.tools import ToolsListView
 from judge.views.widgets import martor_image_uploader
 from martor.views import markdown_search_user
 
@@ -253,6 +255,8 @@ urlpatterns = [
         path('/clone', contests.ContestClone.as_view(), name='contest_clone'),
         path('/ranking/', contests.ContestRanking.as_view(), name='contest_ranking'),
         path('/public_ranking/', contests.ContestPublicRanking.as_view(), name='contest_public_ranking'),
+        path('/resolver/', contests.ContestResolverView.as_view(), name='contest_resolver'),
+        path('/resolver/data/', contests.ContestResolverDataView.as_view(), name='contest_resolver_data'),
         path('/official_ranking/', contests.ContestOfficialRanking.as_view(), name='contest_official_ranking'),
         path('/register', contests.ContestRegister.as_view(), name='contest_register'),
         path('/join', contests.ContestJoin.as_view(), name='contest_join'),
@@ -352,6 +356,8 @@ urlpatterns = [
 
     path('tools/', ToolsListView.as_view(), name='tools_list'),
     path('tool/graph-editor', GraphEditorView.as_view(), name='graph_editor'),
+    path('tool/resolver', ResolverToolView.as_view(), name='resolver_tool'),
+    path('tool/resolver/view', ResolverView.as_view(), name='resolver-view'),
 
     path('license/<str:key>', license.LicenseDetail.as_view(), name='license'),
 

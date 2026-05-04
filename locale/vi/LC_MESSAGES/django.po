@@ -8780,3 +8780,54 @@ msgstr "Phiên bản của trình chấm"
 
 msgid "Maximum single-case runtime:"
 msgstr "Thời gian chạy test lâu nhất:"
+
+msgid "Resolver Tool"
+msgstr "Công cụ Resolver"
+
+msgid "Replay contest standings"
+msgstr "Phát lại bảng xếp hạng"
+
+msgid "JSON Input"
+msgstr "Nhập JSON"
+
+msgid "Codeforces API"
+msgstr "Codeforces API"
+
+msgid "Upload JSON File"
+msgstr "Tải tệp JSON lên"
+
+msgid "Contest ID"
+msgstr "Mã kỳ thi (ID)"
+
+msgid "API Key"
+msgstr "API Key"
+
+msgid "API Secret"
+msgstr "API Secret"
+
+msgid "Fetch from Codeforces"
+msgstr "Lấy dữ liệu từ Codeforces"
+
+msgid "JSON Data"
+msgstr "Dữ liệu JSON"
+
+msgid "Advanced Configuration"
+msgstr "Cấu hình nâng cao"
+
+msgid "Score Decimals"
+msgstr "Số chữ số thập phân của điểm"
+
+msgid "Time Decimals"
+msgstr "Số chữ số thập phân của thời gian"
+
+msgid "Animation (ms/row)"
+msgstr "Tốc độ hiệu ứng (ms/hàng)"
+
+msgid "Auto Delay (ms)"
+msgstr "Độ trễ tự động (ms)"
+
+msgid "Start Resolver"
+msgstr "Bắt đầu Resolver"
+
+msgid "Please provide JSON data."
+msgstr "Vui lòng nhập dữ liệu JSON."
