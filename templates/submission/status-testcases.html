@@ -204,9 +204,15 @@
         {% if not submission.is_graded %}
             <span class="fa fa-spinner fa-pulse"></span>
         {% endif %}
-        <div class="alert alert-info" style="width: fit-content;">
-            {{ submission.long_status }}
-        </div>
+        {% if submission.hide_results_for_user(request.user) %}
+            <div class="alert alert-info" style="width: fit-content;">
+                {{ submission.long_status }}
+            </div>
+        {% else %}
+            <div class="sub-result {{ submission.result_class }}" style="width: fit-content; padding: 10px;">
+                {{ submission.long_status }}
+            </div>
+        {% endif %}
 
         {% endif %}
     {% endif %}
