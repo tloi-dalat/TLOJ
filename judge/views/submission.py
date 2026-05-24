@@ -34,6 +34,29 @@ from judge.utils.raw_sql import join_sql_subquery, use_straight_join
 from judge.utils.views import DiggPaginatorMixin, TitleMixin, add_file_response, generic_message
 
 
+def hide_submission_details_in_memory(submission):
+    is_actually_graded = submission.status not in ('QU', 'P', 'G')
+    submission.status = 'D' if is_actually_graded else 'P'
+    submission.result = None
+    submission.points = None
+    submission.case_points = 0
+    submission.case_total = 0
+    submission.time = None
+    submission.memory = None
+    submission.error = None
+    if 'result_class' in submission.__dict__:
+        del submission.__dict__['result_class']
+    if 'short_status' in submission.__dict__:
+        del submission.__dict__['short_status']
+    if 'long_status' in submission.__dict__:
+        del submission.__dict__['long_status']
+    if is_actually_graded:
+        submission._custom_short_status = _('Submitted')
+        submission._custom_long_status = _('Your submission has been received, please wait for results later.')
+    if submission.problem:
+        submission.problem.testcase_result_visibility_mode = 'H'
+
+
 def submission_related(queryset):
     return queryset.select_related('user__user', 'user__display_badge', 'problem', 'language') \
         .only('id', 'user__user__username', 'user__display_rank', 'user__rating', 'problem__name', 'problem__code',
@@ -241,32 +264,41 @@ class SubmissionStatus(SubmissionDetailBase):
         context = super(SubmissionStatus, self).get_context_data(**kwargs)
         submission = self.object
 
-        context['batches'], statuses, test_case_count = group_test_cases(submission.test_cases.all())
-
-        context['feedback_limit'] = min(3, test_case_count - 1)
-        # In case the submission is in an on-going contest, we don't want to show any feedback.
-        # However, this can be override by setting `submission.problem.allow_view_feedback`.
-        if submission.contest_object and not submission.contest_object.ended:
-            context['feedback_limit'] = 0
-
-        # copy from combine_statuses
-        if not submission.is_graded and len(statuses) > 0 and statuses[-1].batch is not None:
-            context['batches'][-1]['not_graded'] = True
-
-        context['statuses'] = combine_statuses(statuses, submission)
-        context['can_view_test'] = submission.problem.is_testcase_accessible_by(self.request.user)
-        if context['can_view_test']:
-            context['cases_data'] = get_problem_testcases_data(submission.problem)
+        if submission.hide_results_for_user(self.request.user):
+            context['batches'] = []
+            context['statuses'] = []
+            context['can_view_test'] = False
+            context['can_view_testcase_status'] = False
+            context['can_view_batch_status'] = False
+            context['can_view_feedback'] = False
+            hide_submission_details_in_memory(submission)
         else:
-            context['cases_data'] = {}
+            context['batches'], statuses, test_case_count = group_test_cases(submission.test_cases.all())
 
-        context['can_view_testcase_status'] = self.request.user.is_superuser or \
-            submission.problem.testcase_result_visibility_mode == ProblemTestcaseResultAccess.ALL_TEST_CASE
-        context['can_view_batch_status'] = submission.problem.testcase_result_visibility_mode \
-            == ProblemTestcaseResultAccess.ONLY_BATCH_RESULT
+            context['feedback_limit'] = min(3, test_case_count - 1)
+            # In case the submission is in an on-going contest, we don't want to show any feedback.
+            # However, this can be override by setting `submission.problem.allow_view_feedback`.
+            if submission.contest_object and not submission.contest_object.ended:
+                context['feedback_limit'] = 0
 
-        context['can_view_feedback'] = self.request.user.is_superuser or \
-            submission.problem.allow_view_feedback
+            # copy from combine_statuses
+            if not submission.is_graded and len(statuses) > 0 and statuses[-1].batch is not None:
+                context['batches'][-1]['not_graded'] = True
+
+            context['statuses'] = combine_statuses(statuses, submission)
+            context['can_view_test'] = submission.problem.is_testcase_accessible_by(self.request.user)
+            if context['can_view_test']:
+                context['cases_data'] = get_problem_testcases_data(submission.problem)
+            else:
+                context['cases_data'] = {}
+
+            context['can_view_testcase_status'] = self.request.user.is_superuser or \
+                submission.problem.testcase_result_visibility_mode == ProblemTestcaseResultAccess.ALL_TEST_CASE
+            context['can_view_batch_status'] = submission.problem.testcase_result_visibility_mode \
+                == ProblemTestcaseResultAccess.ONLY_BATCH_RESULT
+
+            context['can_view_feedback'] = self.request.user.is_superuser or \
+                submission.problem.allow_view_feedback
         context['time_limit'] = submission.problem.time_limit
         try:
             lang_limit = submission.problem.language_limits.get(language=submission.language)
@@ -356,6 +388,8 @@ class SubmissionsListBase(DiggPaginatorMixin, TitleMixin, ListView):
     first_page_href = None
 
     def get_result_data(self):
+        if self.is_contest_scoped and self.contest.is_offline and not self.contest.is_editable_by(self.request.user):
+            return {'categories': [], 'total': 0}
         result = self._get_result_data()
         for category in result['categories']:
             category['name'] = _(category['name'])
@@ -460,6 +494,11 @@ class SubmissionsListBase(DiggPaginatorMixin, TitleMixin, ListView):
         context['dynamic_contest_id'] = self.is_contest_scoped and self.contest.id
         context['show_problem'] = self.show_problem
 
+        if 'submissions' in context:
+            for submission in context['submissions']:
+                if submission.hide_results_for_user(self.request.user):
+                    hide_submission_details_in_memory(submission)
+
         profile = self.request.profile
         context['completed_problem_ids'] = memo_lazy(lambda: user_completed_ids(profile), set) if authenticated else []
         context['editable_problem_ids'] = memo_lazy(lambda: user_editable_ids(profile), set) if authenticated else []
@@ -474,7 +513,10 @@ class SubmissionsListBase(DiggPaginatorMixin, TitleMixin, ListView):
         context['all_organizations'] = self.get_searchable_organizations()
         context['selected_organization'] = self.selected_organization
 
-        context['results_json'] = mark_safe(json.dumps(self.get_result_data()))
+        if self.is_contest_scoped and self.contest.is_offline and not self.contest.is_editable_by(self.request.user):
+            context['results_json'] = mark_safe('{"categories": [], "total": 0}')
+        else:
+            context['results_json'] = mark_safe(json.dumps(self.get_result_data()))
         context['results_colors_json'] = mark_safe(json.dumps(settings.DMOJ_STATS_SUBMISSION_RESULT_COLORS))
 
         context['page_suffix'] = suffix = ('?' + self.request.GET.urlencode()) if self.request.GET else ''
@@ -715,6 +757,9 @@ def single_submission(request):
     submission = get_object_or_404(submission_related(Submission.objects.all()), id=int(request.GET['id']))
     if not submission.problem.is_accessible_by(request.user):
         raise Http404()
+
+    if submission.hide_results_for_user(request.user):
+        hide_submission_details_in_memory(submission)
 
     return render(request, 'submission/row.html', {
         'submission': submission,

@@ -192,6 +192,10 @@ class Contest(models.Model):
     disallow_virtual = models.BooleanField(verbose_name=_('Disallow virtual joining'),
                                            help_text=_('Disallow virtual joining after contest has ended.'),
                                            default=False)
+    is_offline = models.BooleanField(
+        verbose_name=_('offline contest'), default=False,
+        help_text=_('Hide all submission verdicts, scores, and rankings from contestants.'),
+    )
 
     ranking_access_code = models.CharField(verbose_name=_('ranking access code'),
                                            help_text=_('An optional code to view the contest ranking. '
@@ -250,6 +254,10 @@ class Contest(models.Model):
         return False
 
     def can_see_own_scoreboard(self, user):
+        if self.is_offline:
+            if not user.is_authenticated:
+                return False
+            return user.has_perm('judge.edit_all_contest') or user.profile.id in self.editor_ids
         if self.can_see_full_scoreboard(user):
             return True
         if not self.can_join:
@@ -259,6 +267,10 @@ class Contest(models.Model):
         return True
 
     def can_see_full_scoreboard(self, user):
+        if self.is_offline:
+            if not user.is_authenticated:
+                return False
+            return user.has_perm('judge.edit_all_contest') or user.profile.id in self.editor_ids
         if self.show_scoreboard:
             return True
         if not user.is_authenticated:

@@ -269,7 +269,7 @@ class JudgeHandler(ZlibPacketHandler):
 
         id = packet['submission-id']
         if Submission.objects.filter(id=id).update(status='P', judged_on=self.judge):
-            event.post('sub_%s' % Submission.get_id_secret(id), {'type': 'processing'})
+            self._post_event('sub_%s' % Submission.get_id_secret(id), {'type': 'processing'}, submission_id=id)
             self._post_update_submission(id, 'processing')
             json_log.info(self._make_json_log(packet, action='processing'))
         else:
@@ -371,7 +371,10 @@ class JudgeHandler(ZlibPacketHandler):
                 status='G', is_pretested=packet['pretested'], current_testcase=1,
                 batch=False, judged_date=timezone.now()):
             SubmissionTestCase.objects.filter(submission_id=packet['submission-id']).delete()
-            event.post('sub_%s' % Submission.get_id_secret(packet['submission-id']), {'type': 'grading-begin'})
+            self._post_event(
+                'sub_%s' % Submission.get_id_secret(packet['submission-id']),
+                {'type': 'grading-begin'}, submission_id=packet['submission-id'],
+            )
             self._post_update_submission(packet['submission-id'], 'grading-begin')
             json_log.info(self._make_json_log(packet, action='grading-begin'))
         else:
@@ -455,10 +458,11 @@ class JudgeHandler(ZlibPacketHandler):
 
         finished_submission(submission)
 
-        event.post('sub_%s' % submission.id_secret, {'type': 'grading-end'})
+        self._post_event('sub_%s' % submission.id_secret, {'type': 'grading-end'}, submission_id=submission.id)
         if hasattr(submission, 'contest'):
             participation = submission.contest.participation
-            event.post('contest_%d' % participation.contest_id, {'type': 'update'})
+            if not participation.contest.is_offline:
+                event.post('contest_%d' % participation.contest_id, {'type': 'update'})
         self._post_update_submission(submission.id, 'grading-end', done=True)
 
     def on_compile_error(self, packet):
@@ -466,7 +470,10 @@ class JudgeHandler(ZlibPacketHandler):
         self._free_self(packet)
 
         if Submission.objects.filter(id=packet['submission-id']).update(status='CE', result='CE', error=packet['log']):
-            event.post('sub_%s' % Submission.get_id_secret(packet['submission-id']), {'type': 'compile-error'})
+            self._post_event(
+                'sub_%s' % Submission.get_id_secret(packet['submission-id']),
+                {'type': 'compile-error'}, submission_id=packet['submission-id'],
+            )
             self._post_update_submission(packet['submission-id'], 'compile-error', done=True)
             json_log.info(self._make_json_log(packet, action='compile-error', log=packet['log'],
                                               finish=True, result='CE'))
@@ -479,7 +486,10 @@ class JudgeHandler(ZlibPacketHandler):
         logger.info('%s: Submission generated compiler messages: %s', self.name, packet['submission-id'])
 
         if Submission.objects.filter(id=packet['submission-id']).update(error=packet['log']):
-            event.post('sub_%s' % Submission.get_id_secret(packet['submission-id']), {'type': 'compile-message'})
+            self._post_event(
+                'sub_%s' % Submission.get_id_secret(packet['submission-id']),
+                {'type': 'compile-message'}, submission_id=packet['submission-id'],
+            )
             json_log.info(self._make_json_log(packet, action='compile-message', log=packet['log']))
         else:
             logger.warning('Unknown submission: %s', packet['submission-id'])
@@ -495,7 +505,7 @@ class JudgeHandler(ZlibPacketHandler):
 
         id = packet['submission-id']
         if Submission.objects.filter(id=id).update(status='IE', result='IE', error=packet['message']):
-            event.post('sub_%s' % Submission.get_id_secret(id), {'type': 'internal-error'})
+            self._post_event('sub_%s' % Submission.get_id_secret(id), {'type': 'internal-error'}, submission_id=id)
             self._post_update_submission(id, 'internal-error', done=True)
             json_log.info(self._make_json_log(packet, action='internal-error', message=packet['message'],
                                               finish=True, result='IE'))
@@ -509,7 +519,10 @@ class JudgeHandler(ZlibPacketHandler):
         self._free_self(packet)
 
         if Submission.objects.filter(id=packet['submission-id']).update(status='AB', result='AB', points=0):
-            event.post('sub_%s' % Submission.get_id_secret(packet['submission-id']), {'type': 'aborted'})
+            self._post_event(
+                'sub_%s' % Submission.get_id_secret(packet['submission-id']),
+                {'type': 'aborted'}, submission_id=packet['submission-id'],
+            )
             self._post_update_submission(packet['submission-id'], 'aborted', done=True)
             json_log.info(self._make_json_log(packet, action='aborted', finish=True, result='AB'))
         else:
@@ -605,7 +618,7 @@ class JudgeHandler(ZlibPacketHandler):
             self.update_counter[id] = (1, time.monotonic())
 
         if do_post:
-            event.post('sub_%s' % Submission.get_id_secret(id), {'type': 'test-case'})
+            self._post_event('sub_%s' % Submission.get_id_secret(id), {'type': 'test-case'}, submission_id=id)
             self._post_update_submission(id, state='test-case')
 
     def on_malformed(self, packet):
@@ -651,13 +664,28 @@ class JudgeHandler(ZlibPacketHandler):
         if self._submission_cache_id != id:
             self._submission_cache = Submission.objects.filter(id=id).values(
                 'problem__is_public', 'problem__testcase_result_visibility_mode', 'contest_object_id',
+                'contest_object__is_offline',
                 'user_id', 'problem_id', 'status', 'language__key',
             ).get()
             self._submission_cache_id = id
 
         return self._submission_cache
 
+    def _is_offline_contest_submission(self, id):
+        try:
+            data = self._get_submission_cache(id)
+            return bool(data.get('contest_object__is_offline'))
+        except Exception:
+            return False
+
+    def _post_event(self, channel, payload, submission_id=None):
+        if submission_id and self._is_offline_contest_submission(submission_id):
+            return
+        event.post(channel, payload)
+
     def _post_update_submission(self, id, state, done=False):
+        if self._is_offline_contest_submission(id):
+            return
         data = self._get_submission_cache(id)
         if data['problem__is_public']:
             event.post('submissions', {

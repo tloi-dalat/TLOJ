@@ -15,6 +15,13 @@ size_pack = struct.Struct('!I')
 
 
 def _post_update_submission(submission, done=False):
+    try:
+        is_offline = submission.contest_object_id is not None and submission.contest_object.is_offline
+    except Exception:
+        is_offline = False
+    if is_offline:
+        return
+
     if submission.problem.is_public:
         event.post('submissions', {'type': 'done-submission' if done else 'update-submission',
                                    'id': submission.id,
@@ -127,10 +134,17 @@ def abort_submission(submission):
     # submissions marked as aborted.
     if submission.status == 'D':
         return
+
+    try:
+        is_offline = submission.contest_object_id is not None and submission.contest_object.is_offline
+    except Exception:
+        is_offline = False
+
     response = judge_request({'name': 'terminate-submission', 'submission-id': submission.id})
     # This defaults to true, so that in the case the JudgeList fails to remove the submission from the queue,
     # and returns a bad-request, the submission is not falsely shown as "Aborted" when it will still be judged.
     if not response.get('judge-aborted', True):
         Submission.objects.filter(id=submission.id).update(status='AB', result='AB', points=0)
-        event.post('sub_%s' % Submission.get_id_secret(submission.id), {'type': 'aborted'})
+        if not is_offline:
+            event.post('sub_%s' % Submission.get_id_secret(submission.id), {'type': 'aborted'})
         _post_update_submission(submission, done=True)

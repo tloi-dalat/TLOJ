@@ -361,6 +361,14 @@ class APIContestParticipationList(APIListView):
     def get_unfiltered_queryset(self):
         visible_contests = Contest.get_visible_contests(self.request.user)
 
+        if not (self.request.user.is_authenticated and self.request.user.has_perm('judge.edit_all_contest')):
+            if self.request.user.is_authenticated:
+                visible_contests = visible_contests.filter(
+                    Q(is_offline=False) | Q(authors=self.request.profile) | Q(curators=self.request.profile),
+                ).distinct()
+            else:
+                visible_contests = visible_contests.filter(is_offline=False)
+
         # Check which contest scoreboards the user can actually see.
         # "Contest.get_visible_contests" only gets which contests the user can *see*.
         # Conditions for participation scoreboard access:
@@ -635,6 +643,24 @@ class APISubmissionList(APIListView):
         )
 
     def get_object_data(self, submission):
+        if submission.hide_results_for_user(self.request.user):
+            return {
+                'id': submission.id,
+                'problem': submission.problem.code,
+                'user': submission.user.user.username,
+                'date': submission.date.isoformat(),
+                'language': submission.language.key,
+                'time': None,
+                'memory': None,
+                'points': None,
+                'result': None,
+                'contest': None if not submission.contest_object else {
+                    'key': submission.contest_object.key,
+                    'points': 0.0,
+                    'virtual_participation_number': submission.contest.participation.virtual,
+                    'time_since_start_of_participation': submission.date - submission.contest.participation.real_start,
+                },
+            }
         return {
             'id': submission.id,
             'problem': submission.problem.code,
@@ -666,6 +692,23 @@ class APISubmissionDetail(APILoginRequiredMixin, APIDetailView):
         return submission
 
     def get_object_data(self, submission):
+        if submission.hide_results_for_user(self.request.user):
+            is_actually_graded = submission.status not in ('QU', 'P', 'G')
+            return {
+                'id': submission.id,
+                'problem': submission.problem.code,
+                'user': submission.user.user.username,
+                'date': submission.date.isoformat(),
+                'time': None,
+                'memory': None,
+                'points': None,
+                'language': submission.language.key,
+                'status': 'D' if is_actually_graded else 'P',
+                'result': None,
+                'case_points': 0,
+                'case_total': 0,
+                'cases': [],
+            }
         cases = []
         for batch in group_test_cases(submission.test_cases.all())[0]:
             batch_cases = [

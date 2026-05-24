@@ -116,10 +116,14 @@ class Submission(models.Model):
 
     @property
     def short_status(self):
+        if hasattr(self, '_custom_short_status'):
+            return self._custom_short_status
         return self.result or self.status
 
     @property
     def long_status(self):
+        if hasattr(self, '_custom_long_status'):
+            return self._custom_long_status
         return Submission.USER_DISPLAY_CODES.get(self.short_status, '')
 
     @cached_property
@@ -213,6 +217,18 @@ class Submission(models.Model):
             organization.consume_credit(consumed_credit)
 
     update_credit.alters_data = True
+
+    @property
+    def is_offline_contest(self):
+        return self.contest_object_id is not None and self.contest_object.is_offline
+
+    def hide_results_for_user(self, user):
+        if not self.is_offline_contest:
+            return False
+        if user.is_authenticated:
+            if user.has_perm('judge.edit_all_contest') or user.profile.id in self.contest_object.editor_ids:
+                return False
+        return True
 
     @property
     def is_graded(self):

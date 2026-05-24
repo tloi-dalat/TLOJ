@@ -8780,3 +8780,15 @@ msgstr "Phiên bản của trình chấm"
 
 msgid "Maximum single-case runtime:"
 msgstr "Thời gian chạy test lâu nhất:"
+
+msgid "offline contest"
+msgstr "Kỳ thi offline"
+
+msgid "Hide all submission verdicts, scores, and rankings from contestants."
+msgstr "Ẩn hoàn toàn tất cả kết quả bài làm, điểm số, và bảng xếp hạng đối với thí sinh."
+
+msgid "Submitted"
+msgstr "Đã nộp"
+
+msgid "Your submission has been received, please wait for results later."
+msgstr "Bài nộp của bạn đã được nộp, vui lòng đợi kết quả sau này"

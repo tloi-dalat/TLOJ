@@ -818,6 +818,7 @@ class ContestForm(ModelForm):
             'access_code',
             'is_private',
             'private_contestants',
+            'is_offline',
         ]
 
         widgets = {

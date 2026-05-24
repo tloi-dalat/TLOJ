@@ -2,7 +2,7 @@
 <div class="sub-result {{ submission.result_class }}">
     <div class="score">
         {%- if submission.is_graded -%}
-            {%- if submission.status in ('IE', 'CE', 'AB') -%}
+            {%- if submission.status in ('IE', 'CE', 'AB') or submission.points is none -%}
                 ---
             {%- else -%}
                 {{ submission.case_points|floatformat(-3) }} / {{ submission.case_total|floatformat(0) }}
