@@ -337,7 +337,7 @@ class ContestDetail(ContestMixin, TitleMixin, CommentedDetailView):
         if authenticated and self.object.is_offline and not self.can_edit:
             contest_attempted = set(Submission.objects.filter(
                 user=self.request.profile,
-                contest_object=self.object
+                contest_object=self.object,
             ).values_list('problem_id', flat=True))
             attempted = set(attempted) | contest_attempted
         context['attempted_problem_ids'] = attempted
@@ -375,7 +375,7 @@ class ContestAllProblems(ContestMixin, TitleMixin, DetailView):
         if authenticated and self.object.is_offline and not self.can_edit:
             contest_attempted = set(Submission.objects.filter(
                 user=self.request.profile,
-                contest_object=self.object
+                contest_object=self.object,
             ).values_list('problem_id', flat=True))
             attempted = set(attempted) | contest_attempted
         context['attempted_problem_ids'] = attempted

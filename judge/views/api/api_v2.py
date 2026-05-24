@@ -556,7 +556,7 @@ class APIUserDetail(APIDetailView):
             qs = qs.exclude(
                 Q(contest_object__is_offline=True) &
                 ~Q(contest_object__authors=self.request.profile) &
-                ~Q(contest_object__curators=self.request.profile)
+                ~Q(contest_object__curators=self.request.profile),
             )
         solved_problems = list(
             qs.values('problem').distinct()

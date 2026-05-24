@@ -50,7 +50,7 @@ def user_completed_ids(profile):
             qs = qs.exclude(
                 Q(contest_object__is_offline=True) &
                 ~Q(contest_object__authors=profile) &
-                ~Q(contest_object__curators=profile)
+                ~Q(contest_object__curators=profile),
             )
         result = set(qs.values_list('problem_id', flat=True).distinct())
         cache.set(key, result, 86400)
@@ -75,7 +75,7 @@ def user_attempted_ids(profile):
             qs = qs.exclude(
                 Q(contest_object__is_offline=True) &
                 ~Q(contest_object__authors=profile) &
-                ~Q(contest_object__curators=profile)
+                ~Q(contest_object__curators=profile),
             )
         result = set(qs.values_list('problem_id', flat=True).distinct())
         cache.set(key, result, 86400)
@@ -90,10 +90,10 @@ def user_offline_attempted_ids(profile):
             result = set()
         else:
             qs = profile.submission_set.filter(
-                contest_object__is_offline=True
+                contest_object__is_offline=True,
             ).exclude(
                 Q(contest_object__authors=profile) |
-                Q(contest_object__curators=profile)
+                Q(contest_object__curators=profile),
             )
             result = set(qs.values_list('problem_id', flat=True).distinct())
         cache.set(key, result, 86400)
