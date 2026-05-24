@@ -230,10 +230,14 @@
                             {% elif problem.id in attempted_problem_ids %}
                                 <td style="width: 1em;">
                                     <a href="{{ url('user_submissions', problem.code, request.user.username) }}">
-                                        {% if problem.is_public %}
-                                            <i class="attempted-problem-color fa fa-frown-o"></i>
+                                        {% if contest.is_offline and not can_edit %}
+                                            <i class="submitted-problem-color fa fa-question-circle"></i>
                                         {% else %}
-                                            <i class="attempted-problem-color fa fa-lock"></i>
+                                            {% if problem.is_public %}
+                                                <i class="attempted-problem-color fa fa-frown-o"></i>
+                                            {% else %}
+                                                <i class="attempted-problem-color fa fa-lock"></i>
+                                            {% endif %}
                                         {% endif %}
                                     </a>
                                 </td>

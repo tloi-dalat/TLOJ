@@ -3,14 +3,17 @@ from math import e
 
 from django.core.cache import cache
 from django.db import transaction
-from django.db.models import Case, Count, ExpressionWrapper, F, When
+from django.db.models import Case, Count, ExpressionWrapper, F, Q, When
 from django.db.models.fields import FloatField
 from django.utils import timezone
 from django.utils.translation import gettext_noop
 
 from judge.models import ContestSubmission, Problem, Submission, SubmissionTestCase
 
-__all__ = ['contest_completed_ids', 'get_result_data', 'user_completed_ids', 'user_editable_ids', 'user_tester_ids']
+__all__ = [
+    'contest_completed_ids', 'get_result_data', 'user_completed_ids',
+    'user_editable_ids', 'user_tester_ids', 'user_offline_attempted_ids',
+]
 
 
 def user_tester_ids(profile):
@@ -25,8 +28,15 @@ def contest_completed_ids(participation):
     key = 'contest_complete:%d' % participation.id
     result = cache.get(key)
     if result is None:
-        result = set(participation.submissions.filter(submission__result='AC', points__gte=F('problem__points'))
-                     .values_list('problem__problem_id', flat=True).distinct())
+        contest = participation.contest
+        if contest.is_offline and not (
+            participation.user.user.has_perm('judge.edit_all_contest') or
+            participation.user_id in contest.editor_ids
+        ):
+            result = set()
+        else:
+            result = set(participation.submissions.filter(submission__result='AC', points__gte=F('problem__points'))
+                         .values_list('problem__problem_id', flat=True).distinct())
         cache.set(key, result, 86400)
     return result
 
@@ -35,8 +45,14 @@ def user_completed_ids(profile):
     key = 'user_complete:%d' % profile.id
     result = cache.get(key)
     if result is None:
-        result = set(Submission.objects.filter(user=profile, result='AC', case_points__gte=F('case_total'))
-                     .values_list('problem_id', flat=True).distinct())
+        qs = Submission.objects.filter(user=profile, result='AC', case_points__gte=F('case_total'))
+        if not profile.user.has_perm('judge.edit_all_contest'):
+            qs = qs.exclude(
+                Q(contest_object__is_offline=True) &
+                ~Q(contest_object__authors=profile) &
+                ~Q(contest_object__curators=profile)
+            )
+        result = set(qs.values_list('problem_id', flat=True).distinct())
         cache.set(key, result, 86400)
     return result
 
@@ -54,7 +70,32 @@ def user_attempted_ids(profile):
     key = 'user_attempted:%s' % profile.id
     result = cache.get(key)
     if result is None:
-        result = set(profile.submission_set.values_list('problem_id', flat=True).distinct())
+        qs = profile.submission_set.all()
+        if not profile.user.has_perm('judge.edit_all_contest'):
+            qs = qs.exclude(
+                Q(contest_object__is_offline=True) &
+                ~Q(contest_object__authors=profile) &
+                ~Q(contest_object__curators=profile)
+            )
+        result = set(qs.values_list('problem_id', flat=True).distinct())
+        cache.set(key, result, 86400)
+    return result
+
+
+def user_offline_attempted_ids(profile):
+    key = 'user_offline_attempted:%s' % profile.id
+    result = cache.get(key)
+    if result is None:
+        if profile.user.has_perm('judge.edit_all_contest'):
+            result = set()
+        else:
+            qs = profile.submission_set.filter(
+                contest_object__is_offline=True
+            ).exclude(
+                Q(contest_object__authors=profile) |
+                Q(contest_object__curators=profile)
+            )
+            result = set(qs.values_list('problem_id', flat=True).distinct())
         cache.set(key, result, 86400)
     return result
 

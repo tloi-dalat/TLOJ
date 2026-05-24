@@ -71,6 +71,7 @@ def rescore_problem(self, problem_id, publicy_changed=False):
             profile.calculate_points()
             cache.delete('user_complete:%d' % profile.id)
             cache.delete('user_attempted:%d' % profile.id)
+            cache.delete('user_offline_attempted:%s' % profile.id)
             users += 1
             if users % 10 == 0:
                 p.done = users

@@ -209,6 +209,12 @@
                                         {% endif %}
                                     </a>
                                 </td>
+                            {% elif problem.id in offline_attempted_problems %}
+                                <td class="solved" solved="0">
+                                    <a href="{{ url('user_submissions', problem.code, request.user.username) }}">
+                                        <i class="submitted-problem-color fa fa-question-circle"></i>
+                                    </a>
+                                </td>
                             {% else %}
                                 <td class="solved" solved="-1">
                                     {% if problem.is_public %}

@@ -333,7 +333,14 @@ class ContestDetail(ContestMixin, TitleMixin, CommentedDetailView):
 
         authenticated = self.request.user.is_authenticated
         context['completed_problem_ids'] = user_completed_ids(self.request.profile) if authenticated else []
-        context['attempted_problem_ids'] = user_attempted_ids(self.request.profile) if authenticated else []
+        attempted = user_attempted_ids(self.request.profile) if authenticated else []
+        if authenticated and self.object.is_offline and not self.can_edit:
+            contest_attempted = set(Submission.objects.filter(
+                user=self.request.profile,
+                contest_object=self.object
+            ).values_list('problem_id', flat=True))
+            attempted = set(attempted) | contest_attempted
+        context['attempted_problem_ids'] = attempted
 
         context['can_download_data'] = bool(settings.DMOJ_CONTEST_DATA_DOWNLOAD)
 
@@ -364,7 +371,14 @@ class ContestAllProblems(ContestMixin, TitleMixin, DetailView):
 
         authenticated = self.request.user.is_authenticated
         context['completed_problem_ids'] = user_completed_ids(self.request.profile) if authenticated else []
-        context['attempted_problem_ids'] = user_attempted_ids(self.request.profile) if authenticated else []
+        attempted = user_attempted_ids(self.request.profile) if authenticated else []
+        if authenticated and self.object.is_offline and not self.can_edit:
+            contest_attempted = set(Submission.objects.filter(
+                user=self.request.profile,
+                contest_object=self.object
+            ).values_list('problem_id', flat=True))
+            attempted = set(attempted) | contest_attempted
+        context['attempted_problem_ids'] = attempted
 
         return context
 

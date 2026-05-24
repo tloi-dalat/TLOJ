@@ -38,7 +38,7 @@ from judge.utils.infinite_paginator import InfinitePaginationMixin
 from judge.utils.opengraph import generate_opengraph
 from judge.utils.pdfoid import PDF_RENDERING_ENABLED, render_pdf
 from judge.utils.problems import hot_problems, user_attempted_ids, \
-    user_completed_ids
+    user_completed_ids, user_offline_attempted_ids
 from judge.utils.strings import safe_float_or_none, safe_int_or_none
 from judge.utils.tickets import own_ticket_filter
 from judge.utils.views import QueryStringSortMixin, SingleObjectFormView, TitleMixin, add_file_response, generic_message
@@ -102,6 +102,9 @@ class SolvedProblemMixin(object):
 
     def get_attempted_problems(self):
         return user_attempted_ids(self.profile) if self.profile is not None else ()
+
+    def get_offline_attempted_problems(self):
+        return user_offline_attempted_ids(self.profile) if self.profile is not None else ()
 
     @cached_property
     def in_contest(self):
@@ -422,6 +425,7 @@ class ProblemDetail(ProblemMixin, SolvedProblemMixin, ProblemSubmitMixin, Commen
         context['has_pdf_render'] = PDF_RENDERING_ENABLED
         context['completed_problem_ids'] = self.get_completed_problems()
         context['attempted_problems'] = self.get_attempted_problems()
+        context['offline_attempted_problems'] = self.get_offline_attempted_problems()
 
         can_edit = self.object.is_editable_by(user)
         context['can_edit_problem'] = can_edit
@@ -689,6 +693,7 @@ class ProblemList(QueryStringSortMixin, TitleMixin, SolvedProblemMixin, Infinite
         context['search_query'] = self.search_query
         context['completed_problem_ids'] = self.get_completed_problems()
         context['attempted_problems'] = self.get_attempted_problems()
+        context['offline_attempted_problems'] = self.get_offline_attempted_problems()
         context['hot_problems'] = self.get_hot_problems()
         context['point_start'], context['point_end'], context['point_values'] = self.get_noui_slider_points()
         context.update(self.get_sort_context())

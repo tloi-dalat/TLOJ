@@ -29,7 +29,11 @@
                                 </a>
                             {% elif problem.id in attempted_problem_ids %}
                                 <a href="{{ url('user_submissions', problem.code, request.user.username) }}">
-                                    <i class="attempted-problem-color fa fa-frown-o"></i>
+                                    {% if contest.is_offline and not can_edit %}
+                                        <i class="submitted-problem-color fa fa-question-circle"></i>
+                                    {% else %}
+                                        <i class="attempted-problem-color fa fa-frown-o"></i>
+                                    {% endif %}
                                 </a>
                             {% endif %}
                             <a href="{{ url('problem_detail', problem.code) }}">{{ problem.i18n_name or problem.name }}</a>

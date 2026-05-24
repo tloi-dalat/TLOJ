@@ -544,15 +544,22 @@ class APIUserDetail(APIDetailView):
     slug_url_kwarg = 'user'
 
     def get_object_data(self, profile):
-        solved_problems = list(
-            Submission.objects
-            .filter(
-                result='AC',
-                user=profile,
-                problem__is_public=True,
-                problem__is_organization_private=False,
+        qs = Submission.objects.filter(
+            result='AC',
+            user=profile,
+            problem__is_public=True,
+            problem__is_organization_private=False,
+        )
+        if not self.request.user.is_authenticated:
+            qs = qs.exclude(contest_object__is_offline=True)
+        elif not self.request.user.has_perm('judge.edit_all_contest'):
+            qs = qs.exclude(
+                Q(contest_object__is_offline=True) &
+                ~Q(contest_object__authors=self.request.profile) &
+                ~Q(contest_object__curators=self.request.profile)
             )
-            .values('problem').distinct()
+        solved_problems = list(
+            qs.values('problem').distinct()
             .values_list('problem__code', flat=True),
         )
 
