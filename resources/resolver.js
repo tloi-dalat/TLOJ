@@ -29,6 +29,25 @@ function formatScore(score) {
 function formatTime(time) {
     return resolverConfig.timeDecimals > 0 ? Number(time).toFixed(resolverConfig.timeDecimals) : Math.round(time);
 }
+function getICPCFormatText(state, isPending, subsAfter) {
+    if (!state) {
+        if (isPending) {
+            return subsAfter + " - 0";
+        }
+        return "";
+    }
+    const points = state[0];
+    const bestTime = state[1];
+    const acceptedCount = state[2];
+    const rejectedCount = state[3];
+    const lastTime = state[4] || 0;
+    if (points > 0) {
+        return acceptedCount + " - " + bestTime;
+    } else {
+        const totalSubs = rejectedCount + (isPending ? subsAfter : 0);
+        return totalSubs + " - " + lastTime;
+    }
+}
 class Animator {
     constructor(x, acceleration, maxSpeed) {
         this.acceleration = acceleration;
@@ -81,6 +100,8 @@ const teamAnimators = new Map();
 const teamBoxMap = new Map();
 let animFrameId = null;
 let lastFrameTime = null;
+let contestFormat = "";
+let firstSolvers = {};
 function startAnimationLoop() {
     if (animFrameId !== null) return;
     lastFrameTime = performance.now();
@@ -105,6 +126,7 @@ function animTick(ts) {
 }
 
 function getColorForScore(score, maxScore) {
+    if (!maxScore || maxScore <= 0) return "#0ba70b";
     score = Math.max(0, Math.min(maxScore, score));
     const startColor = { r: 167, g: 11, b: 11 };
     const midColor = { r: 167, g: 167, b: 11 };
@@ -171,12 +193,14 @@ async function fetchContest() {
     const contestId = document.getElementById("contestId").value.trim();
     const apiKey = document.getElementById("apiKey").value.trim();
     const apiSecret = document.getElementById("apiSecret").value.trim();
-    if (!contestId || !apiKey || !apiSecret) {
+    if (!contestId) {
         return;
     }
     const jsonText = document.getElementById("json-data");
     jsonText.value = "Fetching contest info and problems...";
-    let { status, result, comment } = await fetchAPI("contest.standings", { contestId, participantTypes: "CONTESTANT", asManager: true }, apiKey, apiSecret);
+    const params = { contestId, participantTypes: "CONTESTANT" };
+    if (apiKey && apiSecret) params.asManager = true;
+    let { status, result, comment } = await fetchAPI("contest.standings", params, apiKey, apiSecret);
     let contest, problems;
     if (status != "OK") {
         jsonText.value = comment.join("\n");
@@ -189,7 +213,9 @@ async function fetchContest() {
     await new Promise(resolve => setTimeout(resolve, 2500));
     jsonText.value += " done\n";
     jsonText.value += "Fetching contest submissions...";
-    ({ status, result, comment } = await fetchAPI("contest.status", { contestId, asManager: true }, apiKey, apiSecret));
+    const statusParams = { contestId };
+    if (apiKey && apiSecret) statusParams.asManager = true;
+    ({ status, result, comment } = await fetchAPI("contest.status", statusParams, apiKey, apiSecret));
     let submissions;
     if (status != "OK") {
         jsonText.value = comment.join("\n");
@@ -202,7 +228,7 @@ async function fetchContest() {
     const verdicts = ["OK", "PARTIAL", "RUNTIME_ERROR", "WRONG_ANSWER", "PRESENTATION_ERROR", "TIME_LIMIT_EXCEEDED", "MEMORY_LIMIT_EXCEEDED", "IDLENESS_LIMIT_EXCEEDED"];
     submissions = submissions.filter(submission => verdicts.includes(submission.verdict));
     submissions = submissions.reverse();
-    const contestants = uniqueByKey([...new Set(submissions.map(submission => submission.author.members[0]))], "handle");
+    const contestants = uniqueByKey(submissions.map(submission => submission.author.members[0]), "handle");
     for (let i = 0; i < contestants.length; i++) {
         contestants[i].index = i;
     }
@@ -232,6 +258,7 @@ async function fetchContest() {
     data.contest.durationMinutes = Math.floor(contest.durationSeconds / 60);
     data.contest.freezeDurationMinutes = Math.floor(contest.freezeDurationSeconds / 60);
     data.contest.penaltyMinutes = 20;
+    data.contest.format = "icpc";
     data.problems = problems.map(problem => {
         return {
             index: problem.index,
@@ -240,14 +267,14 @@ async function fetchContest() {
     });
     data.contestants = contestants.map(contestant => {
         return {
-            name: contestant.name || contestant.handle,
+            name: contestant.handle,
             logo: contestant.logo,
             rank: contestant.rank,
         };
     });
     data.submissions = submissions.map(submission => {
         return {
-            name: submission.author.members[0].name || submission.author.members[0].handle,
+            name: submission.author.members[0].handle,
             problemIndex: submission.problem.index,
             submitMinutes: Math.floor(submission.relativeTimeSeconds / 60),
             points: submission.points || (submission.verdict == "OK" ? 1 : 0),
@@ -430,6 +457,14 @@ function processContest() {
     }
     const { contest, problems, contestants, submissions } = JSON.parse(document.getElementById("json-data").value);
     penaltyPerSubmission = contest.penaltyMinutes;
+    const headerScore = document.querySelector(".header-score");
+    if (headerScore) {
+        headerScore.textContent = (contest.format === "icpc") ? "SOLVED" : "SCORE";
+    }
+    const headerTime = document.querySelector(".header-time");
+    if (headerTime) {
+        headerTime.textContent = (contest.format === "icpc") ? "PENALTY" : "TIME";
+    }
     const animAcc = Math.pow(2000 / resolverConfig.animDurationPerRow, 2);
     const animMaxSpeed = animAcc * 1.75;
     const headerProblemsEl = document.getElementById("header-problems");
@@ -440,6 +475,16 @@ function processContest() {
         problemIndex[problem.index] = index;
         problemScore[problem.index] = problem.points;
     });
+    contestFormat = contest.format;
+    firstSolvers = {};
+    const sortedSubmissions = [...submissions].sort((a, b) => a.submitMinutes - b.submitMinutes);
+    for (const sub of sortedSubmissions) {
+        if (sub.points === problemScore[sub.problemIndex]) {
+            if (!(sub.problemIndex in firstSolvers)) {
+                firstSolvers[sub.problemIndex] = sub.name;
+            }
+        }
+    }
     const standingsContainer = document.getElementById("standings");
     standingsContainer.innerHTML = "";
     standings = contestants.map(contestant => {
@@ -453,12 +498,15 @@ function processContest() {
                 submitAfterFreeze: false,
             }
             for (const submission of userProblemSubmissions) {
+                if (data.afterFreeze && data.afterFreeze[0] === problemScore[problem.index]) {
+                    continue;
+                }
                 if (submission.submitMinutes < contest.durationMinutes - contest.freezeDurationMinutes) {
                     if (data.beforeFreeze == null) {
                         if (submission.points > 0) {
-                            data.beforeFreeze = [submission.points, submission.submitMinutes, 1, 0];
+                            data.beforeFreeze = [submission.points, submission.submitMinutes, 1, 0, submission.submitMinutes];
                         } else {
-                            data.beforeFreeze = [0, 0, 0, 1];
+                            data.beforeFreeze = [0, 0, 0, 1, submission.submitMinutes];
                         }
                     } else {
                         if (submission.points > data.beforeFreeze[0]) {
@@ -466,8 +514,10 @@ function processContest() {
                             data.beforeFreeze[1] = submission.submitMinutes;
                             data.beforeFreeze[2] += data.beforeFreeze[3] + 1;
                             data.beforeFreeze[3] = 0;
+                            data.beforeFreeze[4] = submission.submitMinutes;
                         } else {
                             data.beforeFreeze[3]++;
+                            data.beforeFreeze[4] = submission.submitMinutes;
                         }
                     }
                     data.afterFreeze = [...data.beforeFreeze];
@@ -475,9 +525,9 @@ function processContest() {
                     data.submitAfterFreeze = true;
                     if (data.afterFreeze == null) {
                         if (submission.points > 0) {
-                            data.afterFreeze = [submission.points, submission.submitMinutes, 1, 0];
+                            data.afterFreeze = [submission.points, submission.submitMinutes, 1, 0, submission.submitMinutes];
                         } else {
-                            data.afterFreeze = [0, 0, 0, 1];
+                            data.afterFreeze = [0, 0, 0, 1, submission.submitMinutes];
                         }
                     } else {
                         if (submission.points > data.afterFreeze[0]) {
@@ -485,8 +535,10 @@ function processContest() {
                             data.afterFreeze[1] = submission.submitMinutes;
                             data.afterFreeze[2] += data.afterFreeze[3] + 1;
                             data.afterFreeze[3] = 0;
+                            data.afterFreeze[4] = submission.submitMinutes;
                         } else {
                             data.afterFreeze[3]++;
+                            data.afterFreeze[4] = submission.submitMinutes;
                         }
                     }
                 }
@@ -578,12 +630,33 @@ function processContest() {
             const pointBox = document.createElement("div");
             pointBox.classList.add("point-box");
             if (problem.submitAfterFreeze) {
-                pointBox.textContent = problem.beforeFreeze ? formatScoreAndTime(problem.beforeFreeze[0], problem.beforeFreeze[2], problem.afterFreeze[2] + problem.afterFreeze[3] - problem.beforeFreeze[2], problem.beforeFreeze[1]) : formatScoreAndTime(0, 0, problem.afterFreeze[2] + problem.afterFreeze[3], 0);
+                const scoreBefore = problem.beforeFreeze ? problem.beforeFreeze[0] : 0;
+                const timeBefore = problem.beforeFreeze ? problem.beforeFreeze[1] : 0;
+                const subsBefore = problem.beforeFreeze ? (problem.beforeFreeze[0] > 0 ? problem.beforeFreeze[2] : problem.beforeFreeze[3]) : 0;
+                const totalBefore = problem.beforeFreeze ? (problem.beforeFreeze[2] + problem.beforeFreeze[3]) : 0;
+                const subsAfter = (problem.afterFreeze[2] + problem.afterFreeze[3]) - totalBefore;
+                if (contestFormat === "icpc") {
+                    pointBox.textContent = getICPCFormatText(problem.beforeFreeze, true, subsAfter);
+                } else {
+                    pointBox.textContent = formatScoreAndTime(scoreBefore, subsBefore, subsAfter, timeBefore);
+                }
                 pointBox.style.background = "gray";
                 pointBox.style.color = "#ffffff";
             } else if (problem.beforeFreeze) {
-                pointBox.textContent = formatScoreAndTime(problem.beforeFreeze[0], problem.beforeFreeze[2], problem.beforeFreeze[3], problem.beforeFreeze[1]);
-                pointBox.style.background = getColorForScore(problem.beforeFreeze[0], problemScore[problem.index]);
+                const score = problem.beforeFreeze[0];
+                const time = problem.beforeFreeze[1];
+                const subs = problem.beforeFreeze[0] > 0 ? problem.beforeFreeze[2] : problem.beforeFreeze[3];
+                if (contestFormat === "icpc") {
+                    pointBox.textContent = getICPCFormatText(problem.beforeFreeze, false, 0);
+                    if (firstSolvers[problem.index] === user.name && score === problemScore[problem.index]) {
+                        pointBox.style.background = "#105010";
+                    } else {
+                        pointBox.style.background = getColorForScore(score, problemScore[problem.index]);
+                    }
+                } else {
+                    pointBox.textContent = formatScoreAndTime(score, subs, 0, time);
+                    pointBox.style.background = getColorForScore(score, problemScore[problem.index]);
+                }
                 pointBox.style.color = "#ffffff";
             } else {
                 pointBox.textContent = problem.index;
@@ -592,19 +665,25 @@ function processContest() {
             }
             problemPointsDiv.appendChild(pointBox);
         });
-        userInfoDiv.appendChild(nameDiv);
-        userInfoDiv.appendChild(problemPointsDiv);
+        const userHeaderDiv = document.createElement("div");
+        userHeaderDiv.classList.add("user-header");
+        const statsDiv = document.createElement("div");
+        statsDiv.classList.add("stats");
         const totalScoreDiv = document.createElement("div");
         totalScoreDiv.classList.add("total-score");
         totalScoreDiv.textContent = formatScore(user.totalScore);
         const totalTimeDiv = document.createElement("div");
         totalTimeDiv.classList.add("total-time");
         totalTimeDiv.textContent = formatTime(user.totalTime);
+        statsDiv.appendChild(totalScoreDiv);
+        statsDiv.appendChild(totalTimeDiv);
+        userHeaderDiv.appendChild(nameDiv);
+        userHeaderDiv.appendChild(statsDiv);
+        userInfoDiv.appendChild(userHeaderDiv);
+        userInfoDiv.appendChild(problemPointsDiv);
         rankBox.appendChild(rankDiv);
         rankBox.appendChild(logoDiv);
         rankBox.appendChild(userInfoDiv);
-        rankBox.appendChild(totalScoreDiv);
-        rankBox.appendChild(totalTimeDiv);
         standingsContainer.appendChild(rankBox);
     });
     standingsContainer.style.height = standings.length * 90 + "px";
@@ -615,6 +694,7 @@ function getBoxByName(name) {
     return teamBoxMap.get(name) || null;
 }
 function run(auto = false) {
+    lastKeyPressTime = 0;
     return new Promise(resolve => {
         if (currentIndex >= 0 && currentIndex < standings.length) {
             const headerH = document.getElementById("header").offsetHeight;
@@ -663,8 +743,20 @@ function run(auto = false) {
             const problemBox = currentBox.querySelector(".problem-points").children[problemIndex[currentProblem.index]];
             const totalScoreDiv = currentBox.querySelector(".total-score");
             const totalTimeDiv = currentBox.querySelector(".total-time");
-            problemBox.textContent = formatScoreAndTime(currentProblem.afterFreeze[0], currentProblem.afterFreeze[2], currentProblem.afterFreeze[3], currentProblem.afterFreeze[1]);
-            problemBox.style.background = getColorForScore(currentProblem.afterFreeze[0], problemScore[currentProblem.index]);
+            const score = currentProblem.afterFreeze[0];
+            const time = currentProblem.afterFreeze[1];
+            const subs = currentProblem.afterFreeze[0] > 0 ? currentProblem.afterFreeze[2] : currentProblem.afterFreeze[3];
+            if (contestFormat === "icpc") {
+                problemBox.textContent = getICPCFormatText(currentProblem.afterFreeze, false, 0);
+                if (firstSolvers[currentProblem.index] === standings[currentIndex].name && score === problemScore[currentProblem.index]) {
+                    problemBox.style.background = "#105010";
+                } else {
+                    problemBox.style.background = getColorForScore(score, problemScore[currentProblem.index]);
+                }
+            } else {
+                problemBox.textContent = formatScoreAndTime(score, subs, 0, time);
+                problemBox.style.background = getColorForScore(score, problemScore[currentProblem.index]);
+            }
             problemBox.style.color = "#ffffff";
             problemBox.style.borderColor = "transparent";
             totalScoreDiv.textContent = formatScore(standings[currentIndex].totalScore += currentProblem.afterFreeze[0] - (currentProblem.beforeFreeze ? currentProblem.beforeFreeze[0] : 0));
@@ -685,6 +777,7 @@ function run(auto = false) {
                 teamBoxMap.get(standings[i].name).querySelector(".rank").textContent = standings[i].rank;
             }
             if (newIndex != currentIndex) {
+                lastKeyPressTime = Date.now();
                 const savedCurrentIndex = currentIndex;
                 for (let i = newIndex; i <= savedCurrentIndex; i++) {
                     teamAnimators.get(standings[i].name)?.setTarget(i);
@@ -706,6 +799,7 @@ function run(auto = false) {
 }
 let isRunning = false;
 let isAuto = false;
+let lastKeyPressTime = 0;
 async function runAutoLoop() {
     while (isAuto && (currentIndex >= 0 || currentAction == 0)) {
         isRunning = true;
@@ -740,7 +834,9 @@ document.addEventListener("keydown", async function (event) {
         return;
     }
     if ((key == "n" || key == "N") && !isAuto && !isRunning) {
-        if (isAnimating()) return;
+        const now = Date.now();
+        if (now - lastKeyPressTime < 500) return;
+        lastKeyPressTime = now;
         isRunning = true;
         await run();
         isRunning = false;

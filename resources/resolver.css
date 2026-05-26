@@ -163,7 +163,7 @@ details {
     color: white;
 }
 
-details > summary {
+details>summary {
     cursor: pointer;
     user-select: none;
     font-size: 0.8rem;
@@ -171,15 +171,15 @@ details > summary {
     padding: 4px 0;
 }
 
-details > summary::-webkit-details-marker {
+details>summary::-webkit-details-marker {
     display: none;
 }
 
-details > summary::before {
+details>summary::before {
     content: "▸ ";
 }
 
-details[open] > summary::before {
+details[open]>summary::before {
     content: "▾ ";
 }
 
@@ -234,6 +234,14 @@ button:hover {
 .header-name {
     flex: 1;
     color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-stats {
+    display: flex;
+    gap: 20px;
 }
 
 .header-score {
@@ -285,10 +293,21 @@ button:hover {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    justify-content: center;
+    justify-content: space-between;
     height: 65px;
     box-sizing: border-box;
+}
+
+.user-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.stats {
+    display: flex;
+    gap: 20px;
 }
 
 .name {
@@ -312,12 +331,12 @@ button:hover {
     padding: 0px;
     border-radius: 4px;
     border: 2px solid transparent;
-    height: 26px;
-    line-height: 22px;
+    height: 30px;
+    line-height: 26px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.85rem;
+    font-size: 1.15rem;
     box-sizing: border-box;
 }
 

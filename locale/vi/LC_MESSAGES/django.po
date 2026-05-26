@@ -8831,3 +8831,15 @@ msgstr "Bắt đầu Resolver"
 
 msgid "Please provide JSON data."
 msgstr "Vui lòng nhập dữ liệu JSON."
+
+msgid "How to use JSON File"
+msgstr "Hướng dẫn sử dụng File JSON"
+
+msgid "The JSON file must contain the following structure:"
+msgstr "File JSON phải có cấu trúc như sau:"
+
+msgid "Use \"icpc\" for Penalty, or other formats like \"vnoj\" for Time."
+msgstr "Dùng \"icpc\" để hiển thị Penalty, hoặc các định dạng khác như \"vnoj\" để hiển thị Time."
+
+msgid "Should be unique handles matching the submission names."
+msgstr "Nên là các handle duy nhất và khớp với tên trong danh sách submissions."

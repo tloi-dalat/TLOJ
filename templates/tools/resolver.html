@@ -17,6 +17,36 @@
                 <label>{{ _('Upload JSON File') }}</label>
                 <input type="file" id="file" accept=".json" onchange="readJSON()">
             </div>
+            <details class="help-details" style="margin-top: 10px;">
+                <summary style="cursor: pointer; font-weight: bold; color: var(--text-color);">{{ _('How to use JSON File') }}</summary>
+                <div class="help-content" style="padding: 10px; background: var(--nav-bg); border-radius: 4px; margin-top: 5px; font-size: 0.9em; line-height: 1.5;">
+                    <p>{{ _('The JSON file must contain the following structure:') }}</p>
+                    <pre style="background: rgba(0,0,0,0.1); padding: 5px; border-radius: 3px; overflow-x: auto;">
+{
+  "contest": {
+    "name": "Contest Name",
+    "durationMinutes": 300,
+    "freezeDurationMinutes": 60,
+    "penaltyMinutes": 20,
+    "format": "icpc"
+  },
+  "problems": [
+    { "index": "A", "points": 1.0 }
+  ],
+  "contestants": [
+    { "name": "contestant_handle" }
+  ],
+  "submissions": [
+    { "name": "contestant_handle", "problemIndex": "A", "submitMinutes": 10, "points": 1.0 }
+  ]
+}
+                    </pre>
+                    <ul>
+                        <li><strong>contest.format</strong>: {{ _('Use "icpc" for ICPC contest format or other formats like "vnoj" for IOI contest format') }}</li>
+                        <li><strong>contestants.name</strong>: {{ _('Should be unique handles matching the submission names.') }}</li>
+                    </ul>
+                </div>
+            </details>
         </div>
 
         <div id="tab-cf" class="tab-content" style="display: none;">

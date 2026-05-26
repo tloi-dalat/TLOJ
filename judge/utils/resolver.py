@@ -21,7 +21,7 @@ def build_resolver_payload(contest, show_virtual=False):
     participations = list(participations_qs)
 
     submissions_qs = ContestSubmission.objects.filter(participation__contest=contest) \
-        .select_related('participation__user', 'submission') \
+        .select_related('participation__user', 'submission', 'participation__contest') \
         .order_by('submission__date')
 
     if not show_virtual:
@@ -35,7 +35,7 @@ def build_resolver_payload(contest, show_virtual=False):
         if not label:
             continue
 
-        delta = cs.submission.date - contest.start_time
+        delta = cs.submission.date - cs.participation.start
         submit_minutes = int(delta.total_seconds() // 60)
 
         submissions_data.append({
@@ -52,6 +52,7 @@ def build_resolver_payload(contest, show_virtual=False):
             'durationMinutes': int((contest.end_time - contest.start_time).total_seconds() // 60),
             'freezeDurationMinutes': contest.frozen_last_minutes,
             'penaltyMinutes': (contest.format.config or {}).get('penalty', 20),
+            'format': contest.format_name,
         },
         'problems': [
             {

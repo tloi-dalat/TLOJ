@@ -246,7 +246,8 @@ class ContestMixin(object):
 
     def can_access_resolver(self):
         return self.resolver_enabled() and (
-            self.request.user.is_staff or self.request.user.is_superuser
+            self.object.can_see_full_scoreboard(self.request.user) or
+            self.has_valid_ranking_access_code() or self.can_edit
         )
 
     def get_object(self, queryset=None):
@@ -1216,7 +1217,8 @@ class ContestResolverDataView(ContestResolverMixin, SingleObjectMixin, View):
         denial = self.validate_resolver_access()
         if denial is not None:
             return denial
-        return JsonResponse(build_resolver_payload(self.object))
+        show_virtual = request.GET.get('show_virtual', 'false').lower() == 'true'
+        return JsonResponse(build_resolver_payload(self.object, show_virtual=show_virtual))
 
 
 class ContestParticipationList(LoginRequiredMixin, ContestRankingBase):
