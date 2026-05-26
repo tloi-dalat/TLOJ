@@ -631,6 +631,7 @@ class APISubmissionList(APIListView):
         return (
             queryset
             .select_related('problem', 'contest', 'contest__participation', 'contest_object', 'user__user', 'language')
+            .prefetch_related('contest_object__authors', 'contest_object__curators')
             .order_by('id')
             .only(
                 'id',
@@ -642,7 +643,9 @@ class APISubmissionList(APIListView):
                 'memory',
                 'points',
                 'result',
+                'status',
                 'contest_object__key',
+                'contest_object__is_offline',
                 'contest__points',
                 'contest__participation__virtual',
                 'contest__participation__real_start',

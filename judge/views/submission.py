@@ -44,17 +44,9 @@ def hide_submission_details_in_memory(submission):
     submission.time = None
     submission.memory = None
     submission.error = None
-    if 'result_class' in submission.__dict__:
-        del submission.__dict__['result_class']
-    if 'short_status' in submission.__dict__:
-        del submission.__dict__['short_status']
-    if 'long_status' in submission.__dict__:
-        del submission.__dict__['long_status']
     if is_actually_graded:
         submission._custom_short_status = _('Submitted')
         submission._custom_long_status = _('Your submission has been received, please wait for results later.')
-    if submission.problem:
-        submission.problem.testcase_result_visibility_mode = 'H'
 
 
 def submission_related(queryset):
@@ -267,6 +259,8 @@ class SubmissionStatus(SubmissionDetailBase):
         if submission.hide_results_for_user(self.request.user):
             context['batches'] = []
             context['statuses'] = []
+            context['cases_data'] = {}
+            context['feedback_limit'] = 0
             context['can_view_test'] = False
             context['can_view_testcase_status'] = False
             context['can_view_batch_status'] = False
@@ -513,10 +507,7 @@ class SubmissionsListBase(DiggPaginatorMixin, TitleMixin, ListView):
         context['all_organizations'] = self.get_searchable_organizations()
         context['selected_organization'] = self.selected_organization
 
-        if self.is_contest_scoped and self.contest.is_offline and not self.contest.is_editable_by(self.request.user):
-            context['results_json'] = mark_safe('{"categories": [], "total": 0}')
-        else:
-            context['results_json'] = mark_safe(json.dumps(self.get_result_data()))
+        context['results_json'] = mark_safe(json.dumps(self.get_result_data()))
         context['results_colors_json'] = mark_safe(json.dumps(settings.DMOJ_STATS_SUBMISSION_RESULT_COLORS))
 
         context['page_suffix'] = suffix = ('?' + self.request.GET.urlencode()) if self.request.GET else ''
