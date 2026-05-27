@@ -827,6 +827,11 @@ class ForceContestMixin(object):
 
 
 class AllContestSubmissions(ForceContestMixin, AllSubmissions):
+    def access_check(self, request):
+        super().access_check(request)
+        if self.contest.is_offline and not self.contest.is_editable_by(request.user):
+            raise Http404()
+
     def is_in_low_power_mode(self):
         return False
 
@@ -841,6 +846,11 @@ class AllContestSubmissions(ForceContestMixin, AllSubmissions):
 
 
 class UserAllContestSubmissions(ForceContestMixin, AllUserSubmissions):
+    def access_check(self, request):
+        super().access_check(request)
+        if self.contest.is_offline and self.profile != request.profile and not self.contest.is_editable_by(request.user):
+            raise Http404()
+
     def is_in_low_power_mode(self):
         return False
 
@@ -892,6 +902,8 @@ class UserContestSubmissions(ForceContestMixin, UserProblemSubmissions):
 
     def access_check(self, request):
         super(UserContestSubmissions, self).access_check(request)
+        if self.contest.is_offline and self.profile != request.profile and not self.contest.is_editable_by(request.user):
+            raise Http404()
         if not self.contest.users.filter(user_id=self.profile.id).exists():
             raise Http404()
 

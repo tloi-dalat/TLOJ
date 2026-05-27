@@ -22,7 +22,7 @@ def generate_day_labels(start_date, end_date, utc_offset):
 
 
 def submission_data(start_date, end_date, utc_offset):
-    queryset = Submission.objects.filter(date__gte=start_date, date__lte=end_date)
+    queryset = Submission.objects.filter(date__gte=start_date, date__lte=end_date).exclude(contest_object__is_offline=True)
 
     submissions = (
         queryset.annotate(date_only=Cast(F('date') + utc_offset, DateField()))
@@ -43,7 +43,6 @@ def submission_data(start_date, end_date, utc_offset):
     results = [(str(Submission.USER_DISPLAY_CODES[res]), count) for (res, count) in results]
 
     queue_time = (
-        # Divide by 1000000 to convert microseconds to seconds
         queryset.filter(judged_date__isnull=False, rejudged_date__isnull=True)
         .annotate(queue_time=Cast(F('judged_date') - F('date'), FloatField()) / 1000000.0)
         .order_by('queue_time').values_list('queue_time', flat=True)

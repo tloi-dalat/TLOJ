@@ -300,6 +300,7 @@ class Profile(models.Model):
         public_problems = Problem.get_public_problems()
         data = (
             public_problems.filter(submission__user=self, submission__points__isnull=False)
+                           .exclude(submission__contest_object__is_offline=True)
                            .annotate(max_points=Max('submission__points')).order_by('-max_points')
                            .values_list('max_points', flat=True).filter(max_points__gt=0)
         )
@@ -308,6 +309,7 @@ class Profile(models.Model):
         problems = (
             public_problems.filter(submission__user=self, submission__result='AC',
                                    submission__case_points__gte=F('submission__case_total'))
+            .exclude(submission__contest_object__is_offline=True)
             .values('id').distinct().count()
         )
         pp = sum(x * y for x, y in zip(table, data)) + bonus_function(problems)

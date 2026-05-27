@@ -829,6 +829,8 @@ class APIContestSyncBase(APIKeyRequiredMixin, APIMixin, BaseDetailView):
     slug_url_kwarg = 'contest_code'
 
     def get_data(self, context):
+        if context['object'].is_offline:
+            raise PermissionDenied()
         return self.get_api_data(context)
 
     def render_to_response(self, context, **response_kwargs):

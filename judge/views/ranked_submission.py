@@ -23,9 +23,9 @@ class RankedSubmissions(ProblemSubmissions):
             constraint = ' AND sub.contest_object_id = %s'
             params.append(self.contest.id)
         else:
-            contest_join = ''
+            contest_join = 'LEFT JOIN judge_contest AS jc ON (sub.contest_object_id = jc.id)'
             points = 'sub.points'
-            constraint = ''
+            constraint = ' AND (jc.is_offline IS NULL OR NOT jc.is_offline)'
 
         if self.selected_languages:
             lang_ids = Language.objects.filter(key__in=self.selected_languages).values_list('id', flat=True)
@@ -40,12 +40,12 @@ class RankedSubmissions(ProblemSubmissions):
             subquery="""
                 SELECT sub.id AS id
                 FROM (
-                    SELECT sub.user_id AS uid, MAX(sub.points) AS points
+                    SELECT sub.user_id AS uid, MAX({points}) AS points
                     FROM judge_submission AS sub {contest_join}
                     WHERE sub.problem_id = %s AND {points} > 0 {constraint}
                     GROUP BY sub.user_id
                 ) AS highscore STRAIGHT_JOIN (
-                    SELECT sub.user_id AS uid, sub.points, MIN(sub.time) as time
+                    SELECT sub.user_id AS uid, {points} as points, MIN(sub.time) as time
                     FROM judge_submission AS sub {contest_join}
                     WHERE sub.problem_id = %s AND {points} > 0 {constraint}
                     GROUP BY sub.user_id, {points}
@@ -79,6 +79,11 @@ class RankedSubmissions(ProblemSubmissions):
 
 
 class ContestRankedSubmission(ForceContestMixin, RankedSubmissions):
+    def access_check(self, request):
+        super().access_check(request)
+        if self.contest.is_offline and not self.contest.is_editable_by(request.user):
+            raise Http404()
+
     def get_title(self):
         if self.problem.is_accessible_by(self.request.user):
             return _('Best solutions for %(problem)s in %(contest)s') % {

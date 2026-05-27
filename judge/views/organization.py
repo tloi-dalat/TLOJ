@@ -659,7 +659,7 @@ class SubmissionListOrganization(InfinitePaginationMixin, PrivateOrganizationMix
 
     def _get_queryset(self):
         query_set = super(SubmissionListOrganization, self)._get_queryset()
-        query_set = query_set.filter(problem__organization=self.organization)
+        query_set = query_set.filter(problem__organization=self.organization).exclude(contest_object__is_offline=True)
         return query_set
 
     def get_context_data(self, **kwargs):

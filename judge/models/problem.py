@@ -513,7 +513,7 @@ class Problem(models.Model):
         return self.submission_source_visibility_mode
 
     def update_stats(self):
-        all_queryset = self.submission_set.filter(user__is_unlisted=False)
+        all_queryset = self.submission_set.filter(user__is_unlisted=False).exclude(contest_object__is_offline=True)
         ac_queryset = all_queryset.filter(points__gte=self.points, result='AC')
         self.user_count = ac_queryset.values('user').distinct().count()
         submissions = all_queryset.count()
@@ -724,6 +724,11 @@ class Solution(models.Model):
         return _('Editorial for %s') % self.problem.name
 
     def is_accessible_by(self, user):
+        if self.problem.contests.filter(contest__is_offline=True,
+                                        contest__start_time__lte=timezone.now(),
+                                        contest__end_time__gte=timezone.now()).exists():
+            if not (user.has_perm('judge.edit_all_contest') or self.problem.is_editable_by(user)):
+                return False
         if self.is_public and self.publish_on < timezone.now():
             return True
         if user.has_perm('judge.see_private_solution'):

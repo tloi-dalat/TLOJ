@@ -132,16 +132,15 @@ def hot_problems(duration, limit):
     qs = cache.get(cache_key)
     if qs is None:
         qs = Problem.get_public_problems() \
-                    .filter(submission__date__gt=timezone.now() - duration, points__gt=0)
+                    .filter(submission__date__gt=timezone.now() - duration, points__gt=0) \
+                    .exclude(submission__contest_object__is_offline=True)
         qs0 = qs.annotate(k=Count('submission__user', distinct=True)).order_by('-k').values_list('k', flat=True)
 
         if not qs0:
             return []
-        # make this an aggregate
         mx = float(qs0[0])
 
         qs = qs.annotate(unique_user_count=Count('submission__user', distinct=True))
-        # fix braindamage in excluding CE
         qs = qs.annotate(submission_volume=Count(Case(
             When(submission__result='AC', then=1),
             When(submission__result='WA', then=1),
@@ -168,7 +167,6 @@ def hot_problems(duration, limit):
 
 @transaction.atomic
 def fast_delete_problem(problem: Problem):
-    # Deliberately skips point recalculation and contest result recomputation during cascade deletion.
     from django.db.models.signals import post_delete
     from judge.signals import contest_submission_delete, submission_delete
 

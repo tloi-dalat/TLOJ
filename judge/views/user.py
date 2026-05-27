@@ -209,12 +209,12 @@ class UserAboutPage(UserPage):
             user_timezone = user_timezone or self.request.profile.timezone
         timezone_offset = pytz.timezone(user_timezone).utcoffset(datetime.datetime.utcnow()).seconds
 
-        submissions_count = self.object.submission_set.count()
+        submissions_count = self.object.submission_set.exclude(contest_object__is_offline=True).count()
         if submissions_count > settings.VNOJ_LOW_POWER_MODE_CONFIG['heat_map_limit']:
             submissions = []
         else:
             submissions = (
-                self.object.submission_set
+                self.object.submission_set.exclude(contest_object__is_offline=True)
                 .annotate(date_only=Cast(F('date') + datetime.timedelta(seconds=timezone_offset), DateField()))
                 .values('date_only').annotate(cnt=Count('id'))
             )
@@ -336,6 +336,7 @@ class UserProblemsPage(UserPage):
 
         result = Submission.objects.filter(user=self.object, points__gt=0, problem__is_public=True,
                                            problem__is_organization_private=False) \
+            .exclude(contest_object__is_offline=True) \
             .exclude(problem__in=self.get_completed_problems() if self.hide_solved else []) \
             .values('problem__id', 'problem__code', 'problem__name', 'problem__points', 'problem__group__full_name') \
             .distinct().annotate(points=Max('points')).order_by('problem__group__full_name', 'problem__code')
