@@ -839,9 +839,9 @@ def denied_offline_contest_response(request, contest):
         message = format_html(
             _(
                 'You cannot view this right now. Please wait for the author to publish it, '
-                'or <a href="{login_url}">log in</a> to continue.'
+                'or <a href="{login_url}">log in</a> to continue.',
             ),
-            login_url=login_url
+            login_url=login_url,
         )
     else:
         title = _('Access Denied')
