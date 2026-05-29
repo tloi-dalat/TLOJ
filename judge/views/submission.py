@@ -826,11 +826,36 @@ class ForceContestMixin(object):
         return super(ForceContestMixin, self).get(request, *args, **kwargs)
 
 
+def denied_offline_contest_response(request, contest):
+    from django.urls import reverse
+    from django.utils.http import urlencode
+    from django.utils.translation import gettext as _
+    from django.utils.html import format_html
+    from judge.utils.views import generic_message
+
+    if not request.user.is_authenticated:
+        login_url = reverse('auth_login') + '?' + urlencode({'next': request.get_full_path()})
+        title = _('Access Denied')
+        message = format_html(
+            _(
+                'You cannot view this right now. Please wait for the author to publish it, '
+                'or <a href="{login_url}">log in</a> to continue.'
+            ),
+            login_url=login_url
+        )
+    else:
+        title = _('Access Denied')
+        message = _('You cannot view this right now. Please wait for the author to publish it.')
+
+    return generic_message(request, title, message, status=403)
+
+
 class AllContestSubmissions(ForceContestMixin, AllSubmissions):
     def access_check(self, request):
         super().access_check(request)
-        if self.contest.is_offline and not self.contest.is_editable_by(request.user):
-            raise Http404()
+        if self.contest.is_offline:
+            if not request.user.is_authenticated:
+                return denied_offline_contest_response(request, self.contest)
 
     def is_in_low_power_mode(self):
         return False
@@ -846,11 +871,6 @@ class AllContestSubmissions(ForceContestMixin, AllSubmissions):
 
 
 class UserAllContestSubmissions(ForceContestMixin, AllUserSubmissions):
-    def access_check(self, request):
-        super().access_check(request)
-        if self.contest.is_offline and self.profile != request.profile and not self.contest.is_editable_by(request.user):
-            raise Http404()
-
     def is_in_low_power_mode(self):
         return False
 
@@ -869,8 +889,11 @@ class UserAllContestSubmissions(ForceContestMixin, AllUserSubmissions):
 
     def access_check(self, request):
         super().access_check(request)
-        if not self.is_own and not self.contest.can_see_full_scoreboard(self.request.user):
-            raise Http404()
+        if not self.is_own:
+            if self.contest.is_offline and not self.contest.is_editable_by(request.user):
+                return denied_offline_contest_response(request, self.contest)
+            if not self.contest.can_see_full_scoreboard(request.user):
+                return denied_offline_contest_response(request, self.contest)
 
     def get_content_title(self):
         if self.is_own:
@@ -902,8 +925,9 @@ class UserContestSubmissions(ForceContestMixin, UserProblemSubmissions):
 
     def access_check(self, request):
         super(UserContestSubmissions, self).access_check(request)
-        if self.contest.is_offline and self.profile != request.profile and not self.contest.is_editable_by(request.user):
-            raise Http404()
+        if (self.contest.is_offline and self.profile != request.profile and
+                not self.contest.is_editable_by(request.user)):
+            return denied_offline_contest_response(request, self.contest)
         if not self.contest.users.filter(user_id=self.profile.id).exists():
             raise Http404()
 

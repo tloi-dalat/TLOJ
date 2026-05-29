@@ -8792,3 +8792,12 @@ msgstr "Đã nộp"
 
 msgid "Your submission has been received, please wait for results later."
 msgstr "Bài nộp của bạn đã được nộp, vui lòng đợi kết quả sau này"
+
+msgid "Access Denied"
+msgstr "Truy cập bị từ chối"
+
+msgid "You cannot view this right now. Please wait for the author to publish it, or <a href=\"{login_url}\">log in</a> to continue."
+msgstr "Bạn không thể xem ngay bây giờ, vui lòng đợi tác giả công bố hoặc <a href=\"{login_url}\">đăng nhập</a> để tiếp tục."
+
+msgid "You cannot view this right now. Please wait for the author to publish it."
+msgstr "Bạn không thể xem ngay bây giờ, vui lòng đợi tác giả công bố."

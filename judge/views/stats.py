@@ -22,7 +22,9 @@ def generate_day_labels(start_date, end_date, utc_offset):
 
 
 def submission_data(start_date, end_date, utc_offset):
-    queryset = Submission.objects.filter(date__gte=start_date, date__lte=end_date).exclude(contest_object__is_offline=True)
+    queryset = Submission.objects.filter(
+        date__gte=start_date, date__lte=end_date,
+    ).exclude(contest_object__is_offline=True)
 
     submissions = (
         queryset.annotate(date_only=Cast(F('date') + utc_offset, DateField()))

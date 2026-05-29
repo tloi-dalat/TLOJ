@@ -82,7 +82,8 @@ class ContestRankedSubmission(ForceContestMixin, RankedSubmissions):
     def access_check(self, request):
         super().access_check(request)
         if self.contest.is_offline and not self.contest.is_editable_by(request.user):
-            raise Http404()
+            from judge.views.submission import denied_offline_contest_response
+            return denied_offline_contest_response(request, self.contest)
 
     def get_title(self):
         if self.problem.is_accessible_by(self.request.user):

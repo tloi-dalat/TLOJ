@@ -30,6 +30,8 @@ def _format_size(bytes, formats, decimals):
 
 @registry.filter
 def kbdetailformat(kb):
+    if kb is None:
+        return ''
     formats = [_('%s B'), _('%s KB'), _('%s MB'), _('%s GB'), _('%s TB'), _('%s PB')]
     decimals = [0, 2, 2, 2, 2, 2]
     return avoid_wrapping(_format_size(kb * 1024, formats, decimals))
@@ -37,6 +39,8 @@ def kbdetailformat(kb):
 
 @registry.filter
 def kbsimpleformat(kb):
+    if kb is None:
+        return ''
     formats = [_('%sB'), _('%sK'), _('%sM'), _('%sG'), _('%sT'), _('%sP')]
     decimals = [0, 0, 0, 0, 0, 0]
     return _format_size(kb * 1024, formats, decimals)
