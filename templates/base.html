@@ -383,22 +383,25 @@
     <footer>
         <span id="footer-content">
             <br>
-            {{_('proudly powered by %(vnoj)s (based on %(dmoj)s)',
-                dmoj=safe('<a style="color: #808080" href="https://dmoj.ca"><b>DMOJ</b></a>'),
-                vnoj=safe('<a style="color: #808080" href="https://github.com/VNOI-Admin/OJ"><b>VNOJ</b></a>')
-            )}}
+
+            {% set vnoj_link = safe('<a style="color: #808080" href="https://github.com/VNOI-Admin/OJ"><b>VNOJ</b></a>') %}
+            {% set dmoj_link = safe('<a style="color: #808080" href="https://dmoj.ca"><b>DMOJ</b></a>') %}
+            {{ _('proudly powered by %(vnoj)s (based on %(dmoj)s)', vnoj=vnoj_link, dmoj=dmoj_link) }}
+
             |
-            {{_('follow us on %(github)s and %(facebook)s',
-                github=safe('<a style="color: #808080" href="https://github.com/tloi-dalat"><b>Github</b></a>'),
-                facebook=safe('<a style="color: #808080" href="https://fb.com/tloi.dl"><b>Facebook</b></a>')
-            )}}
+
+            {% set github_link = safe('<a style="color: #808080" href="https://github.com/tloi-dalat"><b>GitHub</b></a>') %}
+            {% set facebook_link = safe('<a style="color: #808080" href="https://fb.com/tloi.dl"><b>Facebook</b></a>') %}
+            {{ _('follow us on %(github)s and %(facebook)s', github=github_link, facebook=facebook_link) }}
+
             {% if misc_config.footer %}
                 {{ misc_config.footer|safe }} |
             {% endif %}
+
             <form id="set_language" action="{{ url('set_language') }}" method="post" style="display: inline">
                 {% csrf_token %}
                 <input name="next" type="hidden" value="{{ request.get_full_path() }}">
-                <input name="language" type="hidden" value="{{LANGUAGE_CODE}}">
+                <input name="language" type="hidden" value="{{ LANGUAGE_CODE }}">
             </form>
         </span>
     </footer>

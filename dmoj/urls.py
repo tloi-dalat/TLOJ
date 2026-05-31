@@ -348,7 +348,7 @@ urlpatterns = [
     ])),
 
     path('tools/', ToolsListView.as_view(), name='tools_list'),
-    path('tool/graph-editor', GraphEditorView.as_view(), name='graph_editor'),
+    path('tool/graph_editor', GraphEditorView.as_view(), name='graph_editor'),
 
     path('license/<str:key>', license.LicenseDetail.as_view(), name='license'),
 
