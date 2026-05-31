@@ -10,17 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     environment: qa
     steps:
-      - name: SSH and run QA update script through Cloudflare Tunnel
-        uses: and-fm/cloudflared-ssh-action@v3
+      - name: Run QA update script via SSH
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.QA_VPS_HOST }}
-          port: ${{ secrets.QA_VPS_PORT }}
           username: ${{ secrets.QA_VPS_USER }}
-          private_key_filename: qa_key
-          private_key_value: ${{ secrets.QA_VPS_SSH_KEY }}
-          service_token_id: ${{ secrets.QA_CLOUDFLARE_ACCESS_CLIENT_ID }}
-          service_token_secret: ${{ secrets.QA_CLOUDFLARE_ACCESS_CLIENT_SECRET }}
-          commands: |
+          key: ${{ secrets.QA_VPS_SSH_KEY }}
+          port: ${{ secrets.QA_VPS_PORT }}
+          script_stop: true
+          script: |
             /home/tloi/update_tloj.sh
 
   deploy2prod:
