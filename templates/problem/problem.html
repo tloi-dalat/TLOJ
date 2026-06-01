@@ -152,6 +152,9 @@
     {% if request.user.is_authenticated and form %}
         {% include "problem/submit-js.html" %}
     {% endif %}
+    {% include "graph-core-config.html" %}
+    <script type="text/javascript" src="{{ static('graph-core.js') }}"></script>
+    <script type="text/javascript" src="{{ static('graph-viewer.js') }}"></script>
     <script type="text/javascript">
         $(function() {
             $('#pdf_button').click(async function(e) {

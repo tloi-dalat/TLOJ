@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title_row %}
+    <div id="title-row">
+        <h2 id="title">{{ _('Tools') }}</h2>
+    </div>
+{% endblock %}
+
+{% block body %}
+<div id="tools-list">
+    <table class="table striped">
+        <thead>
+            <tr>
+                <th>{{ _('Name') }}</th>
+                <th>{{ _('Description') }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    <a href="{{ url('graph_editor') }}">{{ _('Graph Editor') }}</a>
+                </td>
+                <td>{{ _('Visualize and edit graphs interactively') }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

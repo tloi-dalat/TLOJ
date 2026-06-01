@@ -2,6 +2,7 @@
 .vscode
 .sass-cache
 .python-version
+.claude
 *.sqlite3
 *.py[co]
 *.mo
@@ -45,3 +46,4 @@ celerybeat-schedule.*
 resources/blog-modern.css
 resources/blog-post.css
 resources/theme-toggle.css
+.DS_Store
