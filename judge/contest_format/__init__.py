@@ -6,3 +6,4 @@ from judge.contest_format.ioi import IOIContestFormat
 from judge.contest_format.legacy_ioi import LegacyIOIContestFormat
 from judge.contest_format.registry import choices, formats
 from judge.contest_format.vnoj import VNOJContestFormat
+from judge.contest_format.voi import VOIContestFormat

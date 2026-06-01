@@ -8713,6 +8713,50 @@ msgstr "Không tìm thấy URL rút gọn."
 msgid "This shortened URL is not active."
 msgstr "URL rút gọn này không hoạt động."
 
+#: judge/models/contest.py
+msgid "unfreeze time"
+msgstr "Thời điểm mở băng"
+
+#: judge/models/contest.py
+msgid "Results are revealed after this time. Leave empty to reveal after contest end."
+msgstr "Kết quả sẽ được hiển thị sau thời điểm này. Để trống để hiển thị sau khi kỳ thi kết thúc."
+
+#: judge/models/contest.py
+msgid "Unfreeze time cannot be before contest end time."
+msgstr "Thời điểm mở băng không được trước thời điểm kết thúc kỳ thi."
+
+#: judge/contest_format/voi.py
+msgid "VOI"
+msgstr "Kiểu VOI"
+
+#: judge/contest_format/voi.py
+msgid "The final (last) submission for each problem will be used."
+msgstr "Bài nộp cuối cùng cho mỗi bài sẽ được tính điểm."
+
+#: judge/contest_format/voi.py
+msgid "No penalty for wrong submissions."
+msgstr "Không có phạt cho bài nộp sai."
+
+#: judge/contest_format/voi.py
+msgid "Ties are broken by username only (no time tie-break)."
+msgstr "Điểm bằng nhau sẽ phá vỡ bằng tên người dùng (không dùng thời gian)."
+
+#: judge/contest_format/voi.py
+msgid "Results are revealed after the unfreeze time."
+msgstr "Kết quả sẽ được hiển thị sau thời điểm mở băng."
+
+#: judge/contest_format/voi.py
+msgid "Results are revealed after the contest ends."
+msgstr "Kết quả sẽ được hiển thị sau khi kỳ thi kết thúc."
+
+#: templates/submission/status.html
+msgid "Results are hidden until the contest is unfrozen."
+msgstr "Kết quả được ẩn cho đến khi kỳ thi được mở băng."
+
+#: templates/submission/row.html
+msgid "Hidden"
+msgstr "Ẩn"
+
 #~ msgid "Bedao Team"
 #~ msgstr "Đội Bedao"
 

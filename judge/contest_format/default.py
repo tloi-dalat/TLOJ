@@ -30,13 +30,18 @@ class DefaultContestFormat(BaseContestFormat):
         points = 0
         format_data = {}
 
+        from django.db.models import Count
         for result in participation.submissions.values('problem_id').annotate(
-                time=Max('submission__date'), points=Max('points'),
+                time=Max('submission__date'), points=Max('points'), tries=Count('id'),
         ):
             dt = (result['time'] - participation.start).total_seconds()
             if result['points']:
                 cumtime += dt
-            format_data[str(result['problem_id'])] = {'time': dt, 'points': result['points']}
+            format_data[str(result['problem_id'])] = {
+                'time': dt,
+                'points': result['points'],
+                'tries': result['tries'],
+            }
             points += result['points']
 
         participation.cumtime = max(cumtime, 0)

@@ -1,5 +1,10 @@
 from abc import ABCMeta, abstractmethod
 
+from django.template.defaultfilters import pluralize
+from django.urls import reverse
+from django.utils.html import format_html
+from django.utils.safestring import mark_safe
+
 
 class abstractclassmethod(classmethod):
     __isabstractmethod__ = True
@@ -10,6 +15,15 @@ class abstractclassmethod(classmethod):
 
 
 class BaseContestFormat(metaclass=ABCMeta):
+    # Set to True in formats that hide ALL results until the effective unfreeze time.
+    # For such formats, results are hidden from the start of the contest.
+    # For other formats, results are only hidden between contest_end and unfreeze_time (if set).
+    hides_results_before_unfreeze = False
+
+    # Default DB ordering fields for the ranking queryset (after is_disqualified).
+    # VOI overrides this to use username for deterministic tie-breaking.
+    ranking_sort_fields = ('-score', 'cumtime', 'tiebreaker', '-submission_count')
+
     @abstractmethod
     def __init__(self, contest, config):
         self.config = config
@@ -116,6 +130,46 @@ class BaseContestFormat(metaclass=ABCMeta):
         :return: A generator, where each item is an individual line.
         """
         raise NotImplementedError()
+
+    def display_hidden_problem_cell(self, participation, contest_problem):
+        """
+        Returns the HTML cell to display when results are hidden before unfreeze.
+        Shows an empty cell if no submissions, otherwise shows a frozen/unknown cell
+        with the submission count (e.g. "? 2 tries").
+        """
+        format_data = (participation.format_data or {}).get(str(contest_problem.id))
+        if not format_data:
+            return mark_safe('<td></td>')
+
+        tries = format_data.get('tries', 0)
+        if not tries:
+            return mark_safe('<td></td>')
+
+        url = reverse('contest_user_submissions',
+                      args=[self.contest.key, participation.user.user.username, contest_problem.problem.code])
+        return format_html(
+            '<td class="pending"><a href="{url}">?<div class="solving-time">{tries} {msg}</div></a></td>',
+            url=url,
+            tries=tries,
+            msg=pluralize(tries, 'try,tries'),
+        )
+
+    def display_hidden_result_cell(self, participation):
+        """
+        Returns the HTML total-score cell to display when results are hidden before unfreeze.
+        """
+        from django.urls import reverse as _reverse
+        url = _reverse('contest_all_user_submissions',
+                       args=[self.contest.key, participation.user.user.username])
+        return format_html('<td class="user-points"><a href="{url}">?</a></td>', url=url)
+
+    def get_ranker_key(self):
+        """
+        Returns an attrgetter key used by the Python ranker to determine ties.
+        VOI overrides this to use only points (no cumtime/tiebreaker).
+        """
+        from operator import attrgetter
+        return attrgetter('points', 'cumtime', 'tiebreaker')
 
     @classmethod
     def best_solution_state(cls, points, total):

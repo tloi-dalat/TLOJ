@@ -1,4 +1,38 @@
 {% set can_view, can_edit = submission_layout(submission, profile_id, request.user, completed_problem_ids, editable_problem_ids, tester_problem_ids) %}
+{% set _result_hidden = result_hidden if result_hidden is defined else false %}
+{% if _result_hidden %}
+<div class="sub-result">
+    <div class="score">---</div>
+    <div class="state">
+        <span class="status">{{ _('Hidden') }}</span> |
+        <span class="language">{{ submission.language.short_display_name }}</span>
+    </div>
+</div>
+<div class="sub-main">
+    <div class="sub-info">
+        {% if show_problem %}
+            <div class="name">
+                <a href="{{ url('problem_detail', submission.problem.code) }}">{{ problem_name }}</a>
+            </div>
+        {% endif %}
+        <div>
+            {{ link_user(submission.user) }}
+            <br class="xs-br">
+            <span class="time">{{ relative_time(submission.date) }}</span>
+            {% if not request.in_contest and submission.contest_object_id %}
+                <a href="{{ url('contest_view', submission.contest_object.key) }}"
+                   class="submission-contest">
+                    <i title="{{ submission.contest_object.name }}" class="fa fa-dot-circle-o"></i>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<div class="sub-usage">
+    <div class="time">---</div>
+    <div class="memory">---</div>
+</div>
+{% else %}
 <div class="sub-result {{ submission.result_class }}">
     <div class="score">
         {%- if submission.is_graded -%}
@@ -107,3 +141,4 @@
         <div class="memory">{{ submission.memory|kbdetailformat }}</div>
     {% endif %}
 </div>
+{% endif %}

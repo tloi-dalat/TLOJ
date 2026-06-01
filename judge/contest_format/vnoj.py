@@ -120,7 +120,8 @@ class VNOJContestFormat(DefaultContestFormat):
                     cumtime += dt
                     last = max(last, dt)
 
-                format_data[str(prob)] = {'time': dt, 'points': points, 'penalty': prev}
+                tries = problem_subs.count()
+                format_data[str(prob)] = {'time': dt, 'points': points, 'penalty': prev, 'tries': tries}
 
                 if not frozen and participation.contest.frozen_last_minutes != 0:
                     format_data[str(prob)]['pending'] = problem_subs \
