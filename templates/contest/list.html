@@ -167,7 +167,7 @@
     <td>
         {% if request.profile not in contest.authors.all() and request.profile not in contest.curators.all() and request.profile not in contest.testers.all() %}
             {% if request.profile and contest.id in request.profile.registered_contest_ids %}
-                <span style="color: #87ab69"><b>{{ _('Already Registered') }}</b></span>
+                <span style="color: #87ab69"><b>{{ _('Already registered') }}</b></span>
             {% elif not contest.can_register %}
                 {% if contest.time_before_register %}
                     <span class="time">{{ _('Registration opens in %(countdown)s', countdown=as_countdown(contest.time_before_register)) }}</span>

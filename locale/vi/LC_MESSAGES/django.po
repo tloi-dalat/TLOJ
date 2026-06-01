@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dmoj\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-31 18:26+0000\n"
+"POT-Creation-Date: 2026-06-01 02:48+0000\n"
 "PO-Revision-Date: 2020-08-23 18:59\n"
 "Last-Translator: \n"
 "Language-Team: Vietnamese\n"
@@ -3915,7 +3915,7 @@ msgstr "Kỳ thi đã kết thúc"
 msgid "\"%s\" has ended."
 msgstr "\"%s\" đã kết thúc."
 
-#: judge/views/contests.py:519
+#: judge/views/contests.py:519 templates/contest/list.html:166
 msgid "Already registered"
 msgstr "Đã đăng ký"
 
@@ -5577,14 +5577,6 @@ msgid "Contest"
 msgid_plural "Contests"
 msgstr[0] "Kỳ thi"
 
-#: templates/contest/list.html:187
-msgid "Registered users:"
-msgstr "Số người đã đăng ký:"
-
-#: templates/contest/list.html:170
-msgid "Already Registered"
-msgstr "Đã đăng ký"
-
 #: templates/contest/access_code.html:63
 msgid "Please enter your access code:"
 msgstr "Hãy nhập mã truy cập của bạn:"
@@ -6055,6 +6047,10 @@ msgstr "Tham gia"
 #, python-format
 msgid "Registration opens in %(countdown)s"
 msgstr "Đăng ký mở sau %(countdown)s"
+
+#: templates/contest/list.html:183
+msgid "Registered users:"
+msgstr "Số người đã đăng ký:"
 
 #: templates/contest/list.html:193
 msgid "Active contests"
