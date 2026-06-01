@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-31 18:26+0000\n"
+"POT-Creation-Date: 2026-06-01 02:48+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3842,7 +3842,7 @@ msgstr ""
 msgid "\"%s\" has ended."
 msgstr ""
 
-#: judge/views/contests.py:519
+#: judge/views/contests.py:519 templates/contest/list.html:166
 msgid "Already registered"
 msgstr ""
 
@@ -5940,6 +5940,10 @@ msgstr ""
 #: templates/contest/list.html:169
 #, python-format
 msgid "Registration opens in %(countdown)s"
+msgstr ""
+
+#: templates/contest/list.html:183
+msgid "Registered users:"
 msgstr ""
 
 #: templates/contest/list.html:193
