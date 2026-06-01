@@ -5577,6 +5577,14 @@ msgid "Contest"
 msgid_plural "Contests"
 msgstr[0] "Kỳ thi"
 
+#: templates/contest/list.html:187
+msgid "Registered users:"
+msgstr "Số người đã đăng ký:"
+
+#: templates/contest/list.html:170
+msgid "Already Registered"
+msgstr "Đã đăng ký"
+
 #: templates/contest/access_code.html:63
 msgid "Please enter your access code:"
 msgstr "Hãy nhập mã truy cập của bạn:"
