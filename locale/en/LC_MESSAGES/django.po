@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-01 02:48+0000\n"
+"POT-Creation-Date: 2026-06-01 04:46+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -389,7 +389,7 @@ msgid "Regenerate"
 msgstr ""
 
 #: judge/admin/runtime.py:76 templates/contest/contest.html:283
-#: templates/contest/contest.html:317
+#: templates/contest/contest.html:317 templates/tools/list.html:15
 msgid "Description"
 msgstr ""
 
@@ -4016,11 +4016,11 @@ msgstr ""
 msgid "corrupt page %s"
 msgstr ""
 
-#: judge/views/graph_editor.py:11
+#: judge/views/graph_editor.py:11 templates/tools/list.html:5
 msgid "Tools"
 msgstr ""
 
-#: judge/views/graph_editor.py:16 templates/tools/list.html:10
+#: judge/views/graph_editor.py:16 templates/tools/list.html:21
 msgid "Graph Editor"
 msgstr ""
 
@@ -6383,6 +6383,7 @@ msgid "New contests"
 msgstr ""
 
 #: templates/organization/list.html:23 templates/status/language-list.html:35
+#: templates/tools/list.html:14
 msgid "Name"
 msgstr ""
 
@@ -8067,7 +8068,7 @@ msgstr ""
 msgid "Graph canvas"
 msgstr ""
 
-#: templates/tools/list.html:11
+#: templates/tools/list.html:23
 msgid "Visualize and edit graphs interactively"
 msgstr ""
 
