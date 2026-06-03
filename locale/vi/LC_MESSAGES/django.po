@@ -8730,33 +8730,6 @@ msgstr "URL rút gọn này không hoạt động."
 #~ msgid "Order in contest"
 #~ msgstr "Thứ tự của bài tập trong kỳ thi"
 
-#, python-format
-#~ msgid "Enter access code for \"%s\""
-#~ msgstr "Nhập access code của \"%s\""
-
-#~ msgid "Invalid access code."
-#~ msgstr "Mã truy cập không hợp lệ."
-
-#~ msgid "Rate all users who joined."
-#~ msgstr ""
-#~ "Tính rating tất cả những người đã tham gia kỳ thi (kể cả không nộp bài "
-#~ "nào)."
-
-#~ msgid "In the meantime, try resubmitting in a few seconds."
-#~ msgstr "Bạn có thể thử nộp lại bài trong vài giây nữa"
-
-#~ msgid "Associated page"
-#~ msgstr "Trang liên kết"
-
-#~ msgid "Authors"
-#~ msgstr "Tác giả"
-
-#~ msgid "Page %(current)s of %(total)s"
-#~ msgstr "Trang %(current)s / %(total)s"
-
-msgid "Maximum single-case runtime:"
-msgstr "Thời gian chạy test lâu nhất:"
-
 msgid "Resolver Tool"
 msgstr "Công cụ Resolver"
 
@@ -8829,6 +8802,30 @@ msgstr "bài nộp đang chờ"
 msgid "Press ENTER to start"
 msgstr "Nhấn ENTER để bắt đầu"
 
+#, python-format
+#~ msgid "Enter access code for \"%s\""
+#~ msgstr "Nhập access code của \"%s\""
+
+#~ msgid "Invalid access code."
+#~ msgstr "Mã truy cập không hợp lệ."
+
+#~ msgid "Rate all users who joined."
+#~ msgstr ""
+#~ "Tính rating tất cả những người đã tham gia kỳ thi (kể cả không nộp bài "
+#~ "nào)."
+
+#~ msgid "In the meantime, try resubmitting in a few seconds."
+#~ msgstr "Bạn có thể thử nộp lại bài trong vài giây nữa"
+
+#~ msgid "Associated page"
+#~ msgstr "Trang liên kết"
+
+#~ msgid "Authors"
+#~ msgstr "Tác giả"
+
+#~ msgid "Page %(current)s of %(total)s"
+#~ msgstr "Trang %(current)s / %(total)s"
+
 #~ msgid "You are not allowed to kick people from this organization."
 #~ msgstr "Bạn không có quyền loại người từ tổ chức này."
 
@@ -8837,3 +8834,6 @@ msgstr "Nhấn ENTER để bắt đầu"
 
 #~ msgid "Version Matrix"
 #~ msgstr "Phiên bản của trình chấm"
+
+#~ msgid "Maximum single-case runtime:"
+#~ msgstr "Thời gian chạy test lâu nhất:"
