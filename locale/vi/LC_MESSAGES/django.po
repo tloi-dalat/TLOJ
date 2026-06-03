@@ -8730,6 +8730,78 @@ msgstr "URL rút gọn này không hoạt động."
 #~ msgid "Order in contest"
 #~ msgstr "Thứ tự của bài tập trong kỳ thi"
 
+msgid "Resolver Tool"
+msgstr "Công cụ Resolver"
+
+msgid "Replay contest standings"
+msgstr "Phát lại bảng xếp hạng"
+
+msgid "JSON Input"
+msgstr "Nhập JSON"
+
+msgid "Codeforces API"
+msgstr "Codeforces API"
+
+msgid "Upload JSON File"
+msgstr "Tải tệp JSON lên"
+
+msgid "Contest ID"
+msgstr "Mã kỳ thi (ID)"
+
+msgid "API Key"
+msgstr "API Key"
+
+msgid "API Secret"
+msgstr "API Secret"
+
+msgid "Fetch from Codeforces"
+msgstr "Lấy dữ liệu từ Codeforces"
+
+msgid "JSON Data"
+msgstr "Dữ liệu JSON"
+
+msgid "Advanced Configuration"
+msgstr "Cấu hình nâng cao"
+
+msgid "Score Decimals"
+msgstr "Số chữ số thập phân của điểm"
+
+msgid "Time Decimals"
+msgstr "Số chữ số thập phân của thời gian"
+
+msgid "Animation (ms/row)"
+msgstr "Tốc độ hiệu ứng (ms/hàng)"
+
+msgid "Auto Delay (ms)"
+msgstr "Độ trễ tự động (ms)"
+
+msgid "Start Resolver"
+msgstr "Bắt đầu Resolver"
+
+msgid "Please provide JSON data."
+msgstr "Vui lòng nhập dữ liệu JSON."
+
+msgid "How to use JSON File"
+msgstr "Hướng dẫn sử dụng File JSON"
+
+msgid "The JSON file must contain the following structure:"
+msgstr "File JSON phải có cấu trúc như sau:"
+
+msgid "Should be unique handles matching the submission names."
+msgstr "Nên là các handle duy nhất và khớp với tên trong danh sách submissions."
+
+msgid "Resolver"
+msgstr "Resolver"
+
+msgid "Resolver Viewer"
+msgstr "Trình xem Resolver"
+
+msgid "pending submissions"
+msgstr "bài nộp đang chờ"
+
+msgid "Press ENTER to start"
+msgstr "Nhấn ENTER để bắt đầu"
+
 #, python-format
 #~ msgid "Enter access code for \"%s\""
 #~ msgstr "Nhập access code của \"%s\""

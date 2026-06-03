@@ -90,7 +90,7 @@
             "regex": "^/tools",
             "parent": null,
             "lft": 1,
-            "rght": 4,
+            "rght": 6,
             "tree_id": 5,
             "level": 0
         }
@@ -107,6 +107,22 @@
             "parent": 8,
             "lft": 2,
             "rght": 3,
+            "tree_id": 5,
+            "level": 1
+        }
+    },
+    {
+        "model": "judge.navigationbar",
+        "pk": 11,
+        "fields": {
+            "order": 2,
+            "key": "resolver",
+            "label": "Resolver Tools",
+            "path": "/tool/resolver",
+            "regex": "^/tool/resolver",
+            "parent": 8,
+            "lft": 4,
+            "rght": 5,
             "tree_id": 5,
             "level": 1
         }

@@ -3,12 +3,7 @@ from django.views.generic import TemplateView
 
 from judge.utils.views import TitleMixin
 
-__all__ = ['GraphEditorView', 'ToolsListView']
-
-
-class ToolsListView(TitleMixin, TemplateView):
-    template_name = 'tools/list.html'
-    title = _('Tools')
+__all__ = ['GraphEditorView']
 
 
 class GraphEditorView(TitleMixin, TemplateView):
