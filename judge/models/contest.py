@@ -90,7 +90,7 @@ class Contest(models.Model):
     unfreeze_time = models.DateTimeField(
         verbose_name=_('unfreeze time'),
         null=True, blank=True,
-        help_text=_('Results are revealed after this time. Leave empty to reveal after contest end.'),
+        help_text=_('Results are revealed after this time.'),
     )
     registration_start = models.DateTimeField(verbose_name=_('registration start time'),
                                               blank=True, null=True, default=None)

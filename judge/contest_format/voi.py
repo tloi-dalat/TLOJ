@@ -136,7 +136,7 @@ class VOIContestFormat(DefaultContestFormat):
         return attrgetter('points')
 
     def get_short_form_display(self):
-        yield _('The final (last) submission for each problem will be used.')
+        yield _('The final submission for each problem will be used.')
         yield _('No penalty for wrong submissions.')
         yield _('Ties are broken by username only (no time tie-break).')
         base_unfreeze = self.contest.get_unfreeze_time()
