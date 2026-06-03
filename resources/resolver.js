@@ -475,7 +475,7 @@ function processContest() {
         problemIndex[problem.index] = index;
         problemScore[problem.index] = problem.points;
     });
-    contestFormat = contest.format;
+    contestFormat = contest.format || "vnoj";
     firstSolvers = {};
     const sortedSubmissions = [...submissions].sort((a, b) => a.submitMinutes - b.submitMinutes);
     for (const sub of sortedSubmissions) {
