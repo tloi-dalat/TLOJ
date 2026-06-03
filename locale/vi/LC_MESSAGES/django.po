@@ -380,7 +380,7 @@ msgid "Regenerate"
 msgstr "Tạo lại"
 
 #: judge/admin/runtime.py:76 templates/contest/contest.html:283
-#: templates/contest/contest.html:317
+#: templates/contest/contest.html:317 templates/tools/list.html:15
 msgid "Description"
 msgstr "Mô tả"
 
@@ -3951,7 +3951,7 @@ msgstr "Kỳ thi đã kết thúc"
 msgid "\"%s\" has ended."
 msgstr "\"%s\" đã kết thúc."
 
-#: judge/views/contests.py:519
+#: judge/views/contests.py:519 templates/contest/list.html:166
 msgid "Already registered"
 msgstr "Đã đăng ký"
 
@@ -4126,11 +4126,11 @@ msgstr "Không có quyền truy cập \"%s\""
 msgid "corrupt page %s"
 msgstr "trang lỗi %s"
 
-#: judge/views/graph_editor.py:11
+#: judge/views/graph_editor.py:11 templates/tools/list.html:5
 msgid "Tools"
 msgstr "Các công cụ"
 
-#: judge/views/graph_editor.py:16 templates/tools/list.html:10
+#: judge/views/graph_editor.py:16 templates/tools/list.html:21
 msgid "Graph Editor"
 msgstr "Vẽ đồ thị"
 
@@ -6084,6 +6084,10 @@ msgstr "Tham gia"
 msgid "Registration opens in %(countdown)s"
 msgstr "Đăng ký mở sau %(countdown)s"
 
+#: templates/contest/list.html:183
+msgid "Registered users:"
+msgstr "Số người đã đăng ký:"
+
 #: templates/contest/list.html:193
 msgid "Active contests"
 msgstr "Các kỳ thi đang tham gia"
@@ -6540,6 +6544,7 @@ msgid "New contests"
 msgstr "Kỳ thi mới"
 
 #: templates/organization/list.html:23 templates/status/language-list.html:35
+#: templates/tools/list.html:14
 msgid "Name"
 msgstr "Tên"
 
@@ -8291,9 +8296,9 @@ msgstr "Danh sách kề"
 msgid "Graph canvas"
 msgstr "Vùng vẽ đồ thị"
 
-#: templates/tools/list.html:11
+#: templates/tools/list.html:23
 msgid "Visualize and edit graphs interactively"
-msgstr "Vẽ và chỉnh sủa đồ thị"
+msgstr "Vẽ và chỉnh sửa đồ thị"
 
 #: templates/urlshortener/confirm_delete.html:65
 msgid ""
