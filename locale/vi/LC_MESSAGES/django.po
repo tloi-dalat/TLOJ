@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dmoj\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-06 19:14+0000\n"
+"POT-Creation-Date: 2026-06-06 19:15+0000\n"
 "PO-Revision-Date: 2020-08-23 18:59\n"
 "Last-Translator: \n"
 "Language-Team: Vietnamese\n"
@@ -4669,56 +4669,56 @@ msgstr "So sánh bài nộp %(first)s và %(second)s"
 msgid "All submissions"
 msgstr "Danh sách bài nộp"
 
-#: judge/views/submission.py:583 judge/views/submission.py:588
+#: judge/views/submission.py:582 judge/views/submission.py:587
 msgid "All my submissions"
 msgstr "Danh sách bài nộp của tôi"
 
-#: judge/views/submission.py:584 judge/views/submission.py:589
+#: judge/views/submission.py:583 judge/views/submission.py:588
 #, python-format
 msgid "All submissions by %s"
 msgstr "Danh sách bài nộp bởi %s"
 
-#: judge/views/submission.py:625 judge/views/submission.py:628
+#: judge/views/submission.py:624 judge/views/submission.py:627
 #, python-format
 msgid "All submissions for %s"
 msgstr "Danh sách bài nộp cho %s"
 
-#: judge/views/submission.py:699 judge/views/submission.py:706
+#: judge/views/submission.py:698 judge/views/submission.py:705
 #, python-format
 msgid "My submissions for %(problem)s"
 msgstr "Danh sách bài nộp của tôi cho %(problem)s"
 
-#: judge/views/submission.py:700 judge/views/submission.py:710
+#: judge/views/submission.py:699 judge/views/submission.py:709
 #, python-format
 msgid "%(user)s's submissions for %(problem)s"
 msgstr "Danh sách bài nộp của %(user)s cho %(problem)s"
 
-#: judge/views/submission.py:833
+#: judge/views/submission.py:832
 #, python-brace-format
 msgid "All submissions in <a href=\"{1}\">{0}</a>"
 msgstr "Danh sách các bài nộp trong <a href=\"{1}\">{0}</a>"
 
-#: judge/views/submission.py:848 judge/views/submission.py:866
+#: judge/views/submission.py:847 judge/views/submission.py:865
 #, python-format
 msgid "My submissions in %(contest)s"
 msgstr "Danh sách bài nộp của tôi trong %(contest)s"
 
-#: judge/views/submission.py:849 judge/views/submission.py:870
+#: judge/views/submission.py:848 judge/views/submission.py:869
 #, python-format
 msgid "%(user)s's submissions in %(contest)s"
 msgstr "Danh sách bài nộp của %(user)s trong %(contest)s"
 
-#: judge/views/submission.py:881 judge/views/submission.py:899
+#: judge/views/submission.py:880 judge/views/submission.py:898
 #, python-brace-format
 msgid "{user}'s submissions for {problem} in {contest}"
 msgstr "Danh sách bài nộp của {user} cho {problem} trong {contest}"
 
-#: judge/views/submission.py:886
+#: judge/views/submission.py:885
 #, python-brace-format
 msgid "{user}'s submissions for problem {number} in {contest}"
 msgstr "Danh sách bài nộp của {user} cho bài {number} trong {contest}"
 
-#: judge/views/submission.py:907
+#: judge/views/submission.py:906
 #, python-brace-format
 msgid "{user}'s submissions for problem {label} in {contest}"
 msgstr "Danh sách bài nộp của {user} cho bài {label} trong {contest}"

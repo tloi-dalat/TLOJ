@@ -435,7 +435,6 @@ class SubmissionsListBase(DiggPaginatorMixin, TitleMixin, ListView):
             if self.could_filter_by_status():
                 status_filter |= Q(status__in=self.selected_statuses)
             queryset = queryset.filter(status_filter)
-            # Filtering by verdict would reveal results hidden before a contest's unfreeze time.
             if not (self.request.user.has_perm('judge.see_private_contest') or
                     self.request.user.has_perm('judge.edit_all_contest')):
                 from judge.contest_format import hidden_result_contest_ids

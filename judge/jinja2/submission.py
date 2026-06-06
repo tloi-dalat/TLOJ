@@ -99,11 +99,9 @@ def submission_result_hidden(submission, user):
     if not (hides or (contest.unfreeze_time and contest.end_time < now)):
         return False
 
-    # Globally hidden — no need to inspect the participation (avoids a per-row query in lists).
     if now < contest.get_unfreeze_time():
         return True
 
-    # Globally revealed; still hidden only while this submission's virtual window is open.
     try:
         participation = submission.contest.participation
     except (AttributeError, ObjectDoesNotExist):
