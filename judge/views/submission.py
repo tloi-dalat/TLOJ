@@ -235,8 +235,7 @@ class SubmissionStatus(SubmissionDetailBase):
     template_name = 'submission/status.html'
 
     def get_queryset(self):
-        return super().get_queryset().select_related('contest', 'contest_object', 'contest__problem',
-                                                     'contest__participation')
+        return super().get_queryset().select_related('contest', 'contest_object', 'contest__problem')
 
     def get_context_data(self, **kwargs):
         context = super(SubmissionStatus, self).get_context_data(**kwargs)
@@ -244,11 +243,7 @@ class SubmissionStatus(SubmissionDetailBase):
 
         result_hidden = False
         if submission.contest_object_id:
-            try:
-                participation = submission.contest.participation
-            except (AttributeError, ObjectDoesNotExist):
-                participation = None
-            result_hidden = submission.contest_object.should_hide_result(self.request.user, participation)
+            result_hidden = submission.contest_object.should_hide_result(self.request.user, self.request.participation)
         context['result_hidden'] = result_hidden
 
         context['batches'], statuses, test_case_count = group_test_cases(submission.test_cases.all())
@@ -738,11 +733,7 @@ def single_submission(request):
 
     result_hidden = False
     if submission.contest_object_id:
-        try:
-            participation = submission.contest.participation
-        except (AttributeError, ObjectDoesNotExist):
-            participation = None
-        result_hidden = submission.contest_object.should_hide_result(request.user, participation)
+        result_hidden = submission.contest_object.should_hide_result(request.user, request.participation)
 
     return render(request, 'submission/row.html', {
         'submission': submission,

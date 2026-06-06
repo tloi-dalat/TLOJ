@@ -166,6 +166,16 @@
                 $("a#frozen_alert").click();
             }
 
+            $("a#result_hidden_alert").click(function () {
+                var $closer = $(this);
+                $closer.parent().hide();
+                localStorage.setItem(`hide-result-hidden-alert-${contest_key}`, 'true');
+            });
+
+            if (localStorage.getItem(`hide-result-hidden-alert-${contest_key}`) == 'true') {
+                $("a#result_hidden_alert").click();
+            }
+
             // hack to keep scroll position after selecting option
             // https://stackoverflow.com/questions/55045146/select2-do-not-scroll-on-selection
             // scrollAfterSelect is only available after v4.0.6
@@ -508,6 +518,21 @@
 {% endblock %}
 
 {% block body %}
+    {% if result_hidden %}
+    <div class="alert-warning">
+        <p style="padding: 10px; text-align: center">
+        <a class="close" id="result_hidden_alert">x</a>
+        {% if result_globally_hidden %}
+            {%- trans -%}
+                Submission results are hidden until they are released.
+            {%- endtrans -%}
+        {% else %}
+            {%- trans -%}
+                You are participating virtually; submission results are hidden until you leave the contest.
+            {%- endtrans -%}
+        {% endif %}
+    </p></div>
+    {% endif %}
     {% if is_frozen %}
     <div class="alert-warning">
         <p style="padding: 10px; text-align: center">

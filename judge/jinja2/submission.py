@@ -1,6 +1,5 @@
 from operator import attrgetter
 
-from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 
 from judge.models import Problem, Submission, SubmissionSourceAccess
@@ -87,6 +86,8 @@ def hidden_result_problem_ids(user):
 def submission_result_hidden(submission, user):
     if not submission.contest_object_id:
         return False
+    if submission.status == 'IE':
+        return False
     contest = submission.contest_object
     if user.is_authenticated:
         if user.has_perm('judge.see_private_contest') or user.has_perm('judge.edit_all_contest'):
@@ -96,14 +97,11 @@ def submission_result_hidden(submission, user):
 
     now = timezone.now()
     hides = getattr(contest.format, 'hides_results_before_unfreeze', False)
-    if not (hides or (contest.unfreeze_time and contest.end_time < now)):
-        return False
 
-    if now < contest.get_unfreeze_time():
+    if (hides or (contest.unfreeze_time and contest.end_time < now)) and now < contest.get_unfreeze_time():
         return True
 
-    try:
-        participation = submission.contest.participation
-    except (AttributeError, ObjectDoesNotExist):
-        return False
-    return now < contest.get_effective_unfreeze_time(participation)
+    if hides and user.is_authenticated and user.profile.current_contest_id is not None:
+        return user.profile.current_contest.contest_id == contest.id
+
+    return False
