@@ -26,7 +26,7 @@
 {% set is_pretest = submission.is_pretested %}
 
 {% if result_hidden %}
-    <h4>{{ _('Your submission result is hidden until the contest ends') }}</h4>
+    <h4>{{ _('Your submission result is hidden until results are released') }}</h4>
 {% elif submission.status != 'IE' %}
     {% if submission.status == 'QU' %}
         <h4>{{ _('We are waiting for a suitable judge to process your submission...') }}</h4>

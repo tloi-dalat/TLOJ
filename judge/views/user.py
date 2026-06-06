@@ -34,7 +34,7 @@ from reversion import revisions
 
 from judge.forms import CustomAuthenticationForm, ProfileForm, UserBanForm, UserDownloadDataForm, UserForm, \
     newsletter_id
-from judge.models import BlogPost, Contest, Organization, Problem, Profile, Submission
+from judge.models import BlogPost, Organization, Problem, Profile, Submission
 from judge.models import Comment
 from judge.performance_points import get_pp_breakdown
 from judge.ratings import rating_class, rating_progress
@@ -337,12 +337,14 @@ class UserProblemsPage(UserPage):
         hidden_problem_ids = frozenset()
         if not (self.request.user.has_perm('judge.see_private_contest') or
                 self.request.user.has_perm('judge.edit_all_contest')):
-            from judge.contest_format import hidden_result_contest_q
-            hidden_problem_ids = frozenset(
-                Problem.objects.filter(
-                    contests__contest__in=Contest.objects.filter(hidden_result_contest_q()),
-                ).values_list('id', flat=True).distinct(),
-            )
+            from judge.contest_format import hidden_result_contest_ids
+            hidden_contests = hidden_result_contest_ids(self.object)
+            if hidden_contests:
+                hidden_problem_ids = frozenset(
+                    Problem.objects.filter(
+                        contests__contest__in=hidden_contests,
+                    ).values_list('id', flat=True).distinct(),
+                )
 
         result = Submission.objects.filter(user=self.object, points__gt=0, problem__is_public=True,
                                            problem__is_organization_private=False) \
@@ -386,12 +388,14 @@ class UserPerformancePointsAjax(UserProblemsPage):
         hidden_problem_ids = frozenset()
         if not (self.request.user.has_perm('judge.see_private_contest') or
                 self.request.user.has_perm('judge.edit_all_contest')):
-            from judge.contest_format import hidden_result_contest_q
-            hidden_problem_ids = frozenset(
-                Problem.objects.filter(
-                    contests__contest__in=Contest.objects.filter(hidden_result_contest_q()),
-                ).values_list('id', flat=True).distinct(),
-            )
+            from judge.contest_format import hidden_result_contest_ids
+            hidden_contests = hidden_result_contest_ids(self.object)
+            if hidden_contests:
+                hidden_problem_ids = frozenset(
+                    Problem.objects.filter(
+                        contests__contest__in=hidden_contests,
+                    ).values_list('id', flat=True).distinct(),
+                )
         breakdown, self.has_more = get_pp_breakdown(self.object, start=start, end=end,
                                                     exclude_problem_ids=hidden_problem_ids or None)
         context['pp_breakdown'] = breakdown

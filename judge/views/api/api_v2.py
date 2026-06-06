@@ -267,8 +267,9 @@ class APIContestDetail(APIDetailView):
         can_see_problems = (in_contest or contest.ended or contest.is_editable_by(self.request.user))
         if not (self.request.user.has_perm('judge.see_private_contest') or
                 self.request.user.has_perm('judge.edit_all_contest')):
-            from judge.contest_format import hidden_result_contest_q
-            if Contest.objects.filter(pk=contest.pk).filter(hidden_result_contest_q()).exists():
+            from judge.contest_format import hidden_result_contest_ids
+            profile = self.request.profile if self.request.user.is_authenticated else None
+            if contest.pk in hidden_result_contest_ids(profile):
                 can_see_rankings = False
 
         problems = list(
@@ -368,8 +369,9 @@ class APIContestParticipationList(APIListView):
         if self.request.user.has_perm('judge.see_private_contest') or \
                 self.request.user.has_perm('judge.edit_all_contest'):
             return frozenset()
-        from judge.contest_format import hidden_result_contest_q
-        return frozenset(Contest.objects.filter(hidden_result_contest_q()).values_list('id', flat=True))
+        from judge.contest_format import hidden_result_contest_ids
+        profile = self.request.profile if self.request.user.is_authenticated else None
+        return hidden_result_contest_ids(profile)
 
     def get_unfiltered_queryset(self):
         visible_contests = Contest.get_visible_contests(self.request.user)
@@ -562,8 +564,8 @@ class APIUserDetail(APIDetailView):
             problem__is_organization_private=False,
         )
         if not can_see_all:
-            from judge.contest_format import hidden_result_contest_q
-            hidden_contests = Contest.objects.filter(hidden_result_contest_q())
+            from judge.contest_format import hidden_result_contest_ids
+            hidden_contests = hidden_result_contest_ids(profile)
             submissions_q = submissions_q.exclude(contest_object__in=hidden_contests)
         solved_problems = list(
             submissions_q.values('problem').distinct().values_list('problem__code', flat=True),
@@ -581,10 +583,7 @@ class APIUserDetail(APIDetailView):
             .order_by('contest__end_time')
         )
         if not can_see_all:
-            from judge.contest_format import hidden_result_contest_q
-            participations_q = participations_q.exclude(
-                contest__in=Contest.objects.filter(hidden_result_contest_q()),
-            )
+            participations_q = participations_q.exclude(contest__in=hidden_contests)
         for contest_key, score, cumtime, rating, mean, performance in participations_q.values_list(
             'contest__key', 'score', 'cumtime', 'rating__rating', 'rating__mean', 'rating__performance',
         ):
@@ -629,8 +628,9 @@ class APISubmissionList(APIListView):
         if self.request.user.has_perm('judge.see_private_contest') or \
                 self.request.user.has_perm('judge.edit_all_contest'):
             return frozenset()
-        from judge.contest_format import hidden_result_contest_q
-        return frozenset(Contest.objects.filter(hidden_result_contest_q()).values_list('id', flat=True))
+        from judge.contest_format import hidden_result_contest_ids
+        profile = self.request.profile if self.request.user.is_authenticated else None
+        return hidden_result_contest_ids(profile)
 
     @property
     def use_infinite_pagination(self):
@@ -705,10 +705,9 @@ class APISubmissionDetail(APILoginRequiredMixin, APIDetailView):
         if submission.contest_object_id:
             if not (self.request.user.has_perm('judge.see_private_contest') or
                     self.request.user.has_perm('judge.edit_all_contest')):
-                from judge.contest_format import hidden_result_contest_q
-                hidden = Contest.objects.filter(
-                    pk=submission.contest_object_id,
-                ).filter(hidden_result_contest_q()).exists()
+                from judge.contest_format import hidden_result_contest_ids
+                profile = self.request.profile if self.request.user.is_authenticated else None
+                hidden = submission.contest_object_id in hidden_result_contest_ids(profile)
 
         cases = []
         if not hidden:

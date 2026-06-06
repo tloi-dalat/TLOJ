@@ -358,7 +358,7 @@ class ContestDetail(ContestMixin, TitleMixin, CommentedDetailView):
         authenticated = self.request.user.is_authenticated
         context['completed_problem_ids'] = user_completed_ids(self.request.profile) if authenticated else []
         context['attempted_problem_ids'] = user_attempted_ids(self.request.profile) if authenticated else []
-        context['result_hidden'] = self.object.should_hide_result(self.request.user)
+        context['result_hidden'] = self.object.should_hide_result(self.request.user, self.request.participation)
 
         context['can_download_data'] = bool(settings.DMOJ_CONTEST_DATA_DOWNLOAD)
 
@@ -390,7 +390,7 @@ class ContestAllProblems(ContestMixin, TitleMixin, DetailView):
         authenticated = self.request.user.is_authenticated
         context['completed_problem_ids'] = user_completed_ids(self.request.profile) if authenticated else []
         context['attempted_problem_ids'] = user_attempted_ids(self.request.profile) if authenticated else []
-        context['result_hidden'] = self.object.should_hide_result(self.request.user)
+        context['result_hidden'] = self.object.should_hide_result(self.request.user, self.request.participation)
 
         return context
 
@@ -922,7 +922,7 @@ class ContestRankingBase(ContestMixin, TitleMixin, DetailView):
             'contest': self.object,
             'has_rating': self.object.ratings.exists(),
             'is_frozen': self.is_frozen,
-            'result_hidden': self.object.should_hide_result(self.request.user),
+            'result_hidden': self.object.should_hide_result(self.request.user, self.request.participation),
             'perms': PermWrapper(self.request.user),
             'can_edit': self.can_edit,
             'is_ICPC_format': (self.object.format.name == ICPCContestFormat.name),
@@ -961,7 +961,7 @@ class ContestRanking(ContestRankingBase):
 
     @property
     def cache_key(self):
-        result_hidden = self.object.should_hide_result(self.request.user)
+        result_hidden = self.object.should_hide_result(self.request.user, self.request.participation)
         return f'contest_ranking_cache_{self.object.key}_{self.show_virtual}_{self.is_frozen}_' \
                f'{result_hidden}_{self.request.LANGUAGE_CODE}'
 
@@ -986,7 +986,7 @@ class ContestRanking(ContestRankingBase):
         else:
             self.show_virtual = self.request.session.get('show_virtual', False)
 
-        result_hidden = self.object.should_hide_result(self.request.user)
+        result_hidden = self.object.should_hide_result(self.request.user, self.request.participation)
         queryset = self.get_ranking_queryset()
         return get_contest_ranking_list(
             self.request, self.object,
@@ -996,7 +996,7 @@ class ContestRanking(ContestRankingBase):
 
     def get_ranking_list(self):
         if not self.object.can_see_full_scoreboard(self.request.user):
-            result_hidden = self.object.should_hide_result(self.request.user)
+            result_hidden = self.object.should_hide_result(self.request.user, self.request.participation)
             queryset = self.object.users.filter(user=self.request.profile, virtual=ContestParticipation.LIVE)
             return get_contest_ranking_list(
                 self.request, self.object,
@@ -1102,7 +1102,7 @@ class ContestParticipationList(LoginRequiredMixin, ContestRankingBase):
         if not self.object.can_see_full_scoreboard(self.request.user) and self.profile != self.request.profile:
             raise Http404()
 
-        result_hidden = self.object.should_hide_result(self.request.user)
+        result_hidden = self.object.should_hide_result(self.request.user, self.request.participation)
         queryset = self.object.users.filter(user=self.profile, virtual__gte=0).order_by('-virtual')
         live_link = format_html('<a href="{2}#!{1}">{0}</a>', _('Live'), self.profile.username,
                                 reverse('contest_ranking', args=[self.object.key]))
