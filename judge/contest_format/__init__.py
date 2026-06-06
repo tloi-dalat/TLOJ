@@ -28,7 +28,7 @@ def hidden_result_contest_q():
 
 
 def hidden_result_contest_ids(profile=None):
-    from judge.models import Contest, ContestParticipation
+    from judge.models import Contest
 
     if profile is not None:
         cached = getattr(profile, '_hidden_result_contest_ids', None)
@@ -36,16 +36,10 @@ def hidden_result_contest_ids(profile=None):
             return cached
 
     ids = set(Contest.objects.filter(hidden_result_contest_q()).values_list('id', flat=True))
-    if profile is not None:
-        now = timezone.now()
-        participations = (
-            ContestParticipation.objects
-            .filter(user=profile, virtual__gt=0, contest__format_name__in=hide_result_format_names())
-            .select_related('contest')
-        )
-        for participation in participations:
-            if now < participation.contest.get_effective_unfreeze_time(participation):
-                ids.add(participation.contest_id)
+    if profile is not None and profile.current_contest_id is not None:
+        participation = profile.current_contest
+        if participation.contest.format_name in hide_result_format_names():
+            ids.add(participation.contest_id)
 
     result = frozenset(ids)
     if profile is not None:

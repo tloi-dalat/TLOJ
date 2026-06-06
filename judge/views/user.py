@@ -338,9 +338,8 @@ class UserProblemsPage(UserPage):
         if not (self.request.user.has_perm('judge.see_private_contest') or
                 self.request.user.has_perm('judge.edit_all_contest')):
             from judge.contest_format import hidden_result_contest_ids
-            hidden_contests = hidden_result_contest_ids(self.object)
-            if self.request.user.is_authenticated:
-                hidden_contests = hidden_contests | hidden_result_contest_ids(self.request.profile)
+            viewer = self.request.profile if self.request.user.is_authenticated else None
+            hidden_contests = hidden_result_contest_ids(viewer)
             if hidden_contests:
                 hidden_problem_ids = frozenset(
                     Problem.objects.filter(
@@ -391,9 +390,8 @@ class UserPerformancePointsAjax(UserProblemsPage):
         if not (self.request.user.has_perm('judge.see_private_contest') or
                 self.request.user.has_perm('judge.edit_all_contest')):
             from judge.contest_format import hidden_result_contest_ids
-            hidden_contests = hidden_result_contest_ids(self.object)
-            if self.request.user.is_authenticated:
-                hidden_contests = hidden_contests | hidden_result_contest_ids(self.request.profile)
+            viewer = self.request.profile if self.request.user.is_authenticated else None
+            hidden_contests = hidden_result_contest_ids(viewer)
             if hidden_contests:
                 hidden_problem_ids = frozenset(
                     Problem.objects.filter(
