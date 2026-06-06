@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dmoj\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-06 16:17+0000\n"
+"POT-Creation-Date: 2026-06-06 16:27+0000\n"
 "PO-Revision-Date: 2020-08-23 18:59\n"
 "Last-Translator: \n"
 "Language-Team: Vietnamese\n"
@@ -623,7 +623,7 @@ msgstr ""
 "cuối cùng trong **tất cả*** bài tập."
 
 #: judge/contest_format/ecoo.py:150 judge/contest_format/ioi.py:102
-#: judge/contest_format/legacy_ioi.py:144 judge/contest_format/voi.py:138
+#: judge/contest_format/legacy_ioi.py:144 judge/contest_format/voi.py:143
 msgid "Ties by score will **not** be broken."
 msgstr "Các thí sinh bằng điểm bằng điểm sẽ có cùng thứ hạng."
 
@@ -688,22 +688,22 @@ msgstr "VNOJ"
 msgid "VOI"
 msgstr "VOI"
 
-#: judge/contest_format/voi.py:134
+#: judge/contest_format/voi.py:139
 msgid "The **last** submission for each problem will be used."
 msgstr "Bài nộp **cuối cùng** cho mỗi bài sẽ được sử dụng."
 
-#: judge/contest_format/voi.py:136
+#: judge/contest_format/voi.py:141
 msgid ""
 "Ties will be broken by the sum of the last submission time on all problems."
 msgstr ""
 "Các thí sinh bằng điểm sẽ được phân định bằng tổng thời gian của lần nộp "
 "cuối cùng trên tất cả các bài."
 
-#: judge/contest_format/voi.py:140
+#: judge/contest_format/voi.py:145
 msgid "All submission results are hidden until the unfreeze time."
 msgstr "Tất cả kết quả bài nộp đều bị ẩn cho đến thời điểm mở băng."
 
-#: judge/contest_format/voi.py:142
+#: judge/contest_format/voi.py:147
 msgid "All submission results are hidden until the contest ends."
 msgstr "Tất cả kết quả bài nộp đều bị ẩn cho đến khi kỳ thi kết thúc."
 
@@ -7975,8 +7975,8 @@ msgid "Batch #%(id)d"
 msgstr "Nhóm #%(id)d"
 
 #: templates/submission/status-testcases.html:29
-msgid "Your submission result is hidden until the contest is unfrozen"
-msgstr "Kết quả bài nộp của bạn đang bị ẩn cho đến khi kỳ thi được mở băng"
+msgid "Your submission result is hidden until the contest ends"
+msgstr "Kết quả bài nộp của bạn đang bị ẩn cho đến khi kỳ thi kết thúc"
 
 #: templates/submission/status-testcases.html:32
 msgid "We are waiting for a suitable judge to process your submission..."

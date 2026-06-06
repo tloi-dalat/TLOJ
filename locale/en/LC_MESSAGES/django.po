@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-06 16:17+0000\n"
+"POT-Creation-Date: 2026-06-06 16:27+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -618,7 +618,7 @@ msgid ""
 msgstr ""
 
 #: judge/contest_format/ecoo.py:150 judge/contest_format/ioi.py:102
-#: judge/contest_format/legacy_ioi.py:144 judge/contest_format/voi.py:138
+#: judge/contest_format/legacy_ioi.py:144 judge/contest_format/voi.py:143
 msgid "Ties by score will **not** be broken."
 msgstr ""
 
@@ -674,20 +674,20 @@ msgstr ""
 msgid "VOI"
 msgstr ""
 
-#: judge/contest_format/voi.py:134
+#: judge/contest_format/voi.py:139
 msgid "The **last** submission for each problem will be used."
 msgstr ""
 
-#: judge/contest_format/voi.py:136
+#: judge/contest_format/voi.py:141
 msgid ""
 "Ties will be broken by the sum of the last submission time on all problems."
 msgstr ""
 
-#: judge/contest_format/voi.py:140
+#: judge/contest_format/voi.py:145
 msgid "All submission results are hidden until the unfreeze time."
 msgstr ""
 
-#: judge/contest_format/voi.py:142
+#: judge/contest_format/voi.py:147
 msgid "All submission results are hidden until the contest ends."
 msgstr ""
 
@@ -7799,7 +7799,7 @@ msgid "Batch #%(id)d"
 msgstr ""
 
 #: templates/submission/status-testcases.html:29
-msgid "Your submission result is hidden until the contest is unfrozen"
+msgid "Your submission result is hidden until the contest ends"
 msgstr ""
 
 #: templates/submission/status-testcases.html:32
