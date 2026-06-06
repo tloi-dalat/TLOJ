@@ -858,7 +858,7 @@ def base_contest_ranking_list(contest, problems, queryset, frozen=False, result_
 
 
 def base_contest_ranking_queryset(contest):
-    sort_fields = getattr(contest.format, 'ranking_sort_fields', ('-score', 'cumtime', 'tiebreaker', '-submission_count'))
+    sort_fields = contest.format.ranking_sort_fields
     return contest.users.filter(virtual__gt=ContestParticipation.SPECTATE) \
         .prefetch_related(Prefetch('user__organizations',
                                    queryset=Organization.objects.filter(is_unlisted=False))) \

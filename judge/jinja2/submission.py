@@ -1,9 +1,8 @@
 from operator import attrgetter
 
-from django.db.models import Q
 from django.utils import timezone
 
-from judge.models import Contest, Submission, SubmissionSourceAccess
+from judge.models import Contest, Problem, Submission, SubmissionSourceAccess
 from . import registry
 
 
@@ -47,25 +46,6 @@ def submission_layout(submission, profile_id, user, completed_problem_ids, edita
     return can_view, can_edit
 
 
-def _hidden_contest_q():
-    from judge.contest_format.registry import formats as contest_formats
-    now = timezone.now()
-    hide_formats = [name for name, cls in contest_formats.items()
-                    if getattr(cls, 'hides_results_before_unfreeze', False)]
-    return (
-        Q(format_name__in=hide_formats, unfreeze_time__gt=now) |
-        Q(format_name__in=hide_formats, unfreeze_time__isnull=True, end_time__gt=now) |
-        Q(unfreeze_time__isnull=False, end_time__lte=now, unfreeze_time__gt=now)
-    )
-
-
-@registry.function
-def active_contest_result_hidden(request):
-    if not request.in_contest:
-        return False
-    return request.participation.contest.should_hide_result(request.user, request.participation)
-
-
 @registry.function
 def hidden_contest_problem_ids(user):
     """Return frozenset of problem IDs the user submitted to in currently hidden-result contests."""
@@ -73,11 +53,31 @@ def hidden_contest_problem_ids(user):
         return frozenset()
     if user.has_perm('judge.see_private_contest') or user.has_perm('judge.edit_all_contest'):
         return frozenset()
+    from judge.contest_format import hidden_result_contest_q
     return frozenset(
         Submission.objects.filter(
             user=user.profile,
-            contest_object__in=Contest.objects.filter(_hidden_contest_q()),
+            contest_object__in=Contest.objects.filter(hidden_result_contest_q()),
         ).values_list('problem_id', flat=True).distinct()
+    )
+
+
+@registry.function
+def hidden_result_problem_ids(user):
+    """
+    Return frozenset of problem IDs in currently hidden-result contests.
+    Used to mask global %AC / #AC stats that would otherwise reveal live contest activity.
+    Admins and editors with full contest visibility still see the real values.
+    """
+    if user.is_authenticated and (
+        user.has_perm('judge.see_private_contest') or user.has_perm('judge.edit_all_contest')
+    ):
+        return frozenset()
+    from judge.contest_format import hidden_result_contest_q
+    return frozenset(
+        Problem.objects.filter(
+            contests__contest__in=Contest.objects.filter(hidden_result_contest_q()),
+        ).values_list('id', flat=True).distinct()
     )
 
 

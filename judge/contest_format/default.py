@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from django.core.exceptions import ValidationError
-from django.db.models import Max
+from django.db.models import Count, Max
 from django.template.defaultfilters import floatformat
 from django.urls import reverse
 from django.utils.html import format_html
@@ -30,7 +30,6 @@ class DefaultContestFormat(BaseContestFormat):
         points = 0
         format_data = {}
 
-        from django.db.models import Count
         for result in participation.submissions.values('problem_id').annotate(
                 time=Max('submission__date'), points=Max('points'), tries=Count('id'),
         ):

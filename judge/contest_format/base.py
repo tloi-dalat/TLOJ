@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
+from operator import attrgetter
 
-from django.template.defaultfilters import pluralize
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
@@ -132,11 +132,7 @@ class BaseContestFormat(metaclass=ABCMeta):
         raise NotImplementedError()
 
     def display_hidden_problem_cell(self, participation, contest_problem):
-        """
-        Returns the HTML cell to display when results are hidden before unfreeze.
-        Shows an empty cell if no submissions, otherwise shows a frozen/unknown cell
-        with the submission count (e.g. "? 2 tries").
-        """
+        """Returns an empty cell if no submissions, otherwise a pending cell with '?'."""
         format_data = (participation.format_data or {}).get(str(contest_problem.id))
         if not format_data:
             return mark_safe('<td></td>')
@@ -153,20 +149,13 @@ class BaseContestFormat(metaclass=ABCMeta):
         )
 
     def display_hidden_result_cell(self, participation):
-        """
-        Returns the HTML total-score cell to display when results are hidden before unfreeze.
-        """
-        from django.urls import reverse as _reverse
-        url = _reverse('contest_all_user_submissions',
-                       args=[self.contest.key, participation.user.user.username])
+        """Returns the total-score cell when results are hidden before unfreeze."""
+        url = reverse('contest_all_user_submissions',
+                      args=[self.contest.key, participation.user.user.username])
         return format_html('<td class="user-points"><a href="{url}">?</a></td>', url=url)
 
     def get_ranker_key(self):
-        """
-        Returns an attrgetter key used by the Python ranker to determine ties.
-        VOI overrides this to use only points (no cumtime/tiebreaker).
-        """
-        from operator import attrgetter
+        """Returns the attrgetter key for the Python ranker. VOI overrides to sort by points only."""
         return attrgetter('points', 'cumtime', 'tiebreaker')
 
     @classmethod
