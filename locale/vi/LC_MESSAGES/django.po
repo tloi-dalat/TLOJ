@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dmoj\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-06 19:15+0000\n"
+"POT-Creation-Date: 2026-06-06 19:41+0000\n"
 "PO-Revision-Date: 2020-08-23 18:59\n"
 "Last-Translator: \n"
 "Language-Team: Vietnamese\n"
@@ -510,7 +510,7 @@ msgid " Reason: "
 msgstr " Lý Do: "
 
 #: judge/comments.py:63 judge/views/blog.py:50 judge/views/comment.py:45
-#: judge/views/ticket.py:55 judge/views/user.py:510
+#: judge/views/ticket.py:55 judge/views/user.py:514
 msgid "Your part is silent, little toad."
 msgstr "Im lặng đi, bạn không có quyền nói ở đây."
 
@@ -4890,57 +4890,57 @@ msgstr "Bỏ cấm bởi %s"
 msgid "Page %d of Comments"
 msgstr "Bình luận - Trang %d"
 
-#: judge/views/user.py:457
+#: judge/views/user.py:461
 msgid "Preparing your data..."
 msgstr "Đang chuẩn bị dữ liệu của bạn..."
 
-#: judge/views/user.py:461 templates/user/edit-profile.html:377
+#: judge/views/user.py:465 templates/user/edit-profile.html:377
 msgid "Download your data"
 msgstr "Tải xuống dữ liệu của bạn"
 
-#: judge/views/user.py:510
+#: judge/views/user.py:514
 msgid "Can't edit profile"
 msgstr "Không thể sửa hồ sơ"
 
-#: judge/views/user.py:519
+#: judge/views/user.py:523
 msgid "Updated on site"
 msgstr "Cập Nhật trên trang web"
 
-#: judge/views/user.py:552 templates/admin/auth/user/change_form.html:14
+#: judge/views/user.py:556 templates/admin/auth/user/change_form.html:14
 #: templates/admin/auth/user/change_form.html:17 templates/base.html:305
 #: templates/user/user-tabs.html:32
 msgid "Edit profile"
 msgstr "Chỉnh sửa hồ sơ"
 
-#: judge/views/user.py:566
+#: judge/views/user.py:570
 msgid "Generated API token for user"
 msgstr "Đã tạo token API cho người dùng"
 
-#: judge/views/user.py:578
+#: judge/views/user.py:582
 msgid "Removed API token for user"
 msgstr "Đã xóa token API cho người dùng"
 
-#: judge/views/user.py:588
+#: judge/views/user.py:592
 msgid "Generated scratch codes for user"
 msgstr "Đã tạo mã dự phòng cho người dùng"
 
-#: judge/views/user.py:594 templates/user/user-list-tabs.html:4
+#: judge/views/user.py:598 templates/user/user-list-tabs.html:4
 msgid "Leaderboard"
 msgstr "Bảng xếp hạng"
 
-#: judge/views/user.py:629 templates/user/user-list-tabs.html:5
+#: judge/views/user.py:633 templates/user/user-list-tabs.html:5
 msgid "Contributors"
 msgstr "Đóng góp"
 
-#: judge/views/user.py:708
+#: judge/views/user.py:712
 msgid "You have been successfully logged out."
 msgstr "Bạn đã đăng xuất thành công."
 
-#: judge/views/user.py:716
+#: judge/views/user.py:720
 msgid "Password reset"
 msgstr "Đặt lại mật khẩu"
 
-#: judge/views/user.py:726
+#: judge/views/user.py:730
 msgid "You have sent too many password reset requests. Please try again later."
 msgstr "Bạn đã gửi quá nhiều yêu cầu đặt lại mật khẩu. Vui lòng thử lại sau."
 
