@@ -433,8 +433,6 @@ class Contest(models.Model):
         return self.unfreeze_time or self.end_time
 
     def get_effective_unfreeze_time(self, participation=None):
-        # Virtual participants replay the contest, so their results stay hidden until their
-        # own window ends, even after the contest has globally unfrozen.
         base = self.get_unfreeze_time()
         if participation is not None and participation.virtual > 0:
             return max(base, participation.end_time)
