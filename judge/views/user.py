@@ -34,7 +34,7 @@ from reversion import revisions
 
 from judge.forms import CustomAuthenticationForm, ProfileForm, UserBanForm, UserDownloadDataForm, UserForm, \
     newsletter_id
-from judge.models import BlogPost, Organization, Profile, Submission
+from judge.models import BlogPost, Contest, Organization, Problem, Profile, Submission
 from judge.models import Comment
 from judge.performance_points import get_pp_breakdown
 from judge.ratings import rating_class, rating_progress
@@ -334,9 +334,20 @@ class UserProblemsPage(UserPage):
     def get_context_data(self, **kwargs):
         context = super(UserProblemsPage, self).get_context_data(**kwargs)
 
+        hidden_problem_ids = frozenset()
+        if not (self.request.user.has_perm('judge.see_private_contest') or
+                self.request.user.has_perm('judge.edit_all_contest')):
+            from judge.contest_format import hidden_result_contest_q
+            hidden_problem_ids = frozenset(
+                Problem.objects.filter(
+                    contests__contest__in=Contest.objects.filter(hidden_result_contest_q()),
+                ).values_list('id', flat=True).distinct()
+            )
+
         result = Submission.objects.filter(user=self.object, points__gt=0, problem__is_public=True,
                                            problem__is_organization_private=False) \
             .exclude(problem__in=self.get_completed_problems() if self.hide_solved else []) \
+            .exclude(problem__id__in=hidden_problem_ids) \
             .values('problem__id', 'problem__code', 'problem__name', 'problem__points', 'problem__group__full_name') \
             .distinct().annotate(points=Max('points')).order_by('problem__group__full_name', 'problem__code')
 
@@ -352,7 +363,8 @@ class UserProblemsPage(UserPage):
                     'problem__group__full_name': 'group',
                 }), itemgetter('group'))
         ]
-        breakdown, has_more = get_pp_breakdown(self.object, start=0, end=10)
+        breakdown, has_more = get_pp_breakdown(self.object, start=0, end=10,
+                                               exclude_problem_ids=hidden_problem_ids or None)
         context['pp_breakdown'] = breakdown
         context['pp_has_more'] = has_more
 
@@ -371,7 +383,17 @@ class UserPerformancePointsAjax(UserProblemsPage):
                 raise ValueError
         except ValueError:
             start, end = 0, 100
-        breakdown, self.has_more = get_pp_breakdown(self.object, start=start, end=end)
+        hidden_problem_ids = frozenset()
+        if not (self.request.user.has_perm('judge.see_private_contest') or
+                self.request.user.has_perm('judge.edit_all_contest')):
+            from judge.contest_format import hidden_result_contest_q
+            hidden_problem_ids = frozenset(
+                Problem.objects.filter(
+                    contests__contest__in=Contest.objects.filter(hidden_result_contest_q()),
+                ).values_list('id', flat=True).distinct()
+            )
+        breakdown, self.has_more = get_pp_breakdown(self.object, start=start, end=end,
+                                                    exclude_problem_ids=hidden_problem_ids or None)
         context['pp_breakdown'] = breakdown
         return context
 

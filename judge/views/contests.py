@@ -994,10 +994,11 @@ class ContestRanking(ContestRankingBase):
 
     def get_ranking_list(self):
         if not self.object.can_see_full_scoreboard(self.request.user):
+            result_hidden = self.object.should_hide_result(self.request.user)
             queryset = self.object.users.filter(user=self.request.profile, virtual=ContestParticipation.LIVE)
             return get_contest_ranking_list(
                 self.request, self.object,
-                ranking_list=partial(base_contest_ranking_list, queryset=queryset),
+                ranking_list=partial(base_contest_ranking_list, queryset=queryset, result_hidden=result_hidden),
                 ranker=lambda users, key: ((_('???'), user) for user in users),
             )
 
@@ -1099,13 +1100,14 @@ class ContestParticipationList(LoginRequiredMixin, ContestRankingBase):
         if not self.object.can_see_full_scoreboard(self.request.user) and self.profile != self.request.profile:
             raise Http404()
 
+        result_hidden = self.object.should_hide_result(self.request.user)
         queryset = self.object.users.filter(user=self.profile, virtual__gte=0).order_by('-virtual')
         live_link = format_html('<a href="{2}#!{1}">{0}</a>', _('Live'), self.profile.username,
                                 reverse('contest_ranking', args=[self.object.key]))
 
         return get_contest_ranking_list(
             self.request, self.object,
-            ranking_list=partial(base_contest_ranking_list, queryset=queryset),
+            ranking_list=partial(base_contest_ranking_list, queryset=queryset, result_hidden=result_hidden),
             ranker=lambda users, key: ((user.participation.virtual or live_link, user) for user in users))
 
     def get_context_data(self, **kwargs):
