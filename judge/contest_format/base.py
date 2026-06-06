@@ -137,10 +137,6 @@ class BaseContestFormat(metaclass=ABCMeta):
         if not format_data:
             return mark_safe('<td></td>')
 
-        tries = format_data.get('tries', 0)
-        if not tries:
-            return mark_safe('<td></td>')
-
         url = reverse('contest_user_submissions',
                       args=[self.contest.key, participation.user.user.username, contest_problem.problem.code])
         return format_html(

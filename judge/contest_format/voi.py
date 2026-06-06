@@ -14,15 +14,8 @@ from judge.timezone import from_database_time
 
 # Selects the latest valid (non-IE) submission for each problem in the participation.
 # "Valid" means result != 'IE' (exclude system errors). Null result (still judging) is included.
-# Also counts total valid submissions per problem for the hidden cell display.
 VOI_RANKING_SQL = """
-SELECT cs.points, sub.date AS time, cp.id AS prob,
-    (SELECT COUNT(*)
-     FROM judge_contestsubmission ccs2
-        INNER JOIN judge_submission s2 ON s2.id = ccs2.submission_id
-     WHERE ccs2.problem_id = cp.id AND ccs2.participation_id = %s
-       AND (s2.result IS NULL OR s2.result != 'IE')
-    ) AS tries
+SELECT cs.points, sub.date AS time, cp.id AS prob
 FROM judge_contestproblem cp
     INNER JOIN judge_contestsubmission cs ON (cs.problem_id = cp.id AND cs.participation_id = %s)
     INNER JOIN judge_submission sub ON (sub.id = cs.submission_id)
@@ -59,9 +52,9 @@ class VOIContestFormat(DefaultContestFormat):
         format_data = {}
 
         with connection.cursor() as cursor:
-            cursor.execute(VOI_RANKING_SQL, (participation.id, participation.id, participation.id))
+            cursor.execute(VOI_RANKING_SQL, (participation.id, participation.id))
 
-            for sub_points, time, prob, tries in cursor.fetchall():
+            for sub_points, time, prob in cursor.fetchall():
                 time = from_database_time(time)
                 dt = (time - participation.start).total_seconds()
                 sub_points = sub_points or 0
@@ -69,7 +62,6 @@ class VOIContestFormat(DefaultContestFormat):
                 format_data[str(prob)] = {
                     'time': dt,
                     'points': sub_points,
-                    'tries': tries,
                 }
                 points += sub_points
 
