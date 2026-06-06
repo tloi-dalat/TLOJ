@@ -34,7 +34,6 @@ from judge.utils.raw_sql import join_sql_subquery, use_straight_join
 from judge.utils.views import DiggPaginatorMixin, TitleMixin, add_file_response, generic_message
 
 
-
 def submission_related(queryset):
     return queryset.select_related('user__user', 'user__display_badge', 'problem', 'language') \
         .only('id', 'user__user__username', 'user__display_rank', 'user__rating', 'problem__name', 'problem__code',
@@ -243,7 +242,6 @@ class SubmissionStatus(SubmissionDetailBase):
         context = super(SubmissionStatus, self).get_context_data(**kwargs)
         submission = self.object
 
-        # Determine if results should be hidden for this submission's contest.
         result_hidden = False
         if submission.contest_object_id:
             try:
