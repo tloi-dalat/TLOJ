@@ -67,12 +67,6 @@
 
 {% block body %}
     <br>
-    {% if result_hidden %}
-        <div class="submission-result-hidden">
-            <em>{{ _('Results are hidden until the contest is unfrozen.') }}</em>
-        </div>
-        <br>
-    {% endif %}
     {% if not submission.language.file_only or request.user.is_superuser %}
         <div><a href="{{ url('submission_source', submission.id) }}">{{ _('View source') }}</a></div>
     {% endif %}
@@ -110,9 +104,7 @@
     <hr class="half-hr">
     <br>
 
-    {% if not result_hidden %}
     <div id="test-cases">{% include "submission/status-testcases.html" %}</div>
-    {% endif %}
 
     {% if not submission.is_graded and not result_hidden %}
         {% if (request.user == submission.user.user and not request.official_contest_mode) or perms.judge.abort_any_submission %}

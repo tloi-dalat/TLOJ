@@ -1,10 +1,10 @@
 {% set can_view, can_edit = submission_layout(submission, profile_id, request.user, completed_problem_ids, editable_problem_ids, tester_problem_ids) %}
-{% set _result_hidden = result_hidden if result_hidden is defined else false %}
+{% set _result_hidden = result_hidden if result_hidden is defined else submission_result_hidden(submission, request.user) %}
 {% if _result_hidden %}
 <div class="sub-result">
     <div class="score">---</div>
     <div class="state">
-        <span class="status">{{ _('Hidden') }}</span> |
+        <span class="status">HD</span> |
         <span class="language">{{ submission.language.short_display_name }}</span>
     </div>
 </div>
@@ -27,6 +27,22 @@
             {% endif %}
         </div>
     </div>
+    {% if can_view %}
+        <div class="sub-prop"><div>
+            <a href="{{ url('submission_status', submission.id) }}">
+                <i class="fa fa-eye fa-fw"></i><span class="label">{{ _('view') }}</span>
+            </a>
+            {% if not submission.language.file_only %} ·
+                <a href="{{ url('submission_source', submission.id) }}">
+                    <i class="fa fa-file-code-o fa-fw"></i><span class="label">{{ _('source') }}</span>
+                </a>
+            {% else %} ·
+                <a href="{{ url('submission_source_download', submission.id) }}">
+                    <i class="fa fa-download fa-fw"></i><span class="label">{{ _('download') }}</span>
+                </a>
+            {% endif %}
+        </div></div>
+    {% endif %}
 </div>
 <div class="sub-usage">
     <div class="time">---</div>

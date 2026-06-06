@@ -186,10 +186,17 @@
                 </tr>
                 </thead>
                 <tbody>
+                {% set _hidden_problem_ids = hidden_contest_problem_ids(request.user) %}
                 {% for problem in problems %}
                     <tr>
                         {% if request.user.is_authenticated %}
-                            {% if problem.id in completed_problem_ids %}
+                            {% if problem.id in _hidden_problem_ids %}
+                                <td class="solved" solved="-1">
+                                    <a href="{{ url('user_submissions', problem.code, request.user.username) }}">
+                                        <i class="hidden-problem-color fa fa-question-circle"></i>
+                                    </a>
+                                </td>
+                            {% elif problem.id in completed_problem_ids %}
                                 <td class="solved" solved="1">
                                     <a href="{{ url('user_submissions', problem.code, request.user.username) }}">
                                         {% if problem.is_public %}

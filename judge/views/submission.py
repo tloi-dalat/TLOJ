@@ -34,6 +34,23 @@ from judge.utils.raw_sql import join_sql_subquery, use_straight_join
 from judge.utils.views import DiggPaginatorMixin, TitleMixin, add_file_response, generic_message
 
 
+def _hidden_result_q():
+    from judge.contest_format.registry import formats
+    now = timezone.now()
+    hide_formats = [name for name, cls in formats.items()
+                    if getattr(cls, 'hides_results_before_unfreeze', False)]
+    return (
+        Q(contest_object__format_name__in=hide_formats,
+          contest_object__unfreeze_time__gt=now) |
+        Q(contest_object__format_name__in=hide_formats,
+          contest_object__unfreeze_time__isnull=True,
+          contest_object__end_time__gt=now) |
+        Q(contest_object__unfreeze_time__isnull=False,
+          contest_object__end_time__lte=now,
+          contest_object__unfreeze_time__gt=now)
+    )
+
+
 def submission_related(queryset):
     return queryset.select_related('user__user', 'user__display_badge', 'problem', 'language') \
         .only('id', 'user__user__username', 'user__display_rank', 'user__rating', 'problem__name', 'problem__code',
@@ -377,7 +394,7 @@ class SubmissionsListBase(DiggPaginatorMixin, TitleMixin, ListView):
             return {'categories': [], 'total': 0}
         if queryset is None:
             queryset = self.get_queryset()
-        return get_result_data(queryset.order_by())
+        return get_result_data(queryset.exclude(_hidden_result_q()).order_by())
 
     def access_check(self, request):
         pass

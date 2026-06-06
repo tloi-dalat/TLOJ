@@ -358,6 +358,7 @@ class ContestDetail(ContestMixin, TitleMixin, CommentedDetailView):
         authenticated = self.request.user.is_authenticated
         context['completed_problem_ids'] = user_completed_ids(self.request.profile) if authenticated else []
         context['attempted_problem_ids'] = user_attempted_ids(self.request.profile) if authenticated else []
+        context['result_hidden'] = self.object.should_hide_result(self.request.user)
 
         context['can_download_data'] = bool(settings.DMOJ_CONTEST_DATA_DOWNLOAD)
 
@@ -389,6 +390,7 @@ class ContestAllProblems(ContestMixin, TitleMixin, DetailView):
         authenticated = self.request.user.is_authenticated
         context['completed_problem_ids'] = user_completed_ids(self.request.profile) if authenticated else []
         context['attempted_problem_ids'] = user_attempted_ids(self.request.profile) if authenticated else []
+        context['result_hidden'] = self.object.should_hide_result(self.request.user)
 
         return context
 

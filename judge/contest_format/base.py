@@ -148,10 +148,8 @@ class BaseContestFormat(metaclass=ABCMeta):
         url = reverse('contest_user_submissions',
                       args=[self.contest.key, participation.user.user.username, contest_problem.problem.code])
         return format_html(
-            '<td class="pending"><a href="{url}">?<div class="solving-time">{tries} {msg}</div></a></td>',
+            '<td class="pending"><a href="{url}">?</a></td>',
             url=url,
-            tries=tries,
-            msg=pluralize(tries, 'try,tries'),
         )
 
     def display_hidden_result_cell(self, participation):
