@@ -566,6 +566,8 @@ class APIUserDetail(APIDetailView):
         if not can_see_all:
             from judge.contest_format import hidden_result_contest_ids
             hidden_contests = hidden_result_contest_ids(profile)
+            if self.request.user.is_authenticated:
+                hidden_contests = hidden_contests | hidden_result_contest_ids(self.request.profile)
             submissions_q = submissions_q.exclude(contest_object__in=hidden_contests)
         solved_problems = list(
             submissions_q.values('problem').distinct().values_list('problem__code', flat=True),
