@@ -858,7 +858,7 @@ def base_contest_ranking_list(contest, problems, queryset, frozen=False, result_
 
 
 def base_contest_ranking_queryset(contest):
-    sort_fields = contest.format.ranking_sort_fields
+    sort_fields = getattr(contest.format, 'ranking_sort_fields', ('-score', 'cumtime', 'tiebreaker', '-submission_count'))
     return contest.users.filter(virtual__gt=ContestParticipation.SPECTATE) \
         .prefetch_related(Prefetch('user__organizations',
                                    queryset=Organization.objects.filter(is_unlisted=False))) \
@@ -881,7 +881,8 @@ def contest_ranking_list(contest, problems, frozen=False):
 def get_contest_ranking_list(request, contest, participation=None, ranking_list=contest_ranking_list, ranker=ranker):
     problems = list(contest.contest_problems.select_related('problem').defer('problem__description').order_by('order'))
     users, total_ac = ranking_list(contest, problems)
-    ranker_key = contest.format.get_ranker_key()
+    get_ranker_key = getattr(contest.format, 'get_ranker_key', None)
+    ranker_key = get_ranker_key() if get_ranker_key else attrgetter('points', 'cumtime', 'tiebreaker')
     users = ranker(users, key=ranker_key)
 
     return users, problems, total_ac

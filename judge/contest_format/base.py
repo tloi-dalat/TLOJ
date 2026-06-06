@@ -1,5 +1,4 @@
 from abc import ABCMeta, abstractmethod
-from operator import attrgetter
 
 from django.urls import reverse
 from django.utils.html import format_html
@@ -15,15 +14,6 @@ class abstractclassmethod(classmethod):
 
 
 class BaseContestFormat(metaclass=ABCMeta):
-    # Set to True in formats that hide ALL results until the effective unfreeze time.
-    # For such formats, results are hidden from the start of the contest.
-    # For other formats, results are only hidden between contest_end and unfreeze_time (if set).
-    hides_results_before_unfreeze = False
-
-    # Default DB ordering fields for the ranking queryset (after is_disqualified).
-    # VOI overrides this to use username for deterministic tie-breaking.
-    ranking_sort_fields = ('-score', 'cumtime', 'tiebreaker', '-submission_count')
-
     @abstractmethod
     def __init__(self, contest, config):
         self.config = config
@@ -150,9 +140,6 @@ class BaseContestFormat(metaclass=ABCMeta):
                       args=[self.contest.key, participation.user.user.username])
         return format_html('<td class="user-points"><a href="{url}">?</a></td>', url=url)
 
-    def get_ranker_key(self):
-        """Returns the attrgetter key for the Python ranker. VOI overrides to sort by points only."""
-        return attrgetter('points', 'cumtime', 'tiebreaker')
 
     @classmethod
     def best_solution_state(cls, points, total):

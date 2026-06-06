@@ -36,10 +36,7 @@ class DefaultContestFormat(BaseContestFormat):
             dt = (result['time'] - participation.start).total_seconds()
             if result['points']:
                 cumtime += dt
-            format_data[str(result['problem_id'])] = {
-                'time': dt,
-                'points': result['points'],
-            }
+            format_data[str(result['problem_id'])] = {'time': dt, 'points': result['points']}
             points += result['points']
 
         participation.cumtime = max(cumtime, 0)
