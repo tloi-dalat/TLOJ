@@ -50,6 +50,11 @@ class VOIContestFormat(DefaultContestFormat):
         if 'cumtime' in config and not isinstance(config['cumtime'], bool):
             raise ValidationError('cumtime must be a boolean')
 
+    def __init__(self, contest, config):
+        self.config = self.config_defaults.copy()
+        self.config.update(config or {})
+        super().__init__(contest, self.config)
+
     def update_participation(self, participation):
         points = 0
         cumtime = 0
