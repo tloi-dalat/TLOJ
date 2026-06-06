@@ -1,5 +1,3 @@
-from operator import attrgetter
-
 from django.core.exceptions import ValidationError
 from django.db import connection
 from django.template.defaultfilters import floatformat
@@ -35,20 +33,26 @@ WHERE (sub.result IS NULL OR sub.result != 'IE')
 @register_contest_format('voi')
 class VOIContestFormat(DefaultContestFormat):
     name = gettext_lazy('VOI')
+    config_defaults = {'cumtime': False}
+    """
+        cumtime: Specify True if time penalties are to be computed. Defaults to False.
+    """
 
     # All results are hidden until the effective unfreeze time (contest end or unfreeze_time).
     hides_results_before_unfreeze = True
 
-    # Rank by total score only; deterministic tie-break by username (no time penalty).
-    ranking_sort_fields = ('-score', 'user__user__username')
-
     @classmethod
     def validate(cls, config):
-        if config is not None and (not isinstance(config, dict) or config):
-            raise ValidationError('VOI contest expects no config or empty dict as config')
+        if config is None:
+            return
+        if not isinstance(config, dict):
+            raise ValidationError('VOI contest expects a dict as config')
+        if 'cumtime' in config and not isinstance(config['cumtime'], bool):
+            raise ValidationError('cumtime must be a boolean')
 
     def update_participation(self, participation):
         points = 0
+        cumtime = 0
         format_data = {}
 
         with connection.cursor() as cursor:
@@ -56,7 +60,7 @@ class VOIContestFormat(DefaultContestFormat):
 
             for sub_points, time, prob in cursor.fetchall():
                 time = from_database_time(time)
-                dt = (time - participation.start).total_seconds()
+                dt = (time - participation.start).total_seconds() if self.config['cumtime'] else 0
                 sub_points = sub_points or 0
 
                 format_data[str(prob)] = {
@@ -64,8 +68,10 @@ class VOIContestFormat(DefaultContestFormat):
                     'points': sub_points,
                 }
                 points += sub_points
+                if self.config['cumtime']:
+                    cumtime += dt
 
-        participation.cumtime = 0
+        participation.cumtime = max(cumtime, 0)
         participation.score = round(points, self.contest.points_precision)
         participation.tiebreaker = 0
         participation.frozen_score = 0
@@ -124,15 +130,13 @@ class VOIContestFormat(DefaultContestFormat):
             points=floatformat(participation.score, -self.contest.points_precision),
         )
 
-    def get_ranker_key(self):
-        return attrgetter('points')
-
     def get_short_form_display(self):
-        yield _('The final submission for each problem will be used.')
-        yield _('No penalty for wrong submissions.')
-        yield _('Ties are broken by username only (no time tie-break).')
-        base_unfreeze = self.contest.get_unfreeze_time()
-        if base_unfreeze > self.contest.end_time:
-            yield _('Results are revealed after the unfreeze time.')
+        yield _('The **last** submission for each problem will be used.')
+        if self.config['cumtime']:
+            yield _('Ties will be broken by the sum of the last submission time on all problems.')
         else:
-            yield _('Results are revealed after the contest ends.')
+            yield _('Ties by score will **not** be broken.')
+        if self.contest.get_unfreeze_time() > self.contest.end_time:
+            yield _('All submission results are hidden until the unfreeze time.')
+        else:
+            yield _('All submission results are hidden until the contest ends.')
