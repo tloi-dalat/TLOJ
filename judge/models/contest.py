@@ -432,19 +432,14 @@ class Contest(models.Model):
     def get_unfreeze_time(self):
         return self.unfreeze_time or self.end_time
 
-    def get_effective_unfreeze_time(self, participation=None):
-        base = self.get_unfreeze_time()
-        if participation is not None and participation.virtual > 0:
-            return max(base, participation.end_time)
-        return base
-
     def should_hide_result(self, user, participation=None):
         """
         Returns True if submission results should be hidden from this user.
 
-        For VOI format: hidden from contest start until the unfreeze time.
+        For VOI format: hidden from everyone until the unfreeze time, and additionally
+        hidden from a user while they are inside this contest (e.g. a virtual replay) —
+        revealed the moment they leave. `participation` is the viewer's current participation.
         For ICPC/VNOJ with unfreeze_time set: hidden between contest end and unfreeze time.
-        A virtual participation extends the hiding until that window ends.
         Admins and editors always see real results.
         """
         if user.is_authenticated:
@@ -453,15 +448,15 @@ class Contest(models.Model):
             if user.profile.id in self.editor_ids:
                 return False
 
-        if participation is not None and participation.contest_id != self.id:
-            participation = None
-        effective_unfreeze = self.get_effective_unfreeze_time(participation)
+        hides = getattr(self.format, 'hides_results_before_unfreeze', False)
 
-        if getattr(self.format, 'hides_results_before_unfreeze', False):
-            return self._now < effective_unfreeze
+        # Global window: hidden from everyone until the unfreeze time.
+        if (hides or (self.unfreeze_time and self.ended)) and self._now < self.get_unfreeze_time():
+            return True
 
-        if self.unfreeze_time and self.ended:
-            return self._now < effective_unfreeze
+        # Personal: a VOI participant sees nothing for this contest while they are in it.
+        if hides and participation is not None and participation.contest_id == self.id:
+            return True
 
         return False
 

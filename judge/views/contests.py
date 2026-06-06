@@ -889,6 +889,10 @@ def get_contest_ranking_list(request, contest, participation=None, ranking_list=
     return users, problems, total_ac
 
 
+def hidden_result_ranker(users, key=None):
+    return (('?', user) for user in users)
+
+
 class ContestRankingBase(ContestMixin, TitleMixin, DetailView):
     template_name = 'contest/ranking.html'
     ranking_table_template = get_template('contest/ranking-table.html')
@@ -935,6 +939,9 @@ class ContestRankingBase(ContestMixin, TitleMixin, DetailView):
 
         context['rendered_ranking_table'] = self.get_rendered_ranking_table()
         context['tab'] = self.tab
+        result_hidden = self.object.should_hide_result(self.request.user, self.request.participation)
+        context['result_hidden'] = result_hidden
+        context['result_globally_hidden'] = result_hidden and self.object._now < self.object.get_unfreeze_time()
         return context
 
     def get(self, request, *args, **kwargs):
@@ -988,10 +995,14 @@ class ContestRanking(ContestRankingBase):
 
         result_hidden = self.object.should_hide_result(self.request.user, self.request.participation)
         queryset = self.get_ranking_queryset()
+        if result_hidden:
+            # Order by name (not score) so the row order doesn't leak the standings.
+            queryset = queryset.order_by('is_disqualified', 'user__user__username')
         return get_contest_ranking_list(
             self.request, self.object,
             ranking_list=partial(base_contest_ranking_list, queryset=queryset,
                                  frozen=self.is_frozen, result_hidden=result_hidden),
+            ranker=hidden_result_ranker if result_hidden else ranker,
         )
 
     def get_ranking_list(self):
