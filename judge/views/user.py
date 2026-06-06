@@ -341,7 +341,7 @@ class UserProblemsPage(UserPage):
             hidden_problem_ids = frozenset(
                 Problem.objects.filter(
                     contests__contest__in=Contest.objects.filter(hidden_result_contest_q()),
-                ).values_list('id', flat=True).distinct()
+                ).values_list('id', flat=True).distinct(),
             )
 
         result = Submission.objects.filter(user=self.object, points__gt=0, problem__is_public=True,
@@ -390,7 +390,7 @@ class UserPerformancePointsAjax(UserProblemsPage):
             hidden_problem_ids = frozenset(
                 Problem.objects.filter(
                     contests__contest__in=Contest.objects.filter(hidden_result_contest_q()),
-                ).values_list('id', flat=True).distinct()
+                ).values_list('id', flat=True).distinct(),
             )
         breakdown, self.has_more = get_pp_breakdown(self.object, start=start, end=end,
                                                     exclude_problem_ids=hidden_problem_ids or None)

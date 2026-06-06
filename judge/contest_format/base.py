@@ -122,7 +122,6 @@ class BaseContestFormat(metaclass=ABCMeta):
         raise NotImplementedError()
 
     def display_hidden_problem_cell(self, participation, contest_problem):
-        """Returns an empty cell if no submissions, otherwise a pending cell with '?'."""
         format_data = (participation.format_data or {}).get(str(contest_problem.id))
         if not format_data:
             return mark_safe('<td></td>')
@@ -135,11 +134,9 @@ class BaseContestFormat(metaclass=ABCMeta):
         )
 
     def display_hidden_result_cell(self, participation):
-        """Returns the total-score cell when results are hidden before unfreeze."""
         url = reverse('contest_all_user_submissions',
                       args=[self.contest.key, participation.user.user.username])
         return format_html('<td class="user-points"><a href="{url}">?</a></td>', url=url)
-
 
     @classmethod
     def best_solution_state(cls, points, total):

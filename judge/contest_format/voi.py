@@ -10,8 +10,7 @@ from judge.contest_format.default import DefaultContestFormat
 from judge.contest_format.registry import register_contest_format
 from judge.timezone import from_database_time
 
-# Selects the latest valid (non-IE) submission for each problem in the participation.
-# "Valid" means result != 'IE' (exclude system errors). Null result (still judging) is included.
+# NULL result (still judging) is intentionally included — only IE (internal error) is excluded.
 VOI_RANKING_SQL = """
 SELECT cs.points, sub.date AS time, cp.id AS prob
 FROM judge_contestproblem cp

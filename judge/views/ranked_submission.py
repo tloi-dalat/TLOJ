@@ -77,7 +77,7 @@ class RankedSubmissions(ProblemSubmissions):
             queryset = super(RankedSubmissions, self).get_queryset()
         from judge.contest_format import hidden_result_contest_q
         return get_result_data(queryset.exclude(
-            contest_object__in=Contest.objects.filter(hidden_result_contest_q())
+            contest_object__in=Contest.objects.filter(hidden_result_contest_q()),
         ).order_by())
 
 

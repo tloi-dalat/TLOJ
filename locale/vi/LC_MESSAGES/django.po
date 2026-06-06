@@ -625,7 +625,7 @@ msgstr ""
 #: judge/contest_format/ecoo.py:150 judge/contest_format/ioi.py:102
 #: judge/contest_format/legacy_ioi.py:144 judge/contest_format/voi.py:143
 msgid "Ties by score will **not** be broken."
-msgstr "Các thí sinh bằng điểm bằng điểm sẽ có cùng thứ hạng."
+msgstr "Các thí sinh bằng điểm sẽ có cùng thứ hạng."
 
 #: judge/contest_format/icpc.py:20
 msgid "ICPC"

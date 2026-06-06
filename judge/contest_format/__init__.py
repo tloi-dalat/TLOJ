@@ -13,7 +13,6 @@ from judge.contest_format.voi import VOIContestFormat
 
 
 def hidden_result_contest_q():
-    """Return a Q filter for Contest objects whose results are currently hidden."""
     now = timezone.now()
     hide_formats = [name for name, cls in formats.items()
                     if getattr(cls, 'hides_results_before_unfreeze', False)]
