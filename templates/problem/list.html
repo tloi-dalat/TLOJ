@@ -186,10 +186,18 @@
                 </tr>
                 </thead>
                 <tbody>
+                {% set _hidden_problem_ids = hidden_contest_problem_ids(request.user) %}
+                {% set _hidden_stat_ids = hidden_result_problem_ids(request.user) %}
                 {% for problem in problems %}
                     <tr>
                         {% if request.user.is_authenticated %}
-                            {% if problem.id in completed_problem_ids %}
+                            {% if problem.id in _hidden_problem_ids %}
+                                <td class="solved" solved="-1">
+                                    <a href="{{ url('user_submissions', problem.code, request.user.username) }}">
+                                        <i class="hidden-problem-color fa fa-question-circle"></i>
+                                    </a>
+                                </td>
+                            {% elif problem.id in completed_problem_ids %}
                                 <td class="solved" solved="1">
                                     <a href="{{ url('user_submissions', problem.code, request.user.username) }}">
                                         {% if problem.is_public %}
@@ -234,12 +242,17 @@
                             </td>
                         {% endif %}
                         <td class="p">{{ problem.points|floatformat(2) }}</td>
-                        <td class="ac-rate">{{ problem.ac_rate|floatformat(1) }}%</td>
-                        <td class="users">
-                            <a href="{{ url('ranked_submissions', problem.code) }}">
-                                {{ problem.user_count }}
-                            </a>
-                        </td>
+                        {% if problem.id in _hidden_stat_ids %}
+                            <td class="ac-rate">---</td>
+                            <td class="users">---</td>
+                        {% else %}
+                            <td class="ac-rate">{{ problem.ac_rate|floatformat(1) }}%</td>
+                            <td class="users">
+                                <a href="{{ url('ranked_submissions', problem.code) }}">
+                                    {{ problem.user_count }}
+                                </a>
+                            </td>
+                        {% endif %}
                         <td>
                             {% if problem.has_public_editorial %}
                                 <a href="{{ url('problem_editorial', problem.code) }}">

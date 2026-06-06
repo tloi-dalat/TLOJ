@@ -23,7 +23,11 @@
                 <div class="problem_container">
                     <div style="display: flex">
                         <h2 style="margin-top: 0.5em; margin-right: 0.5em;">
-                            {% if problem.id in completed_problem_ids %}
+                            {% if result_hidden and (problem.id in completed_problem_ids or problem.id in attempted_problem_ids) %}
+                                <a href="{{ url('user_submissions', problem.code, request.user.username) }}">
+                                    <i class="hidden-problem-color fa fa-question-circle"></i>
+                                </a>
+                            {% elif problem.id in completed_problem_ids %}
                                 <a href="{{ url('user_submissions', problem.code, request.user.username) }}">
                                     <i class="solved-problem-color fa fa-check-circle"></i>
                                 </a>
