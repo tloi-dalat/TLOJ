@@ -87,6 +87,11 @@ class Contest(models.Model):
     problems = models.ManyToManyField(Problem, verbose_name=_('problems'), through='ContestProblem')
     start_time = models.DateTimeField(verbose_name=_('start time'), db_index=True)
     end_time = models.DateTimeField(verbose_name=_('end time'), db_index=True)
+    unfreeze_time = models.DateTimeField(
+        verbose_name=_('unfreeze time'),
+        null=True, blank=True,
+        help_text=_('Results are revealed after this time.'),
+    )
     registration_start = models.DateTimeField(verbose_name=_('registration start time'),
                                               blank=True, null=True, default=None)
     registration_end = models.DateTimeField(verbose_name=_('registration end time'),
@@ -221,6 +226,9 @@ class Contest(models.Model):
         # Django will complain if you didn't fill in start_time or end_time, so we don't have to.
         if self.start_time and self.end_time and self.start_time >= self.end_time:
             raise ValidationError('What is this? A contest that ended before it starts?')
+
+        if self.unfreeze_time and self.end_time and self.unfreeze_time < self.end_time:
+            raise ValidationError(_('Unfreeze time cannot be before contest end time.'))
 
         if self.registration_start and self.registration_end and self.registration_start >= self.registration_end:
             raise ValidationError('Registration window must start before it ends.')
@@ -419,6 +427,39 @@ class Contest(models.Model):
            self.format.name == contest_format.VNOJContestFormat.name:
             # Keep frozen even if the contest is ended
             return self._now >= self.frozen_time
+        return False
+
+    def get_unfreeze_time(self):
+        return self.unfreeze_time or self.end_time
+
+    def get_effective_unfreeze_time(self, participation=None):
+        base = self.get_unfreeze_time()
+        if participation and participation.virtual:
+            return max(base, participation.end_time)
+        return base
+
+    def should_hide_result(self, user, participation=None):
+        """
+        Returns True if submission results should be hidden from this user.
+
+        For VOI format: hidden from contest start until effective unfreeze time.
+        For ICPC/VNOJ with unfreeze_time set: hidden between contest end and unfreeze time.
+        Admins and editors always see real results.
+        """
+        if user.is_authenticated:
+            if user.has_perm('judge.see_private_contest') or user.has_perm('judge.edit_all_contest'):
+                return False
+            if user.profile.id in self.editor_ids:
+                return False
+
+        effective_unfreeze = self.get_effective_unfreeze_time(participation)
+
+        if getattr(self.format, 'hides_results_before_unfreeze', False):
+            return self._now < effective_unfreeze
+
+        if self.unfreeze_time and self.ended:
+            return self._now < effective_unfreeze
+
         return False
 
     class Inaccessible(Exception):

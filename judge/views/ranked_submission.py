@@ -3,7 +3,7 @@ from django.utils.html import escape, format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 
-from judge.models import Language, Submission
+from judge.models import Contest, Language, Submission
 from judge.utils.problems import get_result_data
 from judge.utils.raw_sql import join_sql_subquery
 from judge.views.submission import ForceContestMixin, ProblemSubmissions
@@ -75,7 +75,10 @@ class RankedSubmissions(ProblemSubmissions):
     def _get_result_data(self, queryset=None):
         if queryset is None:
             queryset = super(RankedSubmissions, self).get_queryset()
-        return get_result_data(queryset.order_by())
+        from judge.contest_format import hidden_result_contest_q
+        return get_result_data(queryset.exclude(
+            contest_object__in=Contest.objects.filter(hidden_result_contest_q()),
+        ).order_by())
 
 
 class ContestRankedSubmission(ForceContestMixin, RankedSubmissions):
