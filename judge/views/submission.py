@@ -246,7 +246,7 @@ class SubmissionStatus(SubmissionDetailBase):
         if submission.contest_object_id:
             try:
                 participation = submission.contest.participation
-            except AttributeError:
+            except (AttributeError, ObjectDoesNotExist):
                 participation = None
             result_hidden = submission.contest_object.should_hide_result(self.request.user, participation)
         context['result_hidden'] = result_hidden
@@ -376,10 +376,12 @@ class SubmissionsListBase(DiggPaginatorMixin, TitleMixin, ListView):
             return {'categories': [], 'total': 0}
         if queryset is None:
             queryset = self.get_queryset()
-        from judge.contest_format import hidden_result_contest_q
-        return get_result_data(
-            queryset.exclude(contest_object__in=Contest.objects.filter(hidden_result_contest_q())).order_by(),
-        )
+        if not (self.request.user.has_perm('judge.see_private_contest') or
+                self.request.user.has_perm('judge.edit_all_contest')):
+            from judge.contest_format import hidden_result_contest_ids
+            profile = self.request.profile if self.request.user.is_authenticated else None
+            queryset = queryset.exclude(contest_object__in=hidden_result_contest_ids(profile))
+        return get_result_data(queryset.order_by())
 
     def access_check(self, request):
         pass
@@ -433,6 +435,12 @@ class SubmissionsListBase(DiggPaginatorMixin, TitleMixin, ListView):
             if self.could_filter_by_status():
                 status_filter |= Q(status__in=self.selected_statuses)
             queryset = queryset.filter(status_filter)
+            # Filtering by verdict would reveal results hidden before a contest's unfreeze time.
+            if not (self.request.user.has_perm('judge.see_private_contest') or
+                    self.request.user.has_perm('judge.edit_all_contest')):
+                from judge.contest_format import hidden_result_contest_ids
+                profile = self.request.profile if self.request.user.is_authenticated else None
+                queryset = queryset.exclude(contest_object__in=hidden_result_contest_ids(profile))
         if self.selected_organization:
             organization_object = get_object_or_404(Organization, pk=self.selected_organization)
             queryset = queryset.filter(user__organizations=organization_object)
@@ -731,7 +739,11 @@ def single_submission(request):
 
     result_hidden = False
     if submission.contest_object_id:
-        result_hidden = submission.contest_object.should_hide_result(request.user)
+        try:
+            participation = submission.contest.participation
+        except (AttributeError, ObjectDoesNotExist):
+            participation = None
+        result_hidden = submission.contest_object.should_hide_result(request.user, participation)
 
     return render(request, 'submission/row.html', {
         'submission': submission,
@@ -803,7 +815,7 @@ class ForceContestMixin(object):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['result_hidden'] = self.contest.should_hide_result(self.request.user)
+        context['result_hidden'] = self.contest.should_hide_result(self.request.user, self.request.participation)
         return context
 
     def get(self, request, *args, **kwargs):

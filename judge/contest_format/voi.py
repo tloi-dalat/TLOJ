@@ -45,9 +45,12 @@ class VOIContestFormat(DefaultContestFormat):
         if config is None:
             return
         if not isinstance(config, dict):
-            raise ValidationError('VOI contest expects a dict as config')
-        if 'cumtime' in config and not isinstance(config['cumtime'], bool):
-            raise ValidationError('cumtime must be a boolean')
+            raise ValidationError('VOI contest expects no config or dict as config')
+        for key, value in config.items():
+            if key not in cls.config_defaults:
+                raise ValidationError('unknown config key "%s"' % key)
+            if not isinstance(value, type(cls.config_defaults[key])):
+                raise ValidationError('invalid type for config key "%s"' % key)
 
     def __init__(self, contest, config):
         self.config = self.config_defaults.copy()
@@ -72,15 +75,11 @@ class VOIContestFormat(DefaultContestFormat):
                     'points': sub_points,
                 }
                 points += sub_points
-                if self.config['cumtime']:
-                    cumtime += dt
+                cumtime += dt
 
         participation.cumtime = max(cumtime, 0)
         participation.score = round(points, self.contest.points_precision)
         participation.tiebreaker = 0
-        participation.frozen_score = 0
-        participation.frozen_cumtime = 0
-        participation.frozen_tiebreaker = 0
         participation.format_data = format_data
         participation.save()
 

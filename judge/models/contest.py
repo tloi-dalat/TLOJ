@@ -433,8 +433,10 @@ class Contest(models.Model):
         return self.unfreeze_time or self.end_time
 
     def get_effective_unfreeze_time(self, participation=None):
+        # Virtual participants replay the contest, so their results stay hidden until their
+        # own window ends, even after the contest has globally unfrozen.
         base = self.get_unfreeze_time()
-        if participation and participation.virtual:
+        if participation is not None and participation.virtual > 0:
             return max(base, participation.end_time)
         return base
 
@@ -442,8 +444,9 @@ class Contest(models.Model):
         """
         Returns True if submission results should be hidden from this user.
 
-        For VOI format: hidden from contest start until effective unfreeze time.
+        For VOI format: hidden from contest start until the unfreeze time.
         For ICPC/VNOJ with unfreeze_time set: hidden between contest end and unfreeze time.
+        A virtual participation extends the hiding until that window ends.
         Admins and editors always see real results.
         """
         if user.is_authenticated:
@@ -452,6 +455,8 @@ class Contest(models.Model):
             if user.profile.id in self.editor_ids:
                 return False
 
+        if participation is not None and participation.contest_id != self.id:
+            participation = None
         effective_unfreeze = self.get_effective_unfreeze_time(participation)
 
         if getattr(self.format, 'hides_results_before_unfreeze', False):

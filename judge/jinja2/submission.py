@@ -1,8 +1,9 @@
 from operator import attrgetter
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 
-from judge.models import Contest, Problem, Submission, SubmissionSourceAccess
+from judge.models import Problem, Submission, SubmissionSourceAccess
 from . import registry
 
 
@@ -52,11 +53,14 @@ def hidden_contest_problem_ids(user):
         return frozenset()
     if user.has_perm('judge.see_private_contest') or user.has_perm('judge.edit_all_contest'):
         return frozenset()
-    from judge.contest_format import hidden_result_contest_q
+    from judge.contest_format import hidden_result_contest_ids
+    hidden = hidden_result_contest_ids(user.profile)
+    if not hidden:
+        return frozenset()
     return frozenset(
         Submission.objects.filter(
             user=user.profile,
-            contest_object__in=Contest.objects.filter(hidden_result_contest_q()),
+            contest_object__in=hidden,
         ).values_list('problem_id', flat=True).distinct(),
     )
 
@@ -67,10 +71,14 @@ def hidden_result_problem_ids(user):
         user.has_perm('judge.see_private_contest') or user.has_perm('judge.edit_all_contest')
     ):
         return frozenset()
-    from judge.contest_format import hidden_result_contest_q
+    from judge.contest_format import hidden_result_contest_ids
+    profile = user.profile if user.is_authenticated else None
+    hidden = hidden_result_contest_ids(profile)
+    if not hidden:
+        return frozenset()
     return frozenset(
         Problem.objects.filter(
-            contests__contest__in=Contest.objects.filter(hidden_result_contest_q()),
+            contests__contest__in=hidden,
         ).values_list('id', flat=True).distinct(),
     )
 
@@ -87,15 +95,17 @@ def submission_result_hidden(submission, user):
             return False
 
     now = timezone.now()
+    hides = getattr(contest.format, 'hides_results_before_unfreeze', False)
+    if not (hides or (contest.unfreeze_time and contest.end_time < now)):
+        return False
+
+    # Globally hidden — no need to inspect the participation (avoids a per-row query in lists).
+    if now < contest.get_unfreeze_time():
+        return True
+
+    # Globally revealed; still hidden only while this submission's virtual window is open.
     try:
         participation = submission.contest.participation
-    except AttributeError:
-        participation = None
-
-    if getattr(contest.format, 'hides_results_before_unfreeze', False):
-        return now < contest.get_effective_unfreeze_time(participation)
-
-    if contest.unfreeze_time and contest.end_time < now:
-        return now < contest.get_effective_unfreeze_time(participation)
-
-    return False
+    except (AttributeError, ObjectDoesNotExist):
+        return False
+    return now < contest.get_effective_unfreeze_time(participation)
