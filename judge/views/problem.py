@@ -213,6 +213,12 @@ class ProblemSubmitMixin:
         # If old_submission exists (for resubmit), use its language
         if hasattr(self, 'old_submission') and self.old_submission is not None:
             return self.old_submission.language
+        last_submission = Submission.objects.filter(
+            user=self.request.profile,
+            problem=self.object,
+        ).order_by('-id').first()
+        if last_submission:
+            return last_submission.language
         return self.request.profile.language
 
     def get_submit_form(self, **kwargs):
@@ -269,6 +275,7 @@ class ProblemSubmitMixin:
             'submissions_left': self.remaining_submission_count,
             'ACE_URL': settings.ACE_URL,
             'default_lang': self.default_language,
+            'language_limits': {limit.language_id: limit for limit in self.object.language_limits.all()},
         }
 
     def handle_submission_post(self, request):
