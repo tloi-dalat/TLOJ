@@ -108,7 +108,7 @@ class ProblemSubmitLanguageMemoryTestCase(CommonDataMixin, TestCase):
 
         # Request resubmit page for submission_python (Python)
         response = self.client.get(
-            reverse('problem_submit', kwargs={'problem': self.problem_a.code, 'submission': submission_python.id})
+            reverse('problem_submit', kwargs={'problem': self.problem_a.code, 'submission': submission_python.id}),
         )
         self.assertEqual(response.status_code, 200)
 
