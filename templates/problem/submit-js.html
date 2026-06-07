@@ -86,9 +86,19 @@
             });
 
             $('#id_language').change(function () {
-                var lang = $("#id_language").find("option:selected").attr('data-ace');
+                var selected_option = $("#id_language").find("option:selected");
+                var lang = selected_option.attr('data-ace');
                 window.ace_source.getSession().setMode("ace/mode/" + lang);
                 update_language_template();
+
+                var time_limit = selected_option.attr('data-time-limit');
+                var memory_limit = selected_option.attr('data-memory-limit');
+                if (time_limit) {
+                    $('#submit-time-limit').text(time_limit);
+                }
+                if (memory_limit) {
+                    $('#submit-memory-limit').text(memory_limit);
+                }
             });
 
             $('#ace_source').on('ace_load', function (e, editor) {
