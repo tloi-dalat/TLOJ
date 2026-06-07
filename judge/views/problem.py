@@ -269,6 +269,7 @@ class ProblemSubmitMixin:
             'submissions_left': self.remaining_submission_count,
             'ACE_URL': settings.ACE_URL,
             'default_lang': self.default_language,
+            'language_limits': {limit.language_id: limit for limit in self.object.language_limits.all()},
         }
 
     def handle_submission_post(self, request):

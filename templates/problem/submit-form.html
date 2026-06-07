@@ -29,6 +29,41 @@
 <form id="problem_submit" action="" method="post" class="form-area" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.non_field_errors() }}
+
+    {% if show_facts %}
+    {% set default_limit = language_limits.get(default_lang.id) if (default_lang and language_limits) else None %}
+    <div class="submit-problem-facts">
+        <div class="submit-problem-fact">
+            <span class="submit-problem-fact-label">{{ _('Input') }}</span>
+            <span class="submit-problem-fact-value">{% if problem.io_method.method == 'file' %}{{ problem.io_method.input }}{% else %}stdin{% endif %}</span>
+        </div>
+        <div class="submit-problem-fact">
+            <span class="submit-problem-fact-label">{{ _('Output') }}</span>
+            <span class="submit-problem-fact-value">{% if problem.io_method.method == 'file' %}{{ problem.io_method.output }}{% else %}stdout{% endif %}</span>
+        </div>
+        <div class="submit-problem-fact">
+            <span class="submit-problem-fact-label">{{ _('Time limit') }}</span>
+            <span id="submit-time-limit" class="submit-problem-fact-value">
+                {%- if default_limit -%}
+                    {{ default_limit.time_limit }}s
+                {%- else -%}
+                    {{ problem.time_limit }}s
+                {%- endif -%}
+            </span>
+        </div>
+        <div class="submit-problem-fact">
+            <span class="submit-problem-fact-label">{{ _('Memory limit') }}</span>
+            <span id="submit-memory-limit" class="submit-problem-fact-value">
+                {%- if default_limit -%}
+                    {{ default_limit.memory_limit|kbsimpleformat }}
+                {%- else -%}
+                    {{ problem.memory_limit|kbsimpleformat }}
+                {%- endif -%}
+            </span>
+        </div>
+    </div>
+    {% endif %}
+
     <div id="submit-wrapper">
         <div id="editor" class="hidden">
             <div>
@@ -54,10 +89,18 @@
                 <div id="language-select">
                     <select id="id_language" name="language">
                         {% for lang in form.fields.language.queryset %}
+                            {% set limit = language_limits.get(lang.id) if language_limits else None %}
                             <option value="{{ lang.id }}" data-id="{{ lang.id }}" data-name="{{ lang.name }}"
                                     data-info="{{ lang.info }}" data-ace="{{ lang.ace }}" data-fileonly="{{ lang.file_only }}"
                                     data-ext="{{ lang.extension }}" data-file-size="{{ lang.file_size_limit }}"
                                     data-judge-info="{{ runtime_versions(lang.runtime_versions()) }}"
+                                    {% if limit %}
+                                        data-time-limit="{{ limit.time_limit }}s"
+                                        data-memory-limit="{{ limit.memory_limit|kbsimpleformat }}"
+                                    {% else %}
+                                        data-time-limit="{{ problem.time_limit }}s"
+                                        data-memory-limit="{{ problem.memory_limit|kbsimpleformat }}"
+                                    {% endif %}
                                     {% if lang.id == default_lang.id %}selected{% endif %}>{{ lang.name }}</option>
                         {% endfor %}
                     </select>

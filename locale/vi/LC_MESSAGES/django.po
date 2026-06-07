@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dmoj\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-06 22:44+0000\n"
+"POT-Creation-Date: 2026-06-07 03:59+0000\n"
 "PO-Revision-Date: 2020-08-23 18:59\n"
 "Last-Translator: \n"
 "Language-Team: Vietnamese\n"
@@ -7303,19 +7303,35 @@ msgstr[0] "Bạn còn %(left)s lần nộp"
 msgid "You have 0 submissions left"
 msgstr "Bạn còn 0 lần nộp"
 
-#: templates/problem/submit-form.html:31
+#: templates/problem/submit-form.html:32
+msgid "Input"
+msgstr "Input"
+
+#: templates/problem/submit-form.html:42
+msgid "Output"
+msgstr "Output"
+
+#: templates/problem/submit-form.html:52
+msgid "Time limit"
+msgstr "Giới hạn thời gian"
+
+#: templates/problem/submit-form.html:56
+msgid "Memory limit"
+msgstr "Giới hạn bộ nhớ"
+
+#: templates/problem/submit-form.html:65
 msgid "Paste your source code here or load it from a file:"
 msgstr "Dán bài làm của bạn ở đây hoặc nhập từ file:"
 
-#: templates/problem/submit-form.html:40
+#: templates/problem/submit-form.html:74
 msgid "You can only submit file for this language."
 msgstr "Ngôn ngữ này chỉ chấp nhận nộp bằng file."
 
-#: templates/problem/submit-form.html:68
+#: templates/problem/submit-form.html:102
 msgid "No judge is available for this problem."
 msgstr "Bài tập này hiện tại không chấm."
 
-#: templates/problem/submit-form.html:72
+#: templates/problem/submit-form.html:106
 msgid "Submit!"
 msgstr "Nộp bài!"
 

@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-06 22:44+0000\n"
+"POT-Creation-Date: 2026-06-07 03:59+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -7163,19 +7163,35 @@ msgstr[1] ""
 msgid "You have 0 submissions left"
 msgstr ""
 
-#: templates/problem/submit-form.html:31
+#: templates/problem/submit-form.html:32
+msgid "Input"
+msgstr ""
+
+#: templates/problem/submit-form.html:42
+msgid "Output"
+msgstr ""
+
+#: templates/problem/submit-form.html:52
+msgid "Time limit"
+msgstr ""
+
+#: templates/problem/submit-form.html:56
+msgid "Memory limit"
+msgstr ""
+
+#: templates/problem/submit-form.html:65
 msgid "Paste your source code here or load it from a file:"
 msgstr ""
 
-#: templates/problem/submit-form.html:40
+#: templates/problem/submit-form.html:74
 msgid "You can only submit file for this language."
 msgstr ""
 
-#: templates/problem/submit-form.html:68
+#: templates/problem/submit-form.html:102
 msgid "No judge is available for this problem."
 msgstr ""
 
-#: templates/problem/submit-form.html:72
+#: templates/problem/submit-form.html:106
 msgid "Submit!"
 msgstr ""
 
