@@ -213,7 +213,10 @@ class ProblemSubmitMixin:
         # If old_submission exists (for resubmit), use its language
         if hasattr(self, 'old_submission') and self.old_submission is not None:
             return self.old_submission.language
-        last_submission = Submission.objects.filter(user=self.request.profile).order_by('-id').first()
+        last_submission = Submission.objects.filter(
+            user=self.request.profile,
+            problem=self.object,
+        ).order_by('-id').first()
         if last_submission:
             return last_submission.language
         return self.request.profile.language
