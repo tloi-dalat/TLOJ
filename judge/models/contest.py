@@ -83,9 +83,15 @@ class Contest(models.Model):
                                                           'but not edit it.'),
                                      blank=True, related_name='testers+')
     description = models.TextField(verbose_name=_('description'), blank=True)
+    terms = models.TextField(verbose_name=_('terms'), blank=True)
     problems = models.ManyToManyField(Problem, verbose_name=_('problems'), through='ContestProblem')
     start_time = models.DateTimeField(verbose_name=_('start time'), db_index=True)
     end_time = models.DateTimeField(verbose_name=_('end time'), db_index=True)
+    unfreeze_time = models.DateTimeField(
+        verbose_name=_('unfreeze time'),
+        null=True, blank=True,
+        help_text=_('Results are revealed after this time.'),
+    )
     registration_start = models.DateTimeField(verbose_name=_('registration start time'),
                                               blank=True, null=True, default=None)
     registration_end = models.DateTimeField(verbose_name=_('registration end time'),
@@ -220,6 +226,9 @@ class Contest(models.Model):
         # Django will complain if you didn't fill in start_time or end_time, so we don't have to.
         if self.start_time and self.end_time and self.start_time >= self.end_time:
             raise ValidationError('What is this? A contest that ended before it starts?')
+
+        if self.unfreeze_time and self.end_time and self.unfreeze_time < self.end_time:
+            raise ValidationError(_('Unfreeze time cannot be before contest end time.'))
 
         if self.registration_start and self.registration_end and self.registration_start >= self.registration_end:
             raise ValidationError('Registration window must start before it ends.')
@@ -418,6 +427,37 @@ class Contest(models.Model):
            self.format.name == contest_format.VNOJContestFormat.name:
             # Keep frozen even if the contest is ended
             return self._now >= self.frozen_time
+        return False
+
+    def get_unfreeze_time(self):
+        return self.unfreeze_time or self.end_time
+
+    def should_hide_result(self, user, participation=None):
+        """
+        Returns True if submission results should be hidden from this user.
+
+        For VOI format: hidden from everyone until the unfreeze time, and additionally
+        hidden from a user while they are inside this contest (e.g. a virtual replay) —
+        revealed the moment they leave. `participation` is the viewer's current participation.
+        For ICPC/VNOJ with unfreeze_time set: hidden between contest end and unfreeze time.
+        Admins and editors always see real results.
+        """
+        if user.is_authenticated:
+            if user.has_perm('judge.see_private_contest') or user.has_perm('judge.edit_all_contest'):
+                return False
+            if user.profile.id in self.editor_ids:
+                return False
+
+        hides = getattr(self.format, 'hides_results_before_unfreeze', False)
+
+        # Global window: hidden from everyone until the unfreeze time.
+        if (hides or (self.unfreeze_time and self.ended)) and self._now < self.get_unfreeze_time():
+            return True
+
+        # Personal: a VOI participant sees nothing for this contest while they are in it.
+        if hides and participation is not None and participation.contest_id == self.id:
+            return True
+
         return False
 
     class Inaccessible(Exception):
@@ -636,11 +676,16 @@ class ContestParticipation(models.Model):
         if not settings.VNOJ_SHOULD_BAN_FOR_CHEATING_IN_CONTESTS or self.contest.is_organization_private:
             return
 
-        disqualifications_count = ContestParticipation.objects.filter(
+        qs = ContestParticipation.objects.filter(
             user=self.user,
             contest__is_organization_private=False,
             is_disqualified=True,
-        ).count()
+        )
+        ban_count_from = settings.VNOJ_BAN_COUNT_FROM_DATE
+        if ban_count_from is not None:
+            qs = qs.filter(contest__start_time__gte=ban_count_from)
+
+        disqualifications_count = qs.count()
         if disqualifications_count >= settings.VNOJ_MAX_DISQUALIFICATIONS_BEFORE_BANNING and \
                 not self.user.is_banned:
             self.user.ban_user(settings.VNOJ_CONTEST_CHEATING_BAN_MESSAGE)

@@ -2,6 +2,7 @@
 .vscode
 .sass-cache
 .python-version
+.claude
 *.sqlite3
 *.py[co]
 *.mo
@@ -32,7 +33,6 @@ vo21.json
 tmp.json
 language_voj.json
 /static
-/media
 backup*.json
 custom_script_*
 websocket/config.js
@@ -46,3 +46,4 @@ celerybeat-schedule.*
 resources/blog-modern.css
 resources/blog-post.css
 resources/theme-toggle.css
+.DS_Store

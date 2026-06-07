@@ -12,12 +12,12 @@
     <div class="content-description">
         {% with orgs=user.organizations.filter(is_unlisted=False) %}
             {% if orgs %}
-                <p style="margin-top: 0"><b>{{ _('From') }}</b>
-                    {% for org in orgs -%}
-                        <a href="{{ org.get_absolute_url() }}">{{ org.name }}</a>
-                        {%- if not loop.last %}, {% endif %}
+                <div style="margin: 0; line-height: 1.4;"><b>{{ _('From') }}</b></div>
+                <ul style="margin: 0; padding-left: 20px;">
+                    {% for org in orgs %}
+                        <li><a href="{{ org.get_absolute_url() }}">{{ org.name }}</a></li>
                     {% endfor %}
-                </p>
+                </ul>
             {% endif %}
         {% endwith %}
         {% if perms.judge.change_profile %}

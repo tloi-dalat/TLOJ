@@ -1,0 +1,429 @@
+{% extends "base.html" %}
+{% block title_row %}{% endblock %}
+
+{% block media %}
+<style>
+  html,
+  body.ge-active {
+    overflow: hidden;
+  }
+
+  #ge-wrap {
+    display: grid;
+    grid-template-columns: minmax(16rem, 20rem) minmax(0, 1fr);
+    gap: 0.75rem;
+    height: calc(100vh - 10.5rem);
+    min-height: 32rem;
+    overflow: hidden;
+    padding: 0.25rem 0 0.5rem;
+  }
+
+  #ge-sidebar {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
+    overflow-y: auto;
+  }
+
+  #ge-sidebar .sidebox {
+    flex: 0 0 auto;
+    padding-bottom: 0.5em !important;
+    margin-bottom: 0.5rem;
+  }
+
+  #ge-sidebar .sidebox.ge-input-box {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 10rem;
+  }
+
+  #ge-sidebar .ge-input-box .sidebox-content {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .ge-option-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.15rem 0;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  #ge-input {
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 6rem;
+    box-sizing: border-box;
+    resize: none;
+    font-family: Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+    font-size: 0.88rem;
+  }
+
+  #ge-canvas-wrap {
+    position: relative;
+    height: 100%;
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid #231f20;
+    border-radius: 4px;
+    background: #fff;
+  }
+
+  #ge-canvas,
+  #ge-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  #ge-overlay {
+    cursor: default;
+  }
+
+  body[data-theme="dark"] #ge-canvas-wrap {
+    border-color: #d0d0d0;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    body[data-theme="auto"] #ge-canvas-wrap {
+      border-color: #d0d0d0;
+    }
+  }
+
+  @media (max-width: 900px) {
+    #ge-wrap {
+      grid-template-columns: 1fr;
+      height: auto;
+      overflow: visible;
+    }
+
+    #ge-sidebar {
+      height: auto;
+      overflow: visible;
+    }
+
+    #ge-sidebar .sidebox.ge-input-box {
+      min-height: 10rem;
+    }
+
+    #ge-canvas-wrap {
+      height: 60vh;
+      min-height: 280px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block body %}
+<div id="ge-wrap">
+  <aside id="ge-sidebar">
+
+    <div class="sidebox">
+      <h3>{{ _('Graph type') }} <i class="fa fa-share-alt" style="float:right; margin: 0.2em 0.4em 0 0;"></i></h3>
+      <div class="sidebox-content">
+        <label class="ge-option-row">
+          <input type="radio" name="ge-type" value="undirected" checked>
+          <span>{{ _('Undirected') }}</span>
+        </label>
+        <label class="ge-option-row">
+          <input type="radio" name="ge-type" value="directed">
+          <span>{{ _('Directed') }}</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="sidebox">
+      <h3>{{ _('Options') }} <i class="fa fa-cog" style="float:right; margin: 0.2em 0.4em 0 0;"></i></h3>
+      <div class="sidebox-content">
+        <label class="ge-option-row">
+          <input type="checkbox" id="ge-lock">
+          <span>{{ _('Lock all nodes') }}</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="sidebox ge-input-box">
+      <h3>{{ _('Adjacency list') }} <i class="fa fa-list" style="float:right; margin: 0.2em 0.4em 0 0;"></i></h3>
+      <div class="sidebox-content">
+        <textarea id="ge-input"></textarea>
+      </div>
+    </div>
+
+  </aside>
+
+  <section id="ge-canvas-wrap" aria-label="{{ _('Graph canvas') }}">
+    <canvas id="ge-canvas"></canvas>
+    <canvas id="ge-overlay"></canvas>
+  </section>
+</div>
+{% endblock %}
+
+{% block bodyend %}
+{% include "graph-core-config.html" %}
+<script src="{{ static('graph-core.js') }}"></script>
+<script>
+(function () {
+'use strict';
+
+const {
+  clamp, dist2D, isDark, NODE_RADIUS,
+  renderEdges, renderNodes, updateGraphLayout,
+  parseInput,
+} = GraphCore;
+
+document.body.classList.add('ge-active');
+window.addEventListener('beforeunload', function () {
+  document.body.classList.remove('ge-active');
+});
+
+const FPS = 90;
+let canvasW = 0;
+let canvasH = 0;
+let nodes = [];
+let nodeMap = new Map();
+let edges = [];
+let edgeLabels = new Map();
+let edgeCurvMap = new Map();
+
+let directed = false;
+let lockMode = false;
+
+let mousePos = { x: 0, y: 0 };
+let dragNode = null;
+let animId = null;
+let dpr = window.devicePixelRatio || 1;
+
+const wrap = document.getElementById('ge-canvas-wrap');
+const canvas = document.getElementById('ge-canvas');
+const overlay = document.getElementById('ge-overlay');
+const ctx = canvas.getContext('2d');
+const inputEl = document.getElementById('ge-input');
+const lockCb = document.getElementById('ge-lock');
+
+function randCoord() {
+  return {
+    x: canvasW / 4 + Math.random() * canvasW / 2,
+    y: canvasH / 4 + Math.random() * canvasH / 2,
+  };
+}
+
+function generateRandomGraph() {
+  const n = 5 + Math.floor(Math.random() * 4);
+  const edgeSet = {};
+  const lines = [];
+
+  function tryEdge(u, v) {
+    if (u === v) return;
+    const key = Math.min(u, v) + ',' + Math.max(u, v);
+    if (!edgeSet[key]) {
+      edgeSet[key] = true;
+      lines.push(u + ' ' + v);
+    }
+  }
+
+  for (let i = 2; i <= n; i++) {
+    tryEdge(1 + Math.floor(Math.random() * (i - 1)), i);
+  }
+
+  const extras = Math.ceil(n / 2);
+  let attempts = extras * 5;
+  let added = 0;
+  while (added < extras && attempts > 0) {
+    attempts--;
+    const before = Object.keys(edgeSet).length;
+    tryEdge(1 + Math.floor(Math.random() * n), 1 + Math.floor(Math.random() * n));
+    if (Object.keys(edgeSet).length > before) {
+      added++;
+    }
+  }
+
+  return lines.join('\n');
+}
+
+function applyGraph(parsed) {
+  const oldNodeMap = new Map(nodeMap);
+
+  nodes = parsed.nodes;
+  edges = parsed.edges;
+  edgeLabels = parsed.edgeLabels;
+
+  nodeMap.clear();
+  nodes.forEach(function (node) {
+    if (oldNodeMap.has(node)) {
+      nodeMap.set(node, oldNodeMap.get(node));
+    } else {
+      const coord = randCoord();
+      nodeMap.set(node, { pos: { x: coord.x, y: coord.y } });
+    }
+  });
+
+  edgeCurvMap.clear();
+}
+
+function render() {
+  ctx.fillStyle = isDark() ? '#181818' : '#ffffff';
+  ctx.fillRect(0, 0, canvasW, canvasH);
+
+  if (dragNode) {
+    const current = nodeMap.get(dragNode);
+    current.pos.x = clamp(mousePos.x, NODE_RADIUS, canvasW - NODE_RADIUS);
+    current.pos.y = clamp(mousePos.y, NODE_RADIUS, canvasH - NODE_RADIUS);
+  }
+
+  renderEdges(ctx, { nodes, nodeMap, edges, edgeLabels, edgeCurvMap, directed });
+  renderNodes(ctx, { nodes, nodeMap });
+
+  if (!lockMode) {
+    updateGraphLayout(nodes, nodeMap, edges, dragNode, canvasW, canvasH);
+  }
+}
+
+function startLoop() {
+  if (animId) {
+    clearInterval(animId);
+  }
+  animId = setInterval(function () {
+    requestAnimationFrame(render);
+  }, 1000 / FPS);
+}
+
+function resizeCanvas() {
+  const nextDpr = window.devicePixelRatio || 1;
+  const width = Math.max(1, wrap.clientWidth);
+  const height = Math.max(1, wrap.clientHeight);
+
+  if (canvasW === width && canvasH === height && dpr === nextDpr) {
+    return;
+  }
+
+  dpr = nextDpr;
+  canvasW = width;
+  canvasH = height;
+
+  canvas.width = Math.round(width * dpr);
+  canvas.height = Math.round(height * dpr);
+  overlay.width = Math.round(width * dpr);
+  overlay.height = Math.round(height * dpr);
+
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
+function clearState() {
+  nodes = [];
+  nodeMap.clear();
+  edges = [];
+  edgeLabels.clear();
+  edgeCurvMap.clear();
+}
+
+function drawGraph() {
+  const text = inputEl.value;
+  if (!text.trim()) {
+    clearState();
+    return;
+  }
+
+  try {
+    const parsed = parseInput(text);
+    if (!parsed.nodes.length) {
+      clearState();
+      return;
+    }
+    applyGraph(parsed);
+  } catch (error) {
+    // silently ignore parse errors
+  }
+}
+
+function syncSettings() {
+  directed = document.querySelector('input[name="ge-type"]:checked').value === 'directed';
+  lockMode = lockCb.checked;
+}
+
+function getNodeAt(x, y) {
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    if (dist2D(nodeMap.get(node).pos, { x: x, y: y }) <= NODE_RADIUS) {
+      return node;
+    }
+  }
+  return null;
+}
+
+overlay.addEventListener('pointerdown', function (event) {
+  event.preventDefault();
+  mousePos = { x: event.offsetX, y: event.offsetY };
+  dragNode = getNodeAt(event.offsetX, event.offsetY);
+  if (dragNode) {
+    const current = nodeMap.get(dragNode);
+    current.pos.x = clamp(mousePos.x, NODE_RADIUS, canvasW - NODE_RADIUS);
+    current.pos.y = clamp(mousePos.y, NODE_RADIUS, canvasH - NODE_RADIUS);
+    overlay.style.cursor = 'grabbing';
+    requestAnimationFrame(render);
+  }
+});
+
+overlay.addEventListener('pointermove', function (event) {
+  event.preventDefault();
+  mousePos = { x: event.offsetX, y: event.offsetY };
+  if (dragNode) {
+    const current = nodeMap.get(dragNode);
+    current.pos.x = clamp(mousePos.x, NODE_RADIUS, canvasW - NODE_RADIUS);
+    current.pos.y = clamp(mousePos.y, NODE_RADIUS, canvasH - NODE_RADIUS);
+    requestAnimationFrame(render);
+    return;
+  }
+  overlay.style.cursor = getNodeAt(event.offsetX, event.offsetY) ? 'pointer' : 'default';
+});
+
+overlay.addEventListener('pointerup', function (event) {
+  event.preventDefault();
+  dragNode = null;
+  overlay.style.cursor = 'default';
+});
+
+overlay.addEventListener('pointerleave', function (event) {
+  event.preventDefault();
+  dragNode = null;
+  overlay.style.cursor = 'default';
+});
+
+let autoDrawTimer = null;
+inputEl.addEventListener('input', function () {
+  clearTimeout(autoDrawTimer);
+  autoDrawTimer = setTimeout(function () {
+    syncSettings();
+    drawGraph();
+  }, 120);
+});
+
+Array.prototype.slice.call(document.querySelectorAll('input[name="ge-type"]')).concat([lockCb])
+  .forEach(function (element) {
+    element.addEventListener('change', function () {
+      syncSettings();
+      if (nodes.length || inputEl.value.trim()) {
+        drawGraph();
+      }
+    });
+  });
+
+window.addEventListener('resize', function () {
+  resizeCanvas();
+});
+
+resizeCanvas();
+syncSettings();
+inputEl.value = generateRandomGraph();
+drawGraph();
+startLoop();
+
+})();
+</script>
+{% endblock %}

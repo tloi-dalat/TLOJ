@@ -5,18 +5,16 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.contrib.sitemaps.views import sitemap
 from django.http import Http404, HttpResponsePermanentRedirect
-from django.templatetags.static import static
 from django.urls import include, path, re_path, reverse
-from django.utils.functional import lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.clickjacking import xframe_options_sameorigin
-from django.views.generic import RedirectView
 
 from judge.feed import AtomBlogFeed, AtomCommentFeed, AtomProblemFeed, BlogFeed, CommentFeed, ProblemFeed
 from judge.sitemap import sitemaps
 from judge.views import TitledTemplateView, api, blog, comment, contests, language, license, mailgun, organization, \
-    preview, problem, problem_manage, ranked_submission, register, stats, status, submission, tag, tasks, ticket, \
-    two_factor, user, widgets
+    preview, problem, problem_download, problem_manage, ranked_submission, register, stats, status, submission, tag, \
+    tasks, ticket, two_factor, user, widgets
+from judge.views.graph_editor import GraphEditorView, ToolsListView
 from judge.views.magazine import MagazinePage
 from judge.views.misc_config import MiscConfigEdit
 from judge.views.problem_data import ProblemDataView, ProblemSubmissionDiff, \
@@ -131,6 +129,7 @@ urlpatterns = [
         path('/pdf', problem.ProblemPdfView.as_view(), name='problem_pdf'),
         path('/pdf/<slug:language>', problem.ProblemPdfView.as_view(), name='problem_pdf'),
         path('/clone', problem.ProblemClone.as_view(), name='problem_clone'),
+        path('/delete', problem.ProblemDelete.as_view(), name='problem_delete'),
         path('/submit', problem.ProblemSubmit.as_view(), name='problem_submit'),
         path('/resubmit/<int:submission>', problem.ProblemSubmit.as_view(), name='problem_submit'),
         path('/update-polygon', problem.ProblemUpdatePolygon.as_view(), name='problem_update_polygon'),
@@ -145,6 +144,9 @@ urlpatterns = [
         path('/test_data/init', problem_init_view, name='problem_data_init'),
         path('/test_data/diff', ProblemSubmissionDiff.as_view(), name='problem_submission_diff'),
         path('/data/<path:path>', problem_data_file, name='problem_data_file'),
+
+        path('/download/package', problem_download.DownloadProblemFullPackage.as_view(),
+             name='problem_download_full_package'),
 
         path('/tickets/', ticket.ProblemTicketListView.as_view(), name='problem_ticket_list'),
         path('/tickets/new', ticket.NewProblemTicketView.as_view(), name='new_problem_ticket'),
@@ -345,6 +347,9 @@ urlpatterns = [
         path('/', lambda _, id, slug: HttpResponsePermanentRedirect(reverse('blog_post', args=[id, slug]))),
     ])),
 
+    path('tools/', ToolsListView.as_view(), name='tools_list'),
+    path('tool/graph_editor', GraphEditorView.as_view(), name='graph_editor'),
+
     path('license/<str:key>', license.LicenseDetail.as_view(), name='license'),
 
     path('mailgun/mail_activate/', mailgun.MailgunActivationView.as_view(), name='mailgun_activate'),
@@ -441,21 +446,6 @@ urlpatterns = [
     path('misc_config/', MiscConfigEdit.as_view(), name='misc_config'),
 ]
 
-favicon_paths = ['apple-touch-icon-180x180.png', 'apple-touch-icon-114x114.png', 'android-chrome-72x72.png',
-                 'apple-touch-icon-57x57.png', 'apple-touch-icon-72x72.png', 'apple-touch-icon.png', 'mstile-70x70.png',
-                 'android-chrome-36x36.png', 'apple-touch-icon-precomposed.png', 'apple-touch-icon-76x76.png',
-                 'apple-touch-icon-60x60.png', 'android-chrome-96x96.png', 'mstile-144x144.png', 'mstile-150x150.png',
-                 'safari-pinned-tab.svg', 'android-chrome-144x144.png', 'apple-touch-icon-152x152.png',
-                 'favicon-96x96.png',
-                 'favicon-32x32.png', 'favicon-16x16.png', 'android-chrome-192x192.png', 'android-chrome-48x48.png',
-                 'mstile-310x150.png', 'apple-touch-icon-144x144.png', 'browserconfig.xml', 'manifest.json',
-                 'apple-touch-icon-120x120.png', 'mstile-310x310.png']
-
-static_lazy = lazy(static, str)
-for favicon in favicon_paths:
-    urlpatterns.append(path(favicon, RedirectView.as_view(
-        url=static_lazy('icons/' + favicon),
-    )))
 
 handler404 = 'judge.views.error.error404'
 handler403 = 'judge.views.error.error403'

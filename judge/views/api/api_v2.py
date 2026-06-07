@@ -265,6 +265,12 @@ class APIContestDetail(APIDetailView):
         in_contest = contest.is_in_contest(self.request.user)
         can_see_rankings = contest.can_see_full_scoreboard(self.request.user)
         can_see_problems = (in_contest or contest.ended or contest.is_editable_by(self.request.user))
+        if not (self.request.user.has_perm('judge.see_private_contest') or
+                self.request.user.has_perm('judge.edit_all_contest')):
+            from judge.contest_format import hidden_result_contest_ids
+            profile = self.request.profile if self.request.user.is_authenticated else None
+            if contest.pk in hidden_result_contest_ids(profile):
+                can_see_rankings = False
 
         problems = list(
             contest.contest_problems
@@ -358,6 +364,15 @@ class APIContestParticipationList(APIListView):
         ('virtual_participation_number', 'virtual'),
     )
 
+    @cached_property
+    def _hidden_contest_ids(self):
+        if self.request.user.has_perm('judge.see_private_contest') or \
+                self.request.user.has_perm('judge.edit_all_contest'):
+            return frozenset()
+        from judge.contest_format import hidden_result_contest_ids
+        profile = self.request.profile if self.request.user.is_authenticated else None
+        return hidden_result_contest_ids(profile)
+
     def get_unfiltered_queryset(self):
         visible_contests = Contest.get_visible_contests(self.request.user)
 
@@ -397,14 +412,15 @@ class APIContestParticipationList(APIListView):
         )
 
     def get_object_data(self, participation):
+        hidden = participation.contest_id in self._hidden_contest_ids
         return {
             'user': participation.user.username,
             'contest': participation.contest.key,
             'start_time': participation.start.isoformat(),
             'end_time': participation.end_time.isoformat(),
-            'score': participation.score,
-            'cumulative_time': participation.cumtime,
-            'tiebreaker': participation.tiebreaker,
+            'score': None if hidden else participation.score,
+            'cumulative_time': None if hidden else participation.cumtime,
+            'tiebreaker': None if hidden else participation.tiebreaker,
             'is_disqualified': participation.is_disqualified,
             'virtual_participation_number': participation.virtual,
         }
@@ -536,20 +552,28 @@ class APIUserDetail(APIDetailView):
     slug_url_kwarg = 'user'
 
     def get_object_data(self, profile):
+        can_see_all = (
+            self.request.user.has_perm('judge.see_private_contest') or
+            self.request.user.has_perm('judge.edit_all_contest')
+        )
+
+        submissions_q = Submission.objects.filter(
+            result='AC',
+            user=profile,
+            problem__is_public=True,
+            problem__is_organization_private=False,
+        )
+        if not can_see_all:
+            from judge.contest_format import hidden_result_contest_ids
+            viewer = self.request.profile if self.request.user.is_authenticated else None
+            hidden_contests = hidden_result_contest_ids(viewer)
+            submissions_q = submissions_q.exclude(contest_object__in=hidden_contests)
         solved_problems = list(
-            Submission.objects
-            .filter(
-                result='AC',
-                user=profile,
-                problem__is_public=True,
-                problem__is_organization_private=False,
-            )
-            .values('problem').distinct()
-            .values_list('problem__code', flat=True),
+            submissions_q.values('problem').distinct().values_list('problem__code', flat=True),
         )
 
         contest_history = []
-        participations = (
+        participations_q = (
             ContestParticipation.objects
             .filter(
                 user=profile,
@@ -559,7 +583,9 @@ class APIUserDetail(APIDetailView):
             )
             .order_by('contest__end_time')
         )
-        for contest_key, score, cumtime, rating, mean, performance in participations.values_list(
+        if not can_see_all:
+            participations_q = participations_q.exclude(contest__in=hidden_contests)
+        for contest_key, score, cumtime, rating, mean, performance in participations_q.values_list(
             'contest__key', 'score', 'cumtime', 'rating__rating', 'rating__mean', 'rating__performance',
         ):
             contest_history.append({
@@ -598,6 +624,15 @@ class APISubmissionList(APIListView):
         ('result', 'result'),
     )
 
+    @cached_property
+    def _hidden_contest_ids(self):
+        if self.request.user.has_perm('judge.see_private_contest') or \
+                self.request.user.has_perm('judge.edit_all_contest'):
+            return frozenset()
+        from judge.contest_format import hidden_result_contest_ids
+        profile = self.request.profile if self.request.user.is_authenticated else None
+        return hidden_result_contest_ids(profile)
+
     @property
     def use_infinite_pagination(self):
         return not self.used_basic_filters
@@ -635,6 +670,7 @@ class APISubmissionList(APIListView):
         )
 
     def get_object_data(self, submission):
+        hidden = submission.contest_object_id in self._hidden_contest_ids
         return {
             'id': submission.id,
             'problem': submission.problem.code,
@@ -643,11 +679,11 @@ class APISubmissionList(APIListView):
             'language': submission.language.key,
             'time': submission.time,
             'memory': submission.memory,
-            'points': submission.points,
-            'result': submission.result,
+            'points': None if hidden else submission.points,
+            'result': None if hidden else submission.result,
             'contest': None if not submission.contest_object else {
                 'key': submission.contest_object.key,
-                'points': submission.contest.points,
+                'points': None if hidden else submission.contest.points,
                 'virtual_participation_number': submission.contest.participation.virtual,
                 'time_since_start_of_participation': submission.date - submission.contest.participation.real_start,
             },
@@ -666,32 +702,39 @@ class APISubmissionDetail(APILoginRequiredMixin, APIDetailView):
         return submission
 
     def get_object_data(self, submission):
-        cases = []
-        for batch in group_test_cases(submission.test_cases.all())[0]:
-            batch_cases = [
-                {
-                    'type': 'case',
-                    'case_id': case.case,
-                    'status': case.status,
-                    'time': case.time,
-                    'memory': case.memory,
-                    'points': case.points,
-                    'total': case.total,
-                } for case in batch['cases']
-            ]
+        hidden = False
+        if submission.contest_object_id:
+            if not (self.request.user.has_perm('judge.see_private_contest') or
+                    self.request.user.has_perm('judge.edit_all_contest')):
+                from judge.contest_format import hidden_result_contest_ids
+                profile = self.request.profile if self.request.user.is_authenticated else None
+                hidden = submission.contest_object_id in hidden_result_contest_ids(profile)
 
-            # These are individual cases.
-            if batch['id'] is None:
-                cases.extend(batch_cases)
-            # This is one batch.
-            else:
-                cases.append({
-                    'type': 'batch',
-                    'batch_id': batch['id'],
-                    'cases': batch_cases,
-                    'points': batch['points'],
-                    'total': batch['total'],
-                })
+        cases = []
+        if not hidden:
+            for batch in group_test_cases(submission.test_cases.all())[0]:
+                batch_cases = [
+                    {
+                        'type': 'case',
+                        'case_id': case.case,
+                        'status': case.status,
+                        'time': case.time,
+                        'memory': case.memory,
+                        'points': case.points,
+                        'total': case.total,
+                    } for case in batch['cases']
+                ]
+
+                if batch['id'] is None:
+                    cases.extend(batch_cases)
+                else:
+                    cases.append({
+                        'type': 'batch',
+                        'batch_id': batch['id'],
+                        'cases': batch_cases,
+                        'points': batch['points'],
+                        'total': batch['total'],
+                    })
 
         return {
             'id': submission.id,
@@ -700,12 +743,12 @@ class APISubmissionDetail(APILoginRequiredMixin, APIDetailView):
             'date': submission.date.isoformat(),
             'time': submission.time,
             'memory': submission.memory,
-            'points': submission.points,
+            'points': None if hidden else submission.points,
             'language': submission.language.key,
             'status': submission.status,
-            'result': submission.result,
-            'case_points': submission.case_points,
-            'case_total': submission.case_total,
+            'result': None if hidden else submission.result,
+            'case_points': None if hidden else submission.case_points,
+            'case_total': None if hidden else submission.case_total,
             'cases': cases,
         }
 

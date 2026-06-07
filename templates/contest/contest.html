@@ -185,7 +185,7 @@
     {% if is_in_contest or contest.ended or request.user.is_superuser or is_editor or is_tester %}
         <div class="contest-problems">
             <h2 style="margin-bottom: 0.2em; float:left;"><i class="fa fa-fw fa-question-circle"></i>{{ _('Problems') }} </h2>
-            {% if can_edit and request.user.is_staff %}
+            {% if can_edit %}
                 <form method="post" action="{{ url('contest_problems_make_public', contest.key) }}" style="display: inline; float:right; margin-left: 10px;">
                     {% csrf_token %}
                     <button type="submit" class="button" onclick="return confirm('{{ _('Are you sure you want to make all problems in this contest public?') }}');">
@@ -217,7 +217,13 @@
                     <tr>
                         <td style="width: 1em;">{{contest.get_label_for_problem(loop.index0)}}</td>
                         {% if request.user.is_authenticated %}
-                            {% if problem.id in completed_problem_ids %}
+                            {% if result_hidden and (problem.id in completed_problem_ids or problem.id in attempted_problem_ids) %}
+                                <td style="width: 1em;">
+                                    <a href="{{ url('user_submissions', problem.code, request.user.username) }}">
+                                        <i class="hidden-problem-color fa fa-question-circle"></i>
+                                    </a>
+                                </td>
+                            {% elif problem.id in completed_problem_ids %}
                                 <td style="width: 1em;">
                                     <a href="{{ url('user_submissions', problem.code, request.user.username) }}">
                                         {% if problem.is_public %}

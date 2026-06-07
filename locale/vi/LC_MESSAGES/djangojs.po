@@ -28,3 +28,27 @@ msgctxt "time format without day"
 msgid "%h:%m:%s"
 msgstr "%h:%m:%s"
 
+#: resources/user_profile.js
+msgid "past year"
+msgstr "năm qua"
+
+#: resources/user_profile.js
+msgid "%(cnt)d total submission"
+msgid_plural "%(cnt)d total submissions"
+msgstr[0] "Tổng cộng %(cnt)d bài nộp"
+
+#: resources/user_profile.js
+msgid "%(cnt)d submission in the last year"
+msgid_plural "%(cnt)d submissions in the last year"
+msgstr[0] "%(cnt)d bài nộp trong năm qua"
+
+#: resources/user_profile.js
+msgid "%(cnt)d submission in %(year)d"
+msgid_plural "%(cnt)d submissions in %(year)d"
+msgstr[0] "%(cnt)d bài nộp trong năm %(year)d"
+
+#: resources/user_profile.js
+msgid "%(cnt)d submission on %(date)s"
+msgid_plural "%(cnt)d submissions on %(date)s"
+msgstr[0] "%(cnt)d bài nộp vào %(date)s"
+

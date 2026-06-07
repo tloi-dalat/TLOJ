@@ -1,5 +1,9 @@
 from abc import ABCMeta, abstractmethod
 
+from django.urls import reverse
+from django.utils.html import format_html
+from django.utils.safestring import mark_safe
+
 
 class abstractclassmethod(classmethod):
     __isabstractmethod__ = True
@@ -116,6 +120,23 @@ class BaseContestFormat(metaclass=ABCMeta):
         :return: A generator, where each item is an individual line.
         """
         raise NotImplementedError()
+
+    def display_hidden_problem_cell(self, participation, contest_problem):
+        format_data = (participation.format_data or {}).get(str(contest_problem.id))
+        if not format_data:
+            return mark_safe('<td></td>')
+
+        url = reverse('contest_user_submissions',
+                      args=[self.contest.key, participation.user.user.username, contest_problem.problem.code])
+        return format_html(
+            '<td class="pending"><a href="{url}">?</a></td>',
+            url=url,
+        )
+
+    def display_hidden_result_cell(self, participation):
+        url = reverse('contest_all_user_submissions',
+                      args=[self.contest.key, participation.user.user.username])
+        return format_html('<td class="user-points"><a href="{url}">?</a></td>', url=url)
 
     @classmethod
     def best_solution_state(cls, points, total):

@@ -152,6 +152,9 @@
     {% if request.user.is_authenticated and form %}
         {% include "problem/submit-js.html" %}
     {% endif %}
+    {% include "graph-core-config.html" %}
+    <script type="text/javascript" src="{{ static('graph-core.js') }}"></script>
+    <script type="text/javascript" src="{{ static('graph-viewer.js') }}"></script>
     <script type="text/javascript">
         $(function() {
             $('#pdf_button').click(async function(e) {
@@ -198,7 +201,11 @@
 {% block title_row %}
     <div class="problem-title">
         {% if request.user.is_authenticated %}
-            {% if problem.id in completed_problem_ids %}
+            {% if problem.id in hidden_contest_problem_ids(request.user) %}
+                <a href="{{ url('user_submissions', problem.code, request.user.username) }}">
+                    <i class="hidden-problem-color title-state fa fa-question-circle"></i>
+                </a>
+            {% elif problem.id in completed_problem_ids %}
                 <a href="{{ url('user_submissions', problem.code, request.user.username) }}">
                     {% if problem.is_public or request.in_contest %}
                         <i class="solved-problem-color title-state fa fa-check-circle"></i>
@@ -293,6 +300,7 @@
             </a>
         </div>
         <div><a href="{{ url('problem_edit', problem.code) }}">{{ _('Edit problem') }}</a></div>
+        <div><a href="{{ url('problem_delete', problem.code) }}?next={{ request.get_full_path()|urlencode }}">{{ _('Delete problem') }}</a></div>
         {% if not problem.is_manually_managed %}
             <div><a href="{{ url('problem_data', problem.code) }}">{{ _('Edit test data') }}</a></div>
         {% endif %}

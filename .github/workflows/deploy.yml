@@ -1,12 +1,32 @@
 name: deploy
 on:
   push:
-    branches: ["master"]
+    branches:
+      - main
+      - release
 jobs:
-  deploy:
+  deploy2qa:
+    if: github.ref_name == 'main'
     runs-on: ubuntu-latest
+    environment: qa
     steps:
-      - name: SSH and run update script
+      - name: Run QA update script via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.QA_VPS_HOST }}
+          username: ${{ secrets.QA_VPS_USER }}
+          key: ${{ secrets.QA_VPS_SSH_KEY }}
+          port: ${{ secrets.QA_VPS_PORT }}
+          script_stop: true
+          script: |
+            /home/tloi/update_tloj.sh
+
+  deploy2prod:
+    if: github.ref_name == 'release'
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - name: Run PROD update script via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
