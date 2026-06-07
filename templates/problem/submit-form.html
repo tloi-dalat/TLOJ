@@ -30,7 +30,6 @@
     {% csrf_token %}
     {{ form.non_field_errors() }}
 
-    {% if show_facts %}
     {% set default_limit = language_limits.get(default_lang.id) if (default_lang and language_limits) else None %}
     <div class="submit-problem-facts">
         <div class="submit-problem-fact">
@@ -62,7 +61,6 @@
             </span>
         </div>
     </div>
-    {% endif %}
 
     <div id="submit-wrapper">
         <div id="editor" class="hidden">
