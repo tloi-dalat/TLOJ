@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dmoj\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-07 03:59+0000\n"
+"POT-Creation-Date: 2026-06-07 06:43+0000\n"
 "PO-Revision-Date: 2020-08-23 18:59\n"
 "Last-Translator: \n"
 "Language-Team: Vietnamese\n"
@@ -3812,8 +3812,8 @@ msgstr "Tạo blog mới"
 
 #: judge/views/blog.py:394 judge/views/contests.py:1271
 #: judge/views/organization.py:395 judge/views/organization.py:699
-#: judge/views/organization.py:723 judge/views/problem.py:941
-#: judge/views/problem.py:981 judge/views/tag.py:182
+#: judge/views/organization.py:723 judge/views/problem.py:942
+#: judge/views/problem.py:982 judge/views/tag.py:182
 msgid "Created on site"
 msgstr "Tạo trên trang web"
 
@@ -3837,7 +3837,7 @@ msgstr "Cập nhật blog"
 
 #: judge/views/blog.py:441 judge/views/comment.py:142
 #: judge/views/contests.py:1340 judge/views/organization.py:438
-#: judge/views/problem.py:1132
+#: judge/views/problem.py:1133
 msgid "Edited from site"
 msgstr "Chỉnh sửa từ trang web"
 
@@ -4338,15 +4338,15 @@ msgstr "Không có lời giải"
 msgid "Could not find an editorial with the code \"%s\"."
 msgstr "Không thể tìm thấy lời giải của bài tập \"%s\"."
 
-#: judge/views/problem.py:286
+#: judge/views/problem.py:287
 msgid "You submitted too many submissions."
 msgstr "Bạn đã nộp bài quá nhiều lần."
 
-#: judge/views/problem.py:292
+#: judge/views/problem.py:293
 msgid "Banned from submitting"
 msgstr "Không thể nộp bài"
 
-#: judge/views/problem.py:293
+#: judge/views/problem.py:294
 msgid ""
 "You have been declared persona non grata for this problem. You are "
 "permanently barred from submitting to this problem."
@@ -4354,19 +4354,19 @@ msgstr ""
 "Bạn đã được coi là cá nhân không tính điểm cho đề này. Bạn không thể nộp bài "
 "này."
 
-#: judge/views/problem.py:298
+#: judge/views/problem.py:299
 msgid "Too many submissions"
 msgstr "Quá nhiều bài nộp"
 
-#: judge/views/problem.py:299
+#: judge/views/problem.py:300
 msgid "You have exceeded the submission limit for this problem."
 msgstr "Bạn đã vượt quá giới hạn lần nộp của bài này."
 
-#: judge/views/problem.py:322
+#: judge/views/problem.py:323
 msgid "No credit"
 msgstr "Không có credit"
 
-#: judge/views/problem.py:324
+#: judge/views/problem.py:325
 #, python-format
 msgid ""
 "The organization %s has no credit left to execute this submission. Ask the "
@@ -4375,88 +4375,88 @@ msgstr ""
 "Tổ chức %s không còn credit để thực hiện bài nộp này. Hãy yêu cầu tổ chức "
 "mua thêm credit."
 
-#: judge/views/problem.py:565
+#: judge/views/problem.py:566
 msgid "Problem list"
 msgstr "Danh sách bài"
 
-#: judge/views/problem.py:768
+#: judge/views/problem.py:769
 msgid "Suggested problem list"
 msgstr "Danh sách các bài được đề xuất"
 
-#: judge/views/problem.py:810 judge/views/problem.py:818
+#: judge/views/problem.py:811 judge/views/problem.py:819
 #, python-format
 msgid "Submit to %s"
 msgstr "Nộp bài %s"
 
-#: judge/views/problem.py:850
+#: judge/views/problem.py:851
 msgid "You are not allowed to submit to this problem."
 msgstr "Bạn không có quyền nộp bài này."
 
-#: judge/views/problem.py:871
+#: judge/views/problem.py:872
 msgid "Clone Problem"
 msgstr "Nhân bản bài tập"
 
-#: judge/views/problem.py:899
+#: judge/views/problem.py:900
 #, python-format
 msgid "Cloned problem from %s"
 msgstr "Nhân bản từ bài %s"
 
-#: judge/views/problem.py:922 judge/views/problem.py:925
+#: judge/views/problem.py:923 judge/views/problem.py:926
 msgid "Creating new problem"
 msgstr "Tạo bài tập mới"
 
-#: judge/views/problem.py:967 judge/views/problem.py:970
+#: judge/views/problem.py:968 judge/views/problem.py:971
 msgid "Suggesting new problem"
 msgstr "Đề xuất bài tập"
 
-#: judge/views/problem.py:989 templates/problem/suggest.html:18
+#: judge/views/problem.py:990 templates/problem/suggest.html:18
 msgid "Import problem from Codeforces Polygon package"
 msgstr "Nhập bài từ gói Codeforces Polygon"
 
-#: judge/views/problem.py:1044
+#: judge/views/problem.py:1045
 msgid "Failed to import problem"
 msgstr "Nhập bài thất bại"
 
-#: judge/views/problem.py:1052 templates/problem/editor.html:103
+#: judge/views/problem.py:1053 templates/problem/editor.html:103
 msgid "Update problem from Codeforces Polygon package"
 msgstr "Cập nhật bài từ gói Codeforces Polygon"
 
-#: judge/views/problem.py:1076 judge/views/problem.py:1154
+#: judge/views/problem.py:1077 judge/views/problem.py:1155
 #, python-brace-format
 msgid "Editing problem {0}"
 msgstr "Sửa đề bài {0}"
 
-#: judge/views/problem.py:1079
+#: judge/views/problem.py:1080
 #, python-format
 msgid "Editing problem %s"
 msgstr "Sửa đề bài %s"
 
-#: judge/views/problem.py:1143
+#: judge/views/problem.py:1144
 msgid "Can't edit problem"
 msgstr "Không thể sửa bài"
 
-#: judge/views/problem.py:1144
+#: judge/views/problem.py:1145
 msgid "You are not allowed to edit this problem."
 msgstr "Bạn không có quyền chỉnh sửa bài tập này."
 
-#: judge/views/problem.py:1164
+#: judge/views/problem.py:1165
 msgid "Edited types/group from site"
 msgstr "Đã chỉnh sửa loại/nhóm từ trang web"
 
-#: judge/views/problem.py:1182
+#: judge/views/problem.py:1183
 #, python-format
 msgid "Delete problem %s"
 msgstr "Xoá bài %s"
 
-#: judge/views/problem.py:1197
+#: judge/views/problem.py:1198
 msgid "Marked as deleted"
 msgstr "Đã đánh dấu là đã xóa"
 
-#: judge/views/problem.py:1205
+#: judge/views/problem.py:1206
 msgid "Can't delete problem"
 msgstr "Không thể xoá bài"
 
-#: judge/views/problem.py:1206
+#: judge/views/problem.py:1207
 msgid "You are not allowed to delete this problem."
 msgstr "Bạn không được phép xoá bài tập này."
 
@@ -7303,52 +7303,52 @@ msgstr[0] "Bạn còn %(left)s lần nộp"
 msgid "You have 0 submissions left"
 msgstr "Bạn còn 0 lần nộp"
 
-#: templates/problem/submit-form.html:32
+#: templates/problem/submit-form.html:33
 msgid "Input"
-msgstr "Input"
+msgstr "Dữ liệu đầu vào"
 
-#: templates/problem/submit-form.html:42
+#: templates/problem/submit-form.html:37
 msgid "Output"
-msgstr "Output"
+msgstr "Kết quả đầu ra"
 
-#: templates/problem/submit-form.html:52
+#: templates/problem/submit-form.html:41
 msgid "Time limit"
 msgstr "Giới hạn thời gian"
 
-#: templates/problem/submit-form.html:56
+#: templates/problem/submit-form.html:51
 msgid "Memory limit"
 msgstr "Giới hạn bộ nhớ"
 
-#: templates/problem/submit-form.html:65
+#: templates/problem/submit-form.html:66
 msgid "Paste your source code here or load it from a file:"
 msgstr "Dán bài làm của bạn ở đây hoặc nhập từ file:"
 
-#: templates/problem/submit-form.html:74
+#: templates/problem/submit-form.html:75
 msgid "You can only submit file for this language."
 msgstr "Ngôn ngữ này chỉ chấp nhận nộp bằng file."
 
-#: templates/problem/submit-form.html:102
+#: templates/problem/submit-form.html:111
 msgid "No judge is available for this problem."
 msgstr "Bài tập này hiện tại không chấm."
 
-#: templates/problem/submit-form.html:106
+#: templates/problem/submit-form.html:115
 msgid "Submit!"
 msgstr "Nộp bài!"
 
-#: templates/problem/submit-js.html:136
+#: templates/problem/submit-js.html:146
 msgid "Your source code must contain at most 65536 characters."
 msgstr "Độ dài code không được vượt quá 65536 ký tự."
 
-#: templates/problem/submit-js.html:150
+#: templates/problem/submit-js.html:160
 #, python-brace-format
 msgid "`Maximum file size is ${file_size_limit}MB.`"
 msgstr "`Dung lượng tối đa của file là ${file_size_limit}MB.`"
 
-#: templates/problem/submit-js.html:174
+#: templates/problem/submit-js.html:184
 msgid "Click to select a file or drag a file into this box"
 msgstr "Nhấn để chọn file hoặc kéo thả file vào đây"
 
-#: templates/problem/submit-js.html:175
+#: templates/problem/submit-js.html:185
 #, python-brace-format
 msgid ""
 "`Only accept \"${file_ext}\". Maximum file size is ${file_size_limit}MB.`"
@@ -7356,11 +7356,11 @@ msgstr ""
 "`Chỉ chấp nhận file có đuôi \"${file_ext}\". Độ lớn tối đa của file là $"
 "{file_size_limit}MB.`"
 
-#: templates/problem/submit-js.html:241
+#: templates/problem/submit-js.html:251
 msgid "File name"
 msgstr "Tên file"
 
-#: templates/problem/submit-js.html:242
+#: templates/problem/submit-js.html:252
 msgid "File size"
 msgstr "Độ lớn của file"
 
