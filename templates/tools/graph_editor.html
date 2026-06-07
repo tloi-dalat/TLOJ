@@ -126,35 +126,31 @@
   <aside id="ge-sidebar">
 
     <div class="sidebox">
-      <h3>Graph type <i class="fa fa-share-alt" style="float:right; margin: 0.2em 0.4em 0 0;"></i></h3>
+      <h3>{{ _('Graph type') }} <i class="fa fa-share-alt" style="float:right; margin: 0.2em 0.4em 0 0;"></i></h3>
       <div class="sidebox-content">
         <label class="ge-option-row">
           <input type="radio" name="ge-type" value="undirected" checked>
-          <span>Undirected</span>
+          <span>{{ _('Undirected') }}</span>
         </label>
         <label class="ge-option-row">
           <input type="radio" name="ge-type" value="directed">
-          <span>Directed</span>
+          <span>{{ _('Directed') }}</span>
         </label>
       </div>
     </div>
 
     <div class="sidebox">
-      <h3>Options <i class="fa fa-cog" style="float:right; margin: 0.2em 0.4em 0 0;"></i></h3>
+      <h3>{{ _('Options') }} <i class="fa fa-cog" style="float:right; margin: 0.2em 0.4em 0 0;"></i></h3>
       <div class="sidebox-content">
         <label class="ge-option-row">
-          <input type="checkbox" id="ge-tree">
-          <span>Tree mode</span>
-        </label>
-        <label class="ge-option-row">
           <input type="checkbox" id="ge-lock">
-          <span>Lock all nodes</span>
+          <span>{{ _('Lock all nodes') }}</span>
         </label>
       </div>
     </div>
 
     <div class="sidebox ge-input-box">
-      <h3>Adjacency list <i class="fa fa-list" style="float:right; margin: 0.2em 0.4em 0 0;"></i></h3>
+      <h3>{{ _('Adjacency list') }} <i class="fa fa-list" style="float:right; margin: 0.2em 0.4em 0 0;"></i></h3>
       <div class="sidebox-content">
         <textarea id="ge-input"></textarea>
       </div>
@@ -162,7 +158,7 @@
 
   </aside>
 
-  <section id="ge-canvas-wrap" aria-label="Graph canvas">
+  <section id="ge-canvas-wrap" aria-label="{{ _('Graph canvas') }}">
     <canvas id="ge-canvas"></canvas>
     <canvas id="ge-overlay"></canvas>
   </section>
@@ -177,9 +173,9 @@
 'use strict';
 
 const {
-  clamp, dist2D, isDark, NODE_RADIUS, NODE_DIST, TENSION, NODE_REPULSION,
-  renderEdges, renderNodes, updateVelocities,
-  parseInput, buildLayers,
+  clamp, dist2D, isDark, NODE_RADIUS,
+  renderEdges, renderNodes, updateGraphLayout,
+  parseInput,
 } = GraphCore;
 
 document.body.classList.add('ge-active');
@@ -192,18 +188,13 @@ let canvasW = 0;
 let canvasH = 0;
 let nodes = [];
 let nodeMap = new Map();
-let adj = new Map();
-let adjSet = new Map();
 let edges = [];
 let edgeLabels = new Map();
 let edgeCurvMap = new Map();
-let edgeToPos = new Map();
 
 let directed = false;
-let treeMode = false;
 let lockMode = false;
 
-let layerMap = null;
 let mousePos = { x: 0, y: 0 };
 let dragNode = null;
 let animId = null;
@@ -214,7 +205,6 @@ const canvas = document.getElementById('ge-canvas');
 const overlay = document.getElementById('ge-overlay');
 const ctx = canvas.getContext('2d');
 const inputEl = document.getElementById('ge-input');
-const treeCb = document.getElementById('ge-tree');
 const lockCb = document.getElementById('ge-lock');
 
 function randCoord() {
@@ -261,10 +251,8 @@ function applyGraph(parsed) {
   const oldNodeMap = new Map(nodeMap);
 
   nodes = parsed.nodes;
-  adj = parsed.adj;
   edges = parsed.edges;
   edgeLabels = parsed.edgeLabels;
-  edgeToPos = parsed.edgeToPos;
 
   nodeMap.clear();
   nodes.forEach(function (node) {
@@ -272,20 +260,11 @@ function applyGraph(parsed) {
       nodeMap.set(node, oldNodeMap.get(node));
     } else {
       const coord = randCoord();
-      nodeMap.set(node, {
-        pos: { x: coord.x, y: coord.y },
-        vel: { x: 0, y: 0 },
-      });
+      nodeMap.set(node, { pos: { x: coord.x, y: coord.y } });
     }
   });
 
-  adjSet.clear();
-  nodes.forEach(function (node) {
-    adjSet.set(node, new Set(adj.get(node) || []));
-  });
-
   edgeCurvMap.clear();
-  layerMap = treeMode ? buildLayers(nodes, adj) : null;
 }
 
 function render() {
@@ -302,7 +281,7 @@ function render() {
   renderNodes(ctx, { nodes, nodeMap });
 
   if (!lockMode) {
-    updateVelocities({ nodes, nodeMap, canvasW, canvasH, adjSet, layerMap }, { nodeDist: NODE_DIST, tension: TENSION, nodeRepulsion: NODE_REPULSION });
+    updateGraphLayout(nodes, nodeMap, edges, dragNode, canvasW, canvasH);
   }
 }
 
@@ -339,13 +318,9 @@ function resizeCanvas() {
 function clearState() {
   nodes = [];
   nodeMap.clear();
-  adj.clear();
-  adjSet.clear();
   edges = [];
   edgeLabels.clear();
   edgeCurvMap.clear();
-  edgeToPos.clear();
-  layerMap = null;
 }
 
 function drawGraph() {
@@ -369,12 +344,7 @@ function drawGraph() {
 
 function syncSettings() {
   directed = document.querySelector('input[name="ge-type"]:checked').value === 'directed';
-  treeMode = treeCb.checked;
   lockMode = lockCb.checked;
-
-  if (nodes.length) {
-    layerMap = treeMode ? buildLayers(nodes, adj) : null;
-  }
 }
 
 function getNodeAt(x, y) {
@@ -393,7 +363,6 @@ overlay.addEventListener('pointerdown', function (event) {
   dragNode = getNodeAt(event.offsetX, event.offsetY);
   if (dragNode) {
     const current = nodeMap.get(dragNode);
-    current.vel = { x: 0, y: 0 };
     current.pos.x = clamp(mousePos.x, NODE_RADIUS, canvasW - NODE_RADIUS);
     current.pos.y = clamp(mousePos.y, NODE_RADIUS, canvasH - NODE_RADIUS);
     overlay.style.cursor = 'grabbing';
@@ -406,7 +375,6 @@ overlay.addEventListener('pointermove', function (event) {
   mousePos = { x: event.offsetX, y: event.offsetY };
   if (dragNode) {
     const current = nodeMap.get(dragNode);
-    current.vel = { x: 0, y: 0 };
     current.pos.x = clamp(mousePos.x, NODE_RADIUS, canvasW - NODE_RADIUS);
     current.pos.y = clamp(mousePos.y, NODE_RADIUS, canvasH - NODE_RADIUS);
     requestAnimationFrame(render);
@@ -436,7 +404,7 @@ inputEl.addEventListener('input', function () {
   }, 120);
 });
 
-Array.prototype.slice.call(document.querySelectorAll('input[name="ge-type"]')).concat([treeCb, lockCb])
+Array.prototype.slice.call(document.querySelectorAll('input[name="ge-type"]')).concat([lockCb])
   .forEach(function (element) {
     element.addEventListener('change', function () {
       syncSettings();

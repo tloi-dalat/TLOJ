@@ -75,6 +75,11 @@ class RankedSubmissions(ProblemSubmissions):
     def _get_result_data(self, queryset=None):
         if queryset is None:
             queryset = super(RankedSubmissions, self).get_queryset()
+        if not (self.request.user.has_perm('judge.see_private_contest') or
+                self.request.user.has_perm('judge.edit_all_contest')):
+            from judge.contest_format import hidden_result_contest_ids
+            profile = self.request.profile if self.request.user.is_authenticated else None
+            queryset = queryset.exclude(contest_object__in=hidden_result_contest_ids(profile))
         return get_result_data(queryset.order_by())
 
 

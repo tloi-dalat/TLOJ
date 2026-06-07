@@ -241,6 +241,11 @@ class SubmissionStatus(SubmissionDetailBase):
         context = super(SubmissionStatus, self).get_context_data(**kwargs)
         submission = self.object
 
+        result_hidden = False
+        if submission.contest_object_id:
+            result_hidden = submission.contest_object.should_hide_result(self.request.user, self.request.participation)
+        context['result_hidden'] = result_hidden
+
         context['batches'], statuses, test_case_count = group_test_cases(submission.test_cases.all())
 
         context['feedback_limit'] = min(3, test_case_count - 1)
@@ -366,6 +371,11 @@ class SubmissionsListBase(DiggPaginatorMixin, TitleMixin, ListView):
             return {'categories': [], 'total': 0}
         if queryset is None:
             queryset = self.get_queryset()
+        if not (self.request.user.has_perm('judge.see_private_contest') or
+                self.request.user.has_perm('judge.edit_all_contest')):
+            from judge.contest_format import hidden_result_contest_ids
+            profile = self.request.profile if self.request.user.is_authenticated else None
+            queryset = queryset.exclude(contest_object__in=hidden_result_contest_ids(profile))
         return get_result_data(queryset.order_by())
 
     def access_check(self, request):
@@ -420,6 +430,11 @@ class SubmissionsListBase(DiggPaginatorMixin, TitleMixin, ListView):
             if self.could_filter_by_status():
                 status_filter |= Q(status__in=self.selected_statuses)
             queryset = queryset.filter(status_filter)
+            if not (self.request.user.has_perm('judge.see_private_contest') or
+                    self.request.user.has_perm('judge.edit_all_contest')):
+                from judge.contest_format import hidden_result_contest_ids
+                profile = self.request.profile if self.request.user.is_authenticated else None
+                queryset = queryset.exclude(contest_object__in=hidden_result_contest_ids(profile))
         if self.selected_organization:
             organization_object = get_object_or_404(Organization, pk=self.selected_organization)
             queryset = queryset.filter(user__organizations=organization_object)
@@ -650,7 +665,7 @@ class ProblemSubmissionsBase(SubmissionsListBase):
         return context
 
 
-class ProblemSubmissions(ProblemSubmissionsBase):
+class ProblemSubmissions(InfinitePaginationMixin, ProblemSubmissionsBase):
     def get_my_submissions_page(self):
         if self.request.user.is_authenticated:
             if hasattr(self, 'contest'):
@@ -716,6 +731,10 @@ def single_submission(request):
     if not submission.problem.is_accessible_by(request.user):
         raise Http404()
 
+    result_hidden = False
+    if submission.contest_object_id:
+        result_hidden = submission.contest_object.should_hide_result(request.user, request.participation)
+
     return render(request, 'submission/row.html', {
         'submission': submission,
         'completed_problem_ids': user_completed_ids(request.profile) if authenticated else [],
@@ -724,6 +743,7 @@ def single_submission(request):
         'show_problem': show_problem,
         'problem_name': show_problem and submission.problem.translated_name(request.LANGUAGE_CODE),
         'profile_id': request.profile.id if authenticated else 0,
+        'result_hidden': result_hidden,
     })
 
 
@@ -782,6 +802,11 @@ class ForceContestMixin(object):
 
     def get_problem_label(self, problem):
         return self.contest.get_label_for_problem(self.get_problem_number(problem) - 1)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['result_hidden'] = self.contest.should_hide_result(self.request.user, self.request.participation)
+        return context
 
     def get(self, request, *args, **kwargs):
         if 'contest' not in kwargs:

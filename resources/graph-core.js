@@ -2,10 +2,10 @@
 'use strict';
 
 const { nodeRadius: NODE_RADIUS, edgeLabelSeparation: EDGE_LABEL_SEPARATION,
-        nodeFriction: NODE_FRICTION, canvasFieldDist: CANVAS_FIELD_DIST,
-        centeringStrength: CENTERING_STRENGTH, nodeDist: NODE_DIST,
-        tension: TENSION, nodeRepulsion: NODE_REPULSION,
-        nodeThickness: NODE_THICKNESS, edgeThickness: EDGE_THICKNESS } = window.GraphCoreConfig;
+        nodeThickness: NODE_THICKNESS, edgeThickness: EDGE_THICKNESS,
+        chargeStrength: CHARGE_STRENGTH, edgeStrength: EDGE_STRENGTH,
+        gravityStrength: GRAVITY_STRENGTH, idealEdgeDistance: IDEAL_EDGE_DISTANCE,
+        repulsionDistance: REPULSION_DISTANCE } = window.GraphCoreConfig;
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(value, max));
@@ -268,86 +268,6 @@ function renderNodes(ctx, state) {
   });
 }
 
-// state = { nodes, nodeMap, canvasW, canvasH, adjSet, layerMap }
-// config = { nodeDist, tension, nodeRepulsion } — optional, falls back to defaults
-function updateVelocities(state, config) {
-  const { nodes, nodeMap, canvasW, canvasH, adjSet, layerMap } = state;
-  const nodeDist = (config && config.nodeDist != null) ? config.nodeDist : NODE_DIST;
-  const tension = (config && config.tension != null) ? config.tension : TENSION;
-  const nodeRepulsion = (config && config.nodeRepulsion != null) ? config.nodeRepulsion : NODE_REPULSION;
-
-  let centerOfMass = { x: canvasW / 2, y: canvasH / 2 };
-  if (nodes.length) {
-    centerOfMass = nodes.reduce((acc, node) => {
-      const pos = nodeMap.get(node).pos;
-      acc.x += pos.x; acc.y += pos.y; return acc;
-    }, { x: 0, y: 0 });
-    centerOfMass.x /= nodes.length;
-    centerOfMass.y /= nodes.length;
-  }
-  const centerDx = canvasW / 2 - centerOfMass.x;
-  const centerDy = canvasH / 2 - centerOfMass.y;
-
-  nodes.forEach(u => {
-    const uNode = nodeMap.get(u);
-    const uPos = uNode.pos;
-
-    nodes.forEach(v => {
-      if (v === u) return;
-      const vPos = nodeMap.get(v).pos;
-      const distance = Math.max(dist2D(uPos, vPos), 10);
-      let acceleration = 150000 / (2 * Math.pow(distance, 4.5 - nodeRepulsion));
-      const isEdge = adjSet.get(u).has(v) || adjSet.get(v).has(u);
-      if (isEdge) {
-        acceleration = Math.pow(Math.abs(distance - nodeDist), tension) / 100000;
-        if (distance >= nodeDist) acceleration *= -1;
-      }
-      const ax = vPos.x - uPos.x, ay = vPos.y - uPos.y;
-      uNode.vel = {
-        x: clamp((uNode.vel.x - acceleration * ax) * (1 - NODE_FRICTION), -100, 100),
-        y: clamp((uNode.vel.y - acceleration * ay) * (1 - NODE_FRICTION), -100, 100),
-      };
-    });
-
-    const borderXSign = canvasW / 2 - uPos.x >= 0 ? 1 : -1;
-    const borderYSign = canvasH / 2 - uPos.y >= 0 ? 1 : -1;
-    let borderAx = 0, borderAy = 0;
-    if (Math.min(uPos.x, canvasW - uPos.x) <= CANVAS_FIELD_DIST)
-      borderAx = Math.pow(canvasW / 2 - uPos.x, 2) * borderXSign / 500000;
-    if (Math.min(uPos.y, canvasH - uPos.y) <= CANVAS_FIELD_DIST)
-      borderAy = Math.pow(canvasH / 2 - uPos.y, 2) * borderYSign / 500000;
-
-    uNode.vel = {
-      x: clamp((uNode.vel.x + borderAx) * (1 - NODE_FRICTION), -100, 100),
-      y: clamp((uNode.vel.y + borderAy) * (1 - NODE_FRICTION), -100, 100),
-    };
-    uNode.vel = {
-      x: clamp((uNode.vel.x + centerDx * CENTERING_STRENGTH) * (1 - NODE_FRICTION * 0.2), -100, 100),
-      y: clamp((uNode.vel.y + centerDy * CENTERING_STRENGTH) * (1 - NODE_FRICTION * 0.2), -100, 100),
-    };
-
-    if (layerMap && layerMap.has(u)) {
-      const [depth, maxDepth] = layerMap.get(u);
-      let layerHeight = (nodeDist * 4) / 5;
-      if (maxDepth * layerHeight >= canvasH - 2 * CANVAS_FIELD_DIST) {
-        layerHeight = (canvasH - 2 * CANVAS_FIELD_DIST) / maxDepth;
-      }
-      const yTarget = CANVAS_FIELD_DIST + (depth - 0.5) * layerHeight;
-      let ay = Math.pow(Math.abs(uPos.y - yTarget), 1.75) / 100;
-      if (uPos.y > yTarget) ay *= -1;
-      uNode.vel.y = clamp((uNode.vel.y + ay) * (1 - NODE_FRICTION), -100, 100);
-    }
-
-    uNode.pos = { x: uPos.x + uNode.vel.x, y: uPos.y + uNode.vel.y };
-  });
-
-  nodes.forEach(node => {
-    const current = nodeMap.get(node);
-    current.pos.x = clamp(current.pos.x, NODE_RADIUS, canvasW - NODE_RADIUS);
-    current.pos.y = clamp(current.pos.y, NODE_RADIUS, canvasH - NODE_RADIUS);
-  });
-}
-
 function parseInput(text) {
   const lines = text.trim().split('\n')
     .map(line => line.trim().split(/\s+/).filter(Boolean))
@@ -387,51 +307,82 @@ function parseInput(text) {
   return { nodes: newNodes, adj: newAdj, edges: newEdges, edgeLabels: newLabels, edgeToPos: baseEdgeCount };
 }
 
-function buildLayers(nodesList, adjMap) {
-  const combined = new Map();
-  nodesList.forEach(node => combined.set(node, []));
-  adjMap.forEach((neighbors, u) => {
-    neighbors.forEach(v => {
-      if (!combined.get(u).includes(v)) combined.get(u).push(v);
-      if (!combined.has(v)) combined.set(v, []);
-      if (!combined.get(v).includes(u)) combined.get(v).push(u);
-    });
+
+const EPS = 1e-9;
+
+function updateGraphLayout(nodes, nodeMap, edges, dragNode, canvasW, canvasH) {
+  const nodeIndex = new Map(nodes.map((name, i) => [name, i]));
+  const csaNodes = nodes.map(name => ({ center: nodeMap.get(name).pos, fixed: false, dragging: name === dragNode }));
+  const seenEdges = new Set();
+  const csaEdges = [];
+  edges.forEach(edge => {
+    const parts = edge.split(' ');
+    const u = parts[0], v = parts[1];
+    if (u === v) return;
+    const ui = nodeIndex.get(u), vi = nodeIndex.get(v);
+    const key = Math.min(ui, vi) + ',' + Math.max(ui, vi);
+    if (!seenEdges.has(key)) { seenEdges.add(key); csaEdges.push({ source: ui, target: vi }); }
   });
+  const newPos = runGraphPhysicsStep(csaNodes, csaEdges, { x: canvasW / 2, y: canvasH / 2 });
+  nodes.forEach((name, i) => {
+    const node = nodeMap.get(name);
+    node.pos.x = clamp(newPos[i].x, NODE_RADIUS, canvasW - NODE_RADIUS);
+    node.pos.y = clamp(newPos[i].y, NODE_RADIUS, canvasH - NODE_RADIUS);
+  });
+}
 
-  const layers = new Map();
-  const seen = new Set();
+function runGraphPhysicsStep(nodes, edges, gravityCenter) {
+  const n = nodes.length;
+  const pts = nodes.map(node => ({ x: node.center.x, y: node.center.y, dx: 0, dy: 0 }));
 
-  function findMax(node, depth) {
-    seen.add(node);
-    let max = depth;
-    (combined.get(node) || []).forEach(next => { if (!seen.has(next)) max = Math.max(max, findMax(next, depth + 1)); });
-    return max;
+  const adj = Array(n).fill(null).map(() => Array(n).fill(false));
+  for (let i = 0; i < edges.length; i++) {
+    adj[edges[i].source][edges[i].target] = true;
+    adj[edges[i].target][edges[i].source] = true;
   }
 
-  function assign(node, depth, maxDepth) {
-    seen.add(node);
-    layers.set(node, [depth, maxDepth]);
-    (combined.get(node) || []).forEach(next => { if (!seen.has(next)) assign(next, depth + 1, maxDepth); });
-  }
-
-  nodesList.forEach(node => {
-    if (!layers.has(node)) {
-      seen.clear(); const maxDepth = findMax(node, 1);
-      seen.clear(); assign(node, 1, maxDepth);
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      const d = dist2D(pts[i], pts[j]);
+      let force;
+      if (adj[i][j]) {
+        force = d < EPS ? 1000 : EDGE_STRENGTH * (d - IDEAL_EDGE_DISTANCE) / d;
+      } else if (d < REPULSION_DISTANCE) {
+        force = d < EPS ? 1000 : CHARGE_STRENGTH * (d - REPULSION_DISTANCE) / d;
+      } else {
+        continue;
+      }
+      let dx = pts[j].x - pts[i].x, dy = pts[j].y - pts[i].y;
+      let len = Math.sqrt(dx * dx + dy * dy);
+      if (len < EPS) {
+        const angle = Math.random() * 2 * Math.PI;
+        dx = Math.sin(angle); dy = Math.cos(angle); len = 1;
+      }
+      pts[i].dx += force * dx / len; pts[i].dy += force * dy / len;
+      pts[j].dx -= force * dx / len; pts[j].dy -= force * dy / len;
     }
-  });
+  }
 
-  return layers;
+  if (gravityCenter) {
+    for (let i = 0; i < n; i++) {
+      pts[i].dx += GRAVITY_STRENGTH * (gravityCenter.x - pts[i].x);
+      pts[i].dy += GRAVITY_STRENGTH * (gravityCenter.y - pts[i].y);
+    }
+  }
+
+  return nodes.map((node, i) => {
+    if (node.fixed || node.dragging) return node.center;
+    return { x: node.center.x + pts[i].dx, y: node.center.y + pts[i].dy };
+  });
 }
 
 window.GraphCore = {
-  NODE_RADIUS, EDGE_LABEL_SEPARATION, NODE_FRICTION, CANVAS_FIELD_DIST,
-  CENTERING_STRENGTH, NODE_DIST, TENSION, NODE_REPULSION, NODE_THICKNESS, EDGE_THICKNESS,
+  NODE_RADIUS, EDGE_LABEL_SEPARATION, NODE_THICKNESS, EDGE_THICKNESS,
   clamp, dist2D, isPointProjOutsideLine, isDark, getIdealCurvature,
   getCurveControlPoints, getBezierPoint, getBezierTangent, getUpperNormal, findBezierBoundaryT,
   drawLine, drawArrow, drawEdgeLabel, drawSelfLoop,
-  renderEdges, renderNodes, updateVelocities,
-  parseInput, buildLayers,
+  renderEdges, renderNodes, updateGraphLayout,
+  parseInput,
 };
 
 }());

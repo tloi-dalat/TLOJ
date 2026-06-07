@@ -13,8 +13,17 @@ PPBreakdown = namedtuple('PPBreakdown', 'points weight scaled_points problem_nam
                                         'sub_short_status sub_long_status sub_lang')
 
 
-def get_pp_breakdown(user, start=0, end=settings.DMOJ_PP_ENTRIES):
+def get_pp_breakdown(user, start=0, end=settings.DMOJ_PP_ENTRIES, exclude_problem_ids=None):
     join_type = 'STRAIGHT_JOIN' if connection.vendor == 'mysql' else 'INNER JOIN'
+
+    if exclude_problem_ids:
+        exclude_ids = list(exclude_problem_ids)
+        placeholders = ','.join(['%s'] * len(exclude_ids))
+        exclusion_clause = f'AND judge_problem.id NOT IN ({placeholders})'
+        inner_params = [user.id] + exclude_ids
+    else:
+        exclusion_clause = ''
+        inner_params = [user.id]
 
     with connection.cursor() as cursor:
         cursor.execute(f"""
@@ -38,7 +47,8 @@ def get_pp_breakdown(user, start=0, end=settings.DMOJ_PP_ENTRIES):
                 WHERE (judge_problem.is_public AND
                        NOT judge_problem.is_organization_private AND
                        judge_submission.points IS NOT NULL AND
-                       judge_submission.user_id = %s)
+                       judge_submission.user_id = %s
+                       {exclusion_clause})
                 GROUP BY judge_problem.id
                 HAVING MAX(judge_submission.points) > 0.0
             ) AS max_points_table
@@ -51,7 +61,7 @@ def get_pp_breakdown(user, start=0, end=settings.DMOJ_PP_ENTRIES):
             GROUP BY max_points_table.problem_id
             ORDER BY max_points DESC, judge_submission.date DESC
             LIMIT %s OFFSET %s
-        """, (user.id, user.id, end - start + 1, start))
+        """, (*inner_params, user.id, end - start + 1, start))
         data = cursor.fetchall()
 
     breakdown = []
