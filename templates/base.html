@@ -47,13 +47,13 @@
     {% endif %}
     {% compress css %}
         <link rel="stylesheet" href="{{ static(LIGHT_STYLE_CSS) }}">
-        <link rel="stylesheet" href="{{ static(DARK_STYLE_CSS) }}" id="dark-theme-style"
-              media="{% if SITE_THEME_NAME == 'dark' %}all{% elif SITE_THEME_NAME == 'light' %}not all{% else %}(prefers-color-scheme: dark){% endif %}">
         {% if INLINE_FONTAWESOME %}<link rel="stylesheet" href="{{ static('libs/fontawesome/font-awesome.css') }}">{% endif %}
         <link rel="stylesheet" href="{{ static('source_sans_pro.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ static('libs/clipboard/tooltip.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ static('libs/select2/select2.css') }}">
     {% endcompress %}
+    <link rel="stylesheet" href="{{ static(DARK_STYLE_CSS) }}" id="dark-theme-style"
+          media="{% if SITE_THEME_NAME == 'dark' %}all{% elif SITE_THEME_NAME == 'light' %}not all{% else %}(prefers-color-scheme: dark){% endif %}">
     <script>
         (function() {
             var theme = localStorage.getItem('theme') || '{{ SITE_THEME_NAME }}';
@@ -282,8 +282,10 @@
                     </span>
                 </a>
             {% endif %}
-            <a id="theme-toggle" href="javascript:void(0)" title="{{ _('Toggle Dark/Light Mode') }}" style="margin-right: 15px; margin-top: 4px; vertical-align: middle;">
-                <i class="fa fa-moon-o" id="theme-icon" style="font-size: 1.3em;"></i>
+            <a id="theme-toggle" href="javascript:void(0)" style="margin-right: 5px;">
+                <span title="{{ _('Toggle Dark/Light Mode') }}">
+                    <i class="fa fa-moon-o" id="theme-icon" style="font-size: 1.15em;"></i>
+                </span>
             </a>
             <a href=
                 {% if request.resolver_match.view_name == "problem_detail" and problem %}
