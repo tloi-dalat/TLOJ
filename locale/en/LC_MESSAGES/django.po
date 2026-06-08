@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-07 06:43+0000\n"
+"POT-Creation-Date: 2026-06-08 01:45+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -32,7 +32,7 @@ msgstr ""
 msgid "Banned User"
 msgstr ""
 
-#: dmoj/settings.py:104 templates/base.html:303
+#: dmoj/settings.py:104 templates/base.html:318
 #: templates/comments/list.html:102 templates/contest/contest-list-tabs.html:34
 #: templates/contest/ranking-table.html:28
 #: templates/problem/problem-list-tabs.html:15
@@ -83,7 +83,7 @@ msgstr ""
 msgid "Password reset sent"
 msgstr ""
 
-#: dmoj/urls.py:104 templates/base.html:235 templates/organization/tabs.html:15
+#: dmoj/urls.py:104 templates/base.html:245 templates/organization/tabs.html:15
 msgid "Home"
 msgstr ""
 
@@ -252,7 +252,7 @@ msgstr[1] ""
 msgid "username"
 msgstr ""
 
-#: judge/admin/contest.py:419 templates/base.html:344
+#: judge/admin/contest.py:419 templates/base.html:359
 msgid "virtual"
 msgstr ""
 
@@ -384,7 +384,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: judge/admin/runtime.py:62 templates/user/edit-profile.html:120
-#: templates/user/edit-profile.html:251 templates/user/edit-profile.html:400
+#: templates/user/edit-profile.html:251 templates/user/edit-profile.html:398
 msgid "Regenerate"
 msgstr ""
 
@@ -726,7 +726,7 @@ msgstr ""
 msgid "Your password can't be entirely numeric."
 msgstr ""
 
-#: judge/custom_translations.py:24 templates/base.html:260
+#: judge/custom_translations.py:24 templates/base.html:270
 msgid "PRoblems"
 msgstr ""
 
@@ -3739,8 +3739,8 @@ msgstr ""
 
 #: judge/views/blog.py:394 judge/views/contests.py:1271
 #: judge/views/organization.py:395 judge/views/organization.py:699
-#: judge/views/organization.py:723 judge/views/problem.py:942
-#: judge/views/problem.py:982 judge/views/tag.py:182
+#: judge/views/organization.py:723 judge/views/problem.py:948
+#: judge/views/problem.py:988 judge/views/tag.py:182
 msgid "Created on site"
 msgstr ""
 
@@ -3762,7 +3762,7 @@ msgstr ""
 
 #: judge/views/blog.py:441 judge/views/comment.py:142
 #: judge/views/contests.py:1340 judge/views/organization.py:438
-#: judge/views/problem.py:1133
+#: judge/views/problem.py:1139
 msgid "Edited from site"
 msgstr ""
 
@@ -3792,7 +3792,7 @@ msgstr ""
 msgid "Could not find a contest with the key \"%s\"."
 msgstr ""
 
-#: judge/views/contests.py:99 templates/base.html:262
+#: judge/views/contests.py:99 templates/base.html:272
 msgid "Contests"
 msgstr ""
 
@@ -4062,7 +4062,7 @@ msgstr ""
 msgid "Runtimes"
 msgstr ""
 
-#: judge/views/misc_config.py:21 templates/base.html:270
+#: judge/views/misc_config.py:21 templates/base.html:280
 msgid "Site settings"
 msgstr ""
 
@@ -4266,121 +4266,121 @@ msgstr ""
 msgid "Could not find an editorial with the code \"%s\"."
 msgstr ""
 
-#: judge/views/problem.py:287
+#: judge/views/problem.py:293
 msgid "You submitted too many submissions."
 msgstr ""
 
-#: judge/views/problem.py:293
+#: judge/views/problem.py:299
 msgid "Banned from submitting"
 msgstr ""
 
-#: judge/views/problem.py:294
+#: judge/views/problem.py:300
 msgid ""
 "You have been declared persona non grata for this problem. You are "
 "permanently barred from submitting to this problem."
 msgstr ""
 
-#: judge/views/problem.py:299
+#: judge/views/problem.py:305
 msgid "Too many submissions"
 msgstr ""
 
-#: judge/views/problem.py:300
+#: judge/views/problem.py:306
 msgid "You have exceeded the submission limit for this problem."
 msgstr ""
 
-#: judge/views/problem.py:323
+#: judge/views/problem.py:329
 msgid "No credit"
 msgstr ""
 
-#: judge/views/problem.py:325
+#: judge/views/problem.py:331
 #, python-format
 msgid ""
 "The organization %s has no credit left to execute this submission. Ask the "
 "organization to buy more credit."
 msgstr ""
 
-#: judge/views/problem.py:566
+#: judge/views/problem.py:572
 msgid "Problem list"
 msgstr ""
 
-#: judge/views/problem.py:769
+#: judge/views/problem.py:775
 msgid "Suggested problem list"
 msgstr ""
 
-#: judge/views/problem.py:811 judge/views/problem.py:819
+#: judge/views/problem.py:817 judge/views/problem.py:825
 #, python-format
 msgid "Submit to %s"
 msgstr ""
 
-#: judge/views/problem.py:851
+#: judge/views/problem.py:857
 msgid "You are not allowed to submit to this problem."
 msgstr ""
 
-#: judge/views/problem.py:872
+#: judge/views/problem.py:878
 msgid "Clone Problem"
 msgstr ""
 
-#: judge/views/problem.py:900
+#: judge/views/problem.py:906
 #, python-format
 msgid "Cloned problem from %s"
 msgstr ""
 
-#: judge/views/problem.py:923 judge/views/problem.py:926
+#: judge/views/problem.py:929 judge/views/problem.py:932
 msgid "Creating new problem"
 msgstr ""
 
-#: judge/views/problem.py:968 judge/views/problem.py:971
+#: judge/views/problem.py:974 judge/views/problem.py:977
 msgid "Suggesting new problem"
 msgstr ""
 
-#: judge/views/problem.py:990 templates/problem/suggest.html:18
+#: judge/views/problem.py:996 templates/problem/suggest.html:18
 msgid "Import problem from Codeforces Polygon package"
 msgstr ""
 
-#: judge/views/problem.py:1045
+#: judge/views/problem.py:1051
 msgid "Failed to import problem"
 msgstr ""
 
-#: judge/views/problem.py:1053 templates/problem/editor.html:103
+#: judge/views/problem.py:1059 templates/problem/editor.html:103
 msgid "Update problem from Codeforces Polygon package"
 msgstr ""
 
-#: judge/views/problem.py:1077 judge/views/problem.py:1155
+#: judge/views/problem.py:1083 judge/views/problem.py:1161
 #, python-brace-format
 msgid "Editing problem {0}"
 msgstr ""
 
-#: judge/views/problem.py:1080
+#: judge/views/problem.py:1086
 #, python-format
 msgid "Editing problem %s"
 msgstr ""
 
-#: judge/views/problem.py:1144
+#: judge/views/problem.py:1150
 msgid "Can't edit problem"
 msgstr ""
 
-#: judge/views/problem.py:1145
+#: judge/views/problem.py:1151
 msgid "You are not allowed to edit this problem."
 msgstr ""
 
-#: judge/views/problem.py:1165
+#: judge/views/problem.py:1171
 msgid "Edited types/group from site"
 msgstr ""
 
-#: judge/views/problem.py:1183
+#: judge/views/problem.py:1189
 #, python-format
 msgid "Delete problem %s"
 msgstr ""
 
-#: judge/views/problem.py:1198
+#: judge/views/problem.py:1204
 msgid "Marked as deleted"
 msgstr ""
 
-#: judge/views/problem.py:1206
+#: judge/views/problem.py:1212
 msgid "Can't delete problem"
 msgstr ""
 
-#: judge/views/problem.py:1207
+#: judge/views/problem.py:1213
 msgid "You are not allowed to delete this problem."
 msgstr ""
 
@@ -4497,7 +4497,7 @@ msgid "A username must contain letters, numbers, or underscores."
 msgstr ""
 
 #: judge/views/register.py:30 templates/registration/registration_form.html:162
-#: templates/user/edit-profile.html:289
+#: templates/user/edit-profile.html:290
 msgid "Full name"
 msgstr ""
 
@@ -4813,7 +4813,7 @@ msgstr ""
 msgid "Preparing your data..."
 msgstr ""
 
-#: judge/views/user.py:463 templates/user/edit-profile.html:377
+#: judge/views/user.py:463 templates/user/edit-profile.html:375
 msgid "Download your data"
 msgstr ""
 
@@ -4826,7 +4826,7 @@ msgid "Updated on site"
 msgstr ""
 
 #: judge/views/user.py:554 templates/admin/auth/user/change_form.html:14
-#: templates/admin/auth/user/change_form.html:17 templates/base.html:305
+#: templates/admin/auth/user/change_form.html:17 templates/base.html:320
 #: templates/user/user-tabs.html:32
 msgid "Edit profile"
 msgstr ""
@@ -5000,7 +5000,7 @@ msgstr ""
 msgid "Models in the %(name)s application"
 msgstr ""
 
-#: templates/admin/judge/app_index.html:17 templates/user/edit-profile.html:445
+#: templates/admin/judge/app_index.html:17 templates/user/edit-profile.html:443
 msgid "Add"
 msgstr ""
 
@@ -5013,7 +5013,7 @@ msgstr ""
 #: templates/problem/editor.html:125
 #: templates/urlshortener/confirm_delete.html:91
 #: templates/urlshortener/detail.html:101 templates/urlshortener/list.html:73
-#: templates/user/edit-profile.html:437
+#: templates/user/edit-profile.html:435
 msgid "Delete"
 msgstr ""
 
@@ -5050,13 +5050,13 @@ msgstr ""
 
 #: templates/admin/judge/judge/change_form.html:27
 #: templates/admin/judge/judge/change_form.html:30
-#: templates/user/edit-profile.html:389 templates/user/edit-profile.html:392
+#: templates/user/edit-profile.html:387 templates/user/edit-profile.html:390
 msgid "Disable"
 msgstr ""
 
 #: templates/admin/judge/judge/change_form.html:33
 #: templates/admin/judge/judge/change_form.html:36
-#: templates/user/edit-profile.html:420
+#: templates/user/edit-profile.html:418
 msgid "Enable"
 msgstr ""
 
@@ -5074,82 +5074,86 @@ msgstr ""
 msgid "Edit user"
 msgstr ""
 
-#: templates/base.html:112
+#: templates/base.html:113
 msgid "You have a new ticket: "
 msgstr ""
 
-#: templates/base.html:113
+#: templates/base.html:114
 msgid "You have a new reply on ticket "
 msgstr ""
 
-#: templates/base.html:114
+#: templates/base.html:115
 msgid "Access ticket"
 msgstr ""
 
-#: templates/base.html:115
+#: templates/base.html:116
 msgid "Close"
 msgstr ""
 
-#: templates/base.html:261 templates/contest/contest-tabs.html:21
+#: templates/base.html:271 templates/contest/contest-tabs.html:21
 #: templates/contest/prepare-data.html:97 templates/organization/tabs.html:19
 #: templates/user/prepare-data.html:104
 msgid "Submissions"
 msgstr ""
 
-#: templates/base.html:263 templates/contest/list.html:198
+#: templates/base.html:273 templates/contest/list.html:198
 #: templates/contest/list.html:238 templates/contest/list.html:328
 #: templates/organization/tabs.html:16
 msgid "Users"
 msgstr ""
 
-#: templates/base.html:282
+#: templates/base.html:286
+msgid "Toggle Dark/Light Mode"
+msgstr ""
+
+#: templates/base.html:297
 msgid "Report issue"
 msgstr ""
 
-#: templates/base.html:298
+#: templates/base.html:313
 #, python-format
 msgid "Hello, %(username)s."
 msgstr ""
 
-#: templates/base.html:307
+#: templates/base.html:322
 msgid "Stop impersonating"
 msgstr ""
 
-#: templates/base.html:312
+#: templates/base.html:327
 msgid "Log out"
 msgstr ""
 
-#: templates/base.html:321
+#: templates/base.html:336
 #: templates/registration/password_reset_complete.html:4
 msgid "Log in"
 msgstr ""
 
-#: templates/base.html:323 templates/registration/registration_form.html:207
+#: templates/base.html:338 templates/registration/registration_form.html:207
 msgid "or"
 msgstr ""
 
-#: templates/base.html:324
+#: templates/base.html:339
 msgid "Sign up"
 msgstr ""
 
-#: templates/base.html:338
+#: templates/base.html:353
 msgid "spectating"
 msgstr ""
 
-#: templates/base.html:349
+#: templates/base.html:364
 msgid "Go to Rankings"
 msgstr ""
 
-#: templates/base.html:356
+#: templates/base.html:371
 msgid "This site works best with JavaScript enabled."
 msgstr ""
 
-#: templates/base.html:389
+#: templates/base.html:404
 #, python-format
 msgid "proudly powered by %(vnoj)s (based on %(dmoj)s)"
 msgstr ""
 
-#: templates/base.html:395
+#: templates/base.html:410
 #, python-format
 msgid "follow us on %(github)s and %(facebook)s"
 msgstr ""
@@ -7163,35 +7167,35 @@ msgstr[1] ""
 msgid "You have 0 submissions left"
 msgstr ""
 
-#: templates/problem/submit-form.html:33
+#: templates/problem/submit-form.html:32
 msgid "Input"
 msgstr ""
 
-#: templates/problem/submit-form.html:37
+#: templates/problem/submit-form.html:36
 msgid "Output"
 msgstr ""
 
-#: templates/problem/submit-form.html:41
+#: templates/problem/submit-form.html:40
 msgid "Time limit"
 msgstr ""
 
-#: templates/problem/submit-form.html:51
+#: templates/problem/submit-form.html:50
 msgid "Memory limit"
 msgstr ""
 
-#: templates/problem/submit-form.html:66
+#: templates/problem/submit-form.html:64
 msgid "Paste your source code here or load it from a file:"
 msgstr ""
 
-#: templates/problem/submit-form.html:75
+#: templates/problem/submit-form.html:73
 msgid "You can only submit file for this language."
 msgstr ""
 
-#: templates/problem/submit-form.html:111
+#: templates/problem/submit-form.html:109
 msgid "No judge is available for this problem."
 msgstr ""
 
-#: templates/problem/submit-form.html:115
+#: templates/problem/submit-form.html:113
 msgid "Submit!"
 msgstr ""
 
@@ -7475,12 +7479,12 @@ msgid "Default language"
 msgstr ""
 
 #: templates/registration/registration_form.html:216
-#: templates/user/edit-profile.html:340
+#: templates/user/edit-profile.html:338
 msgid "Affiliated organizations"
 msgstr ""
 
 #: templates/registration/registration_form.html:225
-#: templates/user/edit-profile.html:354
+#: templates/user/edit-profile.html:352
 msgid "Notify me about upcoming contests"
 msgstr ""
 
@@ -7534,17 +7538,17 @@ msgid "Enable Two Factor Authentication"
 msgstr ""
 
 #: templates/registration/totp_enable.html:98
-#: templates/user/edit-profile.html:408
+#: templates/user/edit-profile.html:406
 msgid "Below is a list of one-time use scratch codes."
 msgstr ""
 
 #: templates/registration/totp_enable.html:99
-#: templates/user/edit-profile.html:409
+#: templates/user/edit-profile.html:407
 msgid "These codes can only be used once and are for emergency use."
 msgstr ""
 
 #: templates/registration/totp_enable.html:100
-#: templates/user/edit-profile.html:410
+#: templates/user/edit-profile.html:408
 msgid ""
 "You can use these codes to login to your account or disable two-factor "
 "authentication."
@@ -7557,7 +7561,7 @@ msgid ""
 msgstr ""
 
 #: templates/registration/totp_enable.html:102
-#: templates/user/edit-profile.html:412
+#: templates/user/edit-profile.html:410
 msgid "Please write these down and keep them in a secure location."
 msgstr ""
 
@@ -8257,7 +8261,7 @@ msgstr ""
 msgid "Are you sure you want to remove your API token?"
 msgstr ""
 
-#: templates/user/edit-profile.html:143 templates/user/edit-profile.html:404
+#: templates/user/edit-profile.html:143 templates/user/edit-profile.html:402
 msgid "Generate"
 msgstr ""
 
@@ -8274,84 +8278,80 @@ msgstr ""
 msgid "This will invalidate any previous scratch codes you have."
 msgstr ""
 
-#: templates/user/edit-profile.html:214 templates/user/edit-profile.html:413
+#: templates/user/edit-profile.html:214 templates/user/edit-profile.html:411
 msgid ""
 "You will not be able to view your scratch codes after you leave this page!"
 msgstr ""
 
-#: templates/user/edit-profile.html:291
+#: templates/user/edit-profile.html:292
 msgid "Display badge"
 msgstr ""
 
-#: templates/user/edit-profile.html:305
+#: templates/user/edit-profile.html:306
 msgid "Self-description:"
 msgstr ""
 
-#: templates/user/edit-profile.html:313
+#: templates/user/edit-profile.html:314
 msgid "Select your closest major city"
 msgstr ""
 
-#: templates/user/edit-profile.html:314
+#: templates/user/edit-profile.html:315
 msgid "Time zone:"
 msgstr ""
 
-#: templates/user/edit-profile.html:318
+#: templates/user/edit-profile.html:319
 msgid "Language:"
 msgstr ""
 
-#: templates/user/edit-profile.html:322
-msgid "Site theme:"
-msgstr ""
-
-#: templates/user/edit-profile.html:326
+#: templates/user/edit-profile.html:324
 msgid "Editor theme:"
 msgstr ""
 
-#: templates/user/edit-profile.html:331
+#: templates/user/edit-profile.html:329
 msgid "Math engine:"
 msgstr ""
 
-#: templates/user/edit-profile.html:366
+#: templates/user/edit-profile.html:364
 msgid "Change your avatar"
 msgstr ""
 
-#: templates/user/edit-profile.html:371
+#: templates/user/edit-profile.html:369
 msgid "Change your password"
 msgstr ""
 
-#: templates/user/edit-profile.html:386
+#: templates/user/edit-profile.html:384
 msgid "Two-factor authentication is enabled:"
 msgstr ""
 
-#: templates/user/edit-profile.html:394
+#: templates/user/edit-profile.html:392
 msgid "Refresh"
 msgstr ""
 
-#: templates/user/edit-profile.html:397
+#: templates/user/edit-profile.html:395
 msgid "Scratch codes:"
 msgstr ""
 
-#: templates/user/edit-profile.html:401
+#: templates/user/edit-profile.html:399
 msgid "Hidden"
 msgstr ""
 
-#: templates/user/edit-profile.html:411
+#: templates/user/edit-profile.html:409
 msgid "If you ever need more scratch codes, you can regenerate them here."
 msgstr ""
 
-#: templates/user/edit-profile.html:419
+#: templates/user/edit-profile.html:417
 msgid "Two-factor Authentication is disabled:"
 msgstr ""
 
-#: templates/user/edit-profile.html:427
+#: templates/user/edit-profile.html:425
 msgid "Security keys:"
 msgstr ""
 
-#: templates/user/edit-profile.html:444
+#: templates/user/edit-profile.html:442
 msgid "Enter a name for this key"
 msgstr ""
 
-#: templates/user/edit-profile.html:454
+#: templates/user/edit-profile.html:452
 msgid "Update profile"
 msgstr ""
 
