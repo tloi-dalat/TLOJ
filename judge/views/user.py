@@ -733,3 +733,24 @@ class CustomPasswordResetView(PasswordResetView):
         }
 
         return super().post(request, *args, **kwargs)
+
+
+@require_POST
+def update_theme_api(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'status': 'unauthorized'}, status=401)
+
+    import json
+    try:
+        data = json.loads(request.body)
+        theme = data.get('theme')
+    except (json.JSONDecodeError, TypeError):
+        theme = request.POST.get('theme')
+
+    if theme in ['light', 'dark', 'auto']:
+        profile = request.profile
+        profile.site_theme = theme
+        profile.save(update_fields=['site_theme'])
+        return JsonResponse({'status': 'success'})
+
+    return JsonResponse({'status': 'invalid_theme'}, status=400)

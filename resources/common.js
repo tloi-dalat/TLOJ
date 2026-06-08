@@ -340,6 +340,7 @@ $(function() {
                 $themeIcon.removeClass('fa-sun-o').addClass('fa-moon-o');
             }
             $('body').attr('data-theme', theme);
+            window.dispatchEvent(new CustomEvent('theme-change', { detail: { theme: theme } }));
         }
 
         var currentTheme = localStorage.getItem('theme') || document.body.getAttribute('data-theme');
@@ -357,6 +358,10 @@ $(function() {
             var newTheme = (theme === 'dark') ? 'light' : 'dark';
             localStorage.setItem('theme', newTheme);
             updateThemeDisplay(newTheme);
+
+            if (window.user && window.user.id) {
+                $.post('/edit/profile/theme/', { theme: newTheme });
+            }
         });
     }
 });

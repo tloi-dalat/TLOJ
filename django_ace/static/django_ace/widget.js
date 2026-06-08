@@ -101,26 +101,18 @@
         if (theme) {
             editor.setTheme("ace/theme/" + theme);
         } else {
-            if (window.matchMedia) {
-                const setEditorTheme = function (is_dark) {
-                    if (is_dark) {
-                        editor.setTheme("ace/theme/" + default_dark_theme);
-                    } else {
-                        editor.setTheme("ace/theme/" + default_light_theme);
-                    }
+            const setEditorTheme = function (themeName) {
+                if (themeName === 'dark') {
+                    editor.setTheme("ace/theme/" + default_dark_theme);
+                } else {
+                    editor.setTheme("ace/theme/" + default_light_theme);
                 }
+            };
 
-                setEditorTheme(window.matchMedia('(prefers-color-scheme: dark)').matches);
-                try {
-                    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(ev) {
-                        setEditorTheme(ev.matches);
-                    })
-                } catch (err) {
-                    window.matchMedia('(prefers-color-scheme: dark)').addListener(function(ev) {
-                        setEditorTheme(ev.matches);
-                    })
-                }
-            }
+            setEditorTheme(document.body.getAttribute('data-theme'));
+            window.addEventListener('theme-change', function(e) {
+                setEditorTheme(e.detail.theme);
+            });
         }
         if (wordwrap == "true") {
             editor.getSession().setUseWrapMode(true);

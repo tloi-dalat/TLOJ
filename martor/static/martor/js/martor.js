@@ -32,14 +32,7 @@
         };
 
         var isDarkMode = function () {
-            var theme = $('body').data('theme');
-            if (theme === 'auto') {
-                return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-            } else if (theme === 'dark') {
-                return true;
-            } else {
-                return false;
-            }
+            return $('body').attr('data-theme') === 'dark';
         };
 
         // Each multiple editor fields
@@ -63,11 +56,9 @@
             }
 
             setupTheme();
-            if ($('body').data('theme') === 'auto' && window.matchMedia) {
-                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
-                    setupTheme();
-                });
-            }
+            window.addEventListener('theme-change', function () {
+                setupTheme();
+            });
 
             editor.getSession().setMode('ace/mode/markdown');
             editor.getSession().setUseWrapMode(true);
