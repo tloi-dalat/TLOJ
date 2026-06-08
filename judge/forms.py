@@ -55,13 +55,12 @@ class ProfileForm(ModelForm):
     class Meta:
         model = Profile
         fields = ['about', 'display_badge', 'organizations', 'timezone', 'language', 'ace_theme',
-                  'site_theme', 'user_script']
+                  'user_script']
         widgets = {
             'display_badge': Select2Widget(attrs={'style': 'width:200px'}),
             'timezone': Select2Widget(attrs={'style': 'width:200px'}),
             'language': Select2Widget(attrs={'style': 'width:200px'}),
             'ace_theme': Select2Widget(attrs={'style': 'width:200px'}),
-            'site_theme': Select2Widget(attrs={'style': 'width:200px'}),
         }
 
         # Make sure that users cannot change their `about` in contest mode
