@@ -146,6 +146,39 @@
 {% endblock %}
 
 {% block content_js_media %}
+    {% if contest_problem and contest_problem.contest.format_name == 'codeforces' and request.in_contest and not request.participation.ended %}
+        {% set contest = contest_problem.contest %}
+        <script>
+            $(function() {
+                var decay_rate = {{ contest.format.config.decay_rate|default(0.004) }};
+                var min_points_ratio = {{ contest.format.config.min_points_ratio|default(0.3) }};
+                var total_duration = {{ (request.participation.end_time - request.participation.start).total_seconds()|default(0) }};
+                var initial_remaining = {{ request.participation.time_remaining|seconds|default(0) }};
+                var points_precision = {{ contest.points_precision|default(0) }};
+                var page_load_time = Date.now();
+
+                function update_codeforces_points() {
+                    var elapsed_seconds = (total_duration - initial_remaining) + (Date.now() - page_load_time) / 1000;
+                    if (elapsed_seconds > total_duration) {
+                        elapsed_seconds = total_duration;
+                    }
+                    var dt_minutes = Math.floor(elapsed_seconds / 60);
+
+                    $('.codeforces-dynamic-points').each(function() {
+                        var max_points = parseFloat($(this).attr('data-max-points'));
+                        if (isNaN(max_points)) return;
+                        var score_decay = dt_minutes * decay_rate * max_points;
+                        var current_points = Math.max(max_points * min_points_ratio, max_points - score_decay);
+                        var formatted_points = parseFloat(current_points.toFixed(points_precision));
+                        $(this).text(formatted_points);
+                    });
+                }
+
+                update_codeforces_points();
+                setInterval(update_codeforces_points, 1000);
+            });
+        </script>
+    {% endif %}
     {% if not comment_lock %}
         {% include "comments/media-js.html" %}
     {% endif %}
@@ -335,7 +368,12 @@
         <i class="fa fa-check fa-fw"></i><span class="pi-name">{{ _('Points:') }}</span>
         <span class="pi-value">
             {% if contest_problem %}
-                {{ contest_problem.points }}{% if contest_problem.partial %} {{ _('(partial)') }}{% endif %}
+                {% if contest_problem.contest.format_name == 'codeforces' and request.in_contest and not request.participation.ended %}
+                    <span class="codeforces-dynamic-points" data-max-points="{{ contest_problem.points }}">{{ contest_problem.points }}</span>
+                {% else %}
+                    {{ contest_problem.points }}
+                {% endif %}
+                {% if contest_problem.partial %} {{ _('(partial)') }}{% endif %}
             {% else %}
                 {{ problem.points|floatformat(2) }}{% if problem.partial %} {{ _('(partial)') }}{% endif %}
             {% endif %}

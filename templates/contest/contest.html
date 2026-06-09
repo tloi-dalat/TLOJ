@@ -17,6 +17,38 @@
 {% endblock %}
 
 {% block content_js_media %}
+    {% if contest.format_name == 'codeforces' and is_in_contest and not request.participation.ended %}
+        <script>
+            $(function() {
+                var decay_rate = {{ contest.format.config.decay_rate|default(0.004) }};
+                var min_points_ratio = {{ contest.format.config.min_points_ratio|default(0.3) }};
+                var total_duration = {{ (request.participation.end_time - request.participation.start).total_seconds()|default(0) }};
+                var initial_remaining = {{ request.participation.time_remaining|seconds|default(0) }};
+                var points_precision = {{ contest.points_precision|default(0) }};
+                var page_load_time = Date.now();
+
+                function update_codeforces_points() {
+                    var elapsed_seconds = (total_duration - initial_remaining) + (Date.now() - page_load_time) / 1000;
+                    if (elapsed_seconds > total_duration) {
+                        elapsed_seconds = total_duration;
+                    }
+                    var dt_minutes = Math.floor(elapsed_seconds / 60);
+
+                    $('.codeforces-dynamic-points').each(function() {
+                        var max_points = parseFloat($(this).attr('data-max-points'));
+                        if (isNaN(max_points)) return;
+                        var score_decay = dt_minutes * decay_rate * max_points;
+                        var current_points = Math.max(max_points * min_points_ratio, max_points - score_decay);
+                        var formatted_points = parseFloat(current_points.toFixed(points_precision));
+                        $(this).text(formatted_points);
+                    });
+                }
+
+                update_codeforces_points();
+                setInterval(update_codeforces_points, 1000);
+            });
+        </script>
+    {% endif %}
     <script type="text/javascript">
         $(document).ready(function () {
             $('.time-remaining').each(function () {
@@ -261,7 +293,11 @@
                             {% endif %}
                         </td>
                         {% if not is_ICPC_format %}
-                            <td>{{ problem.points|floatformat(-2) }}</td>
+                            {% if contest.format_name == 'codeforces' and is_in_contest and not request.participation.ended %}
+                                <td class="codeforces-dynamic-points" data-max-points="{{ problem.points }}">{{ problem.points|floatformat(-2) }}</td>
+                            {% else %}
+                                <td>{{ problem.points|floatformat(-2) }}</td>
+                            {% endif %}
                         {% endif %}
                         {% if metadata.has_public_editorials %}
                             <td>

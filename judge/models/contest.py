@@ -809,6 +809,67 @@ class ContestSubmission(models.Model):
                                      help_text=_('Whether this submission was ran only on pretests.'),
                                      default=False)
 
+    @property
+    def contest_points(self):
+        format_data = self.participation.format_data
+        if not format_data:
+            return self.points
+
+        prob_data = format_data.get(str(self.problem_id))
+        if not prob_data or 'points' not in prob_data:
+            return self.points
+
+        if self.points == 0:
+            return 0.0
+
+        return prob_data['points']
+
+    @property
+    def contest_points_breakdown(self):
+        participation = self.participation
+        contest = participation.contest
+        if contest.format_name != 'codeforces':
+            return None
+
+        config = contest.format.config
+        min_points_ratio = config.get('min_points_ratio', 0.3)
+        penalty_per_wrong_points = config.get('penalty_per_wrong_points', 50.0)
+        decay_rate = config.get('decay_rate', 0.004)
+
+        max_points = self.problem.points
+        if self.points == 0:
+            return {
+                'is_ac': False,
+                'max_points': max_points,
+                'points_gained': 0.0,
+            }
+
+        dt_seconds = (self.submission.date - participation.start).total_seconds()
+        dt_minutes = int(dt_seconds // 60)
+
+        problem_subs = participation.submissions.exclude(submission__result__isnull=True) \
+                                                .exclude(submission__result__in=['IE', 'CE']) \
+                                                .filter(problem_id=self.problem_id)
+        subs_before_ac = problem_subs.filter(submission__date__lt=self.submission.date)
+        wrong_submissions = subs_before_ac.count()
+
+        score_decay = dt_minutes * decay_rate * max_points
+        base_score = max(max_points * min_points_ratio, max_points - score_decay)
+        penalty_points = penalty_per_wrong_points * wrong_submissions
+        points_gained = max(0.0, (self.points / max_points) * base_score - penalty_points)
+
+        return {
+            'is_ac': True,
+            'max_points': max_points,
+            'points_original': self.points,
+            'time_minutes': dt_minutes,
+            'score_decay': round(score_decay, 1),
+            'base_score': round(base_score, 1),
+            'wrong_submissions': wrong_submissions,
+            'penalty_points': round(penalty_points, 1),
+            'points_gained': round(points_gained, 3),
+        }
+
     class Meta:
         verbose_name = _('contest submission')
         verbose_name_plural = _('contest submissions')

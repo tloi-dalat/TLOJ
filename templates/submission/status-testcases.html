@@ -184,14 +184,32 @@
                     <b>{{ _('Final score:') }}</b>
                 {% endif %}
                 {{ submission.case_points|floatformat(-3) }}/{{ submission.case_total|floatformat(0) }}
-                {% if request.in_contest and submission.contest_or_none %}
+                {% if submission.contest_or_none %}
                     {% with contest=submission.contest_or_none %}
-                        {% set points=contest.points|roundfloat(3) %}
+                        {% set points=contest.contest_points|floatformat(-3) %}
                         {% set total=contest.problem.points|floatformat(-1) %}
                         ({{ _('%(points)s/%(total)s points', points=points, total=total) }})
+
+                        {% set breakdown=contest.contest_points_breakdown %}
+                        {% if breakdown and breakdown.is_ac %}
+                            <div style="font-size: 0.85em; color: #718096; margin-top: 4px;">
+                                <span>{{ _('Reduced due to:') }}</span>
+                                {% if breakdown.score_decay > 0 %}
+                                    <span>{{ _('minute %(min)s (-%(decay)s)', min=breakdown.time_minutes, decay=breakdown.score_decay|floatformat(-3)) }}</span>
+                                {% endif %}
+                                {% if breakdown.wrong_submissions > 0 %}
+                                    {% if breakdown.score_decay > 0 %}<span>, </span>{% endif %}
+                                    <span>{{ _('%(count)s wrong (-%(penalty)s)', count=breakdown.wrong_submissions, penalty=breakdown.penalty_points|floatformat(-3)) }}</span>
+                                {% endif %}
+                                {% if breakdown.max_points > breakdown.points_original %}
+                                    {% if breakdown.score_decay > 0 or breakdown.wrong_submissions > 0 %}<span>, </span>{% endif %}
+                                    <span>{{ _('partial AC %(passed)s/%(max)s', passed=breakdown.points_original|floatformat(-3), max=breakdown.max_points|floatformat(-3)) }}</span>
+                                {% endif %}
+                            </div>
+                        {% endif %}
                     {% endwith %}
                 {% else %}
-                    {% with points=submission.points|floatformat(3), total=submission.problem.points|floatformat(3) %}
+                    {% with points=submission.points|floatformat(-3), total=submission.problem.points|floatformat(-3) %}
                         ({{ _('%(points)s/%(total)s points', points=points, total=total) }})
                     {% endwith %}
                 {% endif %}
