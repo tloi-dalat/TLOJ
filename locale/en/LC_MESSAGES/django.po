@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-08 01:45+0000\n"
+"POT-Creation-Date: 2026-06-09 03:12+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -122,7 +122,7 @@ msgstr ""
 msgid "Included contests"
 msgstr ""
 
-#: judge/admin/contest.py:66 judge/forms.py:693
+#: judge/admin/contest.py:66 judge/forms.py:692
 #: templates/contest/contest.html:206 templates/contest/contest.html:322
 #: templates/contest/moss.html:40 templates/problem/list.html:162
 #: templates/user/user-problems.html:58 templates/user/user-problems.html:102
@@ -271,8 +271,8 @@ msgstr ""
 
 #: judge/admin/interface.py:129 judge/admin/profile.py:111
 #: judge/admin/submission.py:222 judge/models/contest.py:649
-#: judge/models/contest.py:818 judge/models/profile.py:479
-#: judge/models/profile.py:510 judge/models/ticket.py:48
+#: judge/models/contest.py:882 judge/models/profile.py:475
+#: judge/models/profile.py:506 judge/models/ticket.py:48
 msgid "user"
 msgstr ""
 
@@ -575,6 +575,40 @@ msgstr ""
 msgid "Ties will be broken by the time of the last score altering submission."
 msgstr ""
 
+#: judge/contest_format/codeforces.py:13
+msgid "Codeforces"
+msgstr ""
+
+#: judge/contest_format/codeforces.py:99
+msgid "Points decrease dynamically based on solving time."
+msgstr ""
+
+#: judge/contest_format/codeforces.py:100
+msgid ""
+"Wrong submissions before first AC will deduct points and add penalty time."
+msgstr ""
+
+#: judge/contest_format/codeforces.py:103
+#, python-format
+msgid "Minimum points ratio for each problem: **%d%%**."
+msgstr ""
+
+#: judge/contest_format/codeforces.py:107
+#, python-format
+msgid "Each wrong submission before the first AC will deduct **%.1f points**."
+msgstr ""
+
+#: judge/contest_format/codeforces.py:112
+#, python-format
+msgid ""
+"Each wrong submission before the first AC will incur a **penalty of %d "
+"minute**."
+msgid_plural ""
+"Each wrong submission before the first AC will incur a **penalty of %d "
+"minutes**."
+msgstr[0] ""
+msgstr[1] ""
+
 #: judge/contest_format/default.py:18
 msgid "Default"
 msgstr ""
@@ -768,7 +802,7 @@ msgstr ""
 msgid "Scratch codes must be 16 Base32 characters."
 msgstr ""
 
-#: judge/forms.py:45 judge/forms.py:650
+#: judge/forms.py:45 judge/forms.py:649
 msgid "Invalid scratch code."
 msgstr ""
 
@@ -780,166 +814,166 @@ msgstr ""
 msgid "Enable experimental features"
 msgstr ""
 
-#: judge/forms.py:81
+#: judge/forms.py:80
 #, python-format
 msgid "You must solve at least %d problems before you can update your profile."
 msgstr ""
 
-#: judge/forms.py:90 judge/views/organization.py:222 judge/views/register.py:61
+#: judge/forms.py:89 judge/views/organization.py:222 judge/views/register.py:61
 #, python-brace-format
 msgid "You may not be part of more than {count} public organization."
 msgid_plural "You may not be part of more than {count} public organizations."
 msgstr[0] ""
 msgstr[1] ""
 
-#: judge/forms.py:125
+#: judge/forms.py:124
 msgid "Your full name is too long!"
 msgstr ""
 
-#: judge/forms.py:149 judge/forms.py:219
+#: judge/forms.py:148 judge/forms.py:218
 #, python-format
 msgid "You cannot set time limit higher than %d seconds"
 msgstr ""
 
-#: judge/forms.py:166
+#: judge/forms.py:165
 #, python-format
 msgid "Maximum file size is %s."
 msgstr ""
 
-#: judge/forms.py:168
+#: judge/forms.py:167
 msgid "Statement file"
 msgstr ""
 
-#: judge/forms.py:181
+#: judge/forms.py:180
 msgid "Private users"
 msgstr ""
 
-#: judge/forms.py:182
+#: judge/forms.py:181
 msgid "If private, only these users may see the problem."
 msgstr ""
 
-#: judge/forms.py:189 judge/forms.py:798
+#: judge/forms.py:188 judge/forms.py:797
 msgid "You can paste a list of usernames into this box."
 msgstr ""
 
-#: judge/forms.py:198
+#: judge/forms.py:197
 #, python-format
 msgid "Problem id code must starts with `%s`"
 msgstr ""
 
-#: judge/forms.py:206 judge/forms.py:400
+#: judge/forms.py:205 judge/forms.py:399
 #, python-format
 msgid "File size is too big! Maximum file size is %s"
 msgstr ""
 
-#: judge/forms.py:210
+#: judge/forms.py:209
 msgid "You don't have permission to upload file-type statement."
 msgstr ""
 
-#: judge/forms.py:242
+#: judge/forms.py:241
 msgid ""
 "If public, all members in organization can view it. <strong>Set it as "
 "private if you want to use it in a contest, otherwise, users can see the "
 "problem even if they do not join the contest!</strong>"
 msgstr ""
 
-#: judge/forms.py:245
+#: judge/forms.py:244
 msgid "Problem code, e.g: voi19_post"
 msgstr ""
 
-#: judge/forms.py:246
+#: judge/forms.py:245
 msgid ""
 "The full name of the problem, as shown in the problem list. For example: "
 "VOI19 - A cong B"
 msgstr ""
 
-#: judge/forms.py:248
+#: judge/forms.py:247
 msgid ""
 "Points awarded for problem completion. From 0 to 2. You can approximate: 0.5 "
 "is as hard as Problem 1 of VOI; 1 = Problem 2 of VOI; 1.5 = Problem 3 of VOI."
 msgstr ""
 
-#: judge/forms.py:254 judge/forms.py:858
+#: judge/forms.py:253 judge/forms.py:857
 msgid "Only accept alphanumeric characters (a-z, 0-9) and underscore (_)"
 msgstr ""
 
-#: judge/forms.py:270 judge/forms.py:656 judge/models/problem.py:155
+#: judge/forms.py:269 judge/forms.py:655 judge/models/problem.py:155
 msgid "Problem code must be ^[a-z0-9_]+$"
 msgstr ""
 
-#: judge/forms.py:272 templates/organization/storage.html:59
+#: judge/forms.py:271 templates/organization/storage.html:59
 msgid "Package"
 msgstr ""
 
-#: judge/forms.py:275
+#: judge/forms.py:274
 msgid "Ignore zero-point batches"
 msgstr ""
 
-#: judge/forms.py:276
+#: judge/forms.py:275
 msgid "Ignore zero-point cases"
 msgstr ""
 
-#: judge/forms.py:278
+#: judge/forms.py:277
 msgid "Append main solution to tutorial"
 msgstr ""
 
-#: judge/forms.py:308
+#: judge/forms.py:307
 msgid "Download comments?"
 msgstr ""
 
-#: judge/forms.py:309 judge/forms.py:338
+#: judge/forms.py:308 judge/forms.py:337
 msgid "Download submissions?"
 msgstr ""
 
-#: judge/forms.py:310 judge/forms.py:339
+#: judge/forms.py:309 judge/forms.py:338
 msgid "Filter by problem code glob:"
 msgstr ""
 
-#: judge/forms.py:314 judge/forms.py:343
+#: judge/forms.py:313 judge/forms.py:342
 msgid "Leave empty to include all submissions"
 msgstr ""
 
-#: judge/forms.py:317 judge/forms.py:346
+#: judge/forms.py:316 judge/forms.py:345
 #: templates/problem/manage_submission.html:158
 msgid "Filter by result:"
 msgstr ""
 
-#: judge/forms.py:323 judge/forms.py:353
+#: judge/forms.py:322 judge/forms.py:352
 msgid "Please select at least one thing to download."
 msgstr ""
 
-#: judge/forms.py:370
+#: judge/forms.py:369
 msgid "Source file"
 msgstr ""
 
-#: judge/forms.py:388
+#: judge/forms.py:387
 msgid "Source code/file is missing or redundant. Please try again"
 msgstr ""
 
-#: judge/forms.py:395
+#: judge/forms.py:394
 #, python-format
 msgid ""
 "Wrong file type for language %(lang)s, expected %(lang_ext)s, found %(ext)s"
 msgstr ""
 
-#: judge/forms.py:408
+#: judge/forms.py:407
 #, python-format
 msgid "project.json is too big! Maximum file size is %s"
 msgstr ""
 
-#: judge/forms.py:423
+#: judge/forms.py:422
 msgid "Any judge"
 msgstr ""
 
-#: judge/forms.py:434 judge/models/tag.py:35
+#: judge/forms.py:433 judge/models/tag.py:35
 msgid "Problem URL"
 msgstr ""
 
-#: judge/forms.py:435
+#: judge/forms.py:434
 msgid "Full URL to the problem, e.g. https://oj.vnoi.info/problem/post"
 msgstr ""
 
-#: judge/forms.py:525 judge/views/register.py:27
+#: judge/forms.py:524 judge/views/register.py:27
 #: templates/blog/top-contrib.html:8 templates/blog/top-rating.html:8
 #: templates/contest/official-ranking-table.html:5
 #: templates/contest/ranking.html:424
@@ -949,88 +983,88 @@ msgstr ""
 msgid "Username"
 msgstr ""
 
-#: judge/forms.py:526 templates/registration/registration_form.html:181
+#: judge/forms.py:525 templates/registration/registration_form.html:181
 #: templates/registration/registration_form.html:195
 msgid "Password"
 msgstr ""
 
-#: judge/forms.py:547
+#: judge/forms.py:546
 #, python-format
 msgid "This account has been banned. Reason: %s"
 msgstr ""
 
-#: judge/forms.py:578
+#: judge/forms.py:577
 msgid "Invalid code length."
 msgstr ""
 
-#: judge/forms.py:609
+#: judge/forms.py:608
 msgid "Invalid WebAuthn response."
 msgstr ""
 
-#: judge/forms.py:612
+#: judge/forms.py:611
 msgid "No WebAuthn challenge issued."
 msgstr ""
 
-#: judge/forms.py:618
+#: judge/forms.py:617
 msgid "Invalid WebAuthn credential ID."
 msgstr ""
 
-#: judge/forms.py:648
+#: judge/forms.py:647
 msgid "Invalid two-factor authentication token or scratch code."
 msgstr ""
 
-#: judge/forms.py:652
+#: judge/forms.py:651
 msgid "Must specify either totp_token or webauthn_response."
 msgstr ""
 
-#: judge/forms.py:661
+#: judge/forms.py:660
 msgid "Problem with code already exists."
 msgstr ""
 
-#: judge/forms.py:675 judge/models/contest.py:75
+#: judge/forms.py:674 judge/models/contest.py:75
 msgid "Contest id must be ^[a-z0-9_]+$"
 msgstr ""
 
-#: judge/forms.py:680
+#: judge/forms.py:679
 msgid "Contest with key already exists."
 msgstr ""
 
-#: judge/forms.py:704
+#: judge/forms.py:703
 msgid "No such problem."
 msgstr ""
 
-#: judge/forms.py:725
+#: judge/forms.py:724
 #, python-format
 msgid "Contest cannot have more than %(limit)d problems."
 msgstr ""
 
-#: judge/forms.py:740
+#: judge/forms.py:739
 msgid "Problems must have distinct order."
 msgstr ""
 
-#: judge/forms.py:775
+#: judge/forms.py:774
 msgid ""
 "Select one or more authors for this post. If left empty, you will be set as "
 "the author."
 msgstr ""
 
-#: judge/forms.py:776
+#: judge/forms.py:775
 msgid ""
 "A short summary of the post to show in the list, preferably not more than 50 "
 "words."
 msgstr ""
 
-#: judge/forms.py:808
+#: judge/forms.py:807
 #, python-format
 msgid "Contest duration cannot be longer than %d days"
 msgstr ""
 
-#: judge/forms.py:820
+#: judge/forms.py:819
 #, python-format
 msgid "Contest id must starts with `%s`"
 msgstr ""
 
-#: judge/forms.py:853
+#: judge/forms.py:852
 msgid ""
 "Users are able to pratice contest problems even if the contest has ended, so "
 "don't set the contest time too high if you don't really need it."
@@ -1484,7 +1518,7 @@ msgstr ""
 #: judge/models/contest.py:159 judge/models/interface.py:93
 #: judge/models/problem.py:235 judge/models/profile.py:151
 #: judge/models/profile.py:156 judge/models/profile.py:196
-#: judge/models/profile.py:511
+#: judge/models/profile.py:507
 msgid "organization"
 msgstr ""
 
@@ -1673,7 +1707,7 @@ msgid "Change lock status of contest"
 msgstr ""
 
 #: judge/models/contest.py:623 judge/models/contest.py:780
-#: judge/models/contest.py:819 judge/models/contest.py:843
+#: judge/models/contest.py:883 judge/models/contest.py:907
 #: judge/models/submission.py:94
 msgid "contest"
 msgstr ""
@@ -1778,7 +1812,7 @@ msgid "contest participations"
 msgstr ""
 
 #: judge/models/contest.py:779 judge/models/contest.py:803
-#: judge/models/contest.py:844 judge/models/problem.py:672
+#: judge/models/contest.py:908 judge/models/problem.py:672
 #: judge/models/problem.py:677 judge/models/problem.py:696
 #: judge/models/problem_data.py:57
 msgid "problem"
@@ -1826,7 +1860,7 @@ msgstr ""
 msgid "submission"
 msgstr ""
 
-#: judge/models/contest.py:805 judge/models/contest.py:820
+#: judge/models/contest.py:805 judge/models/contest.py:884
 msgid "participation"
 msgstr ""
 
@@ -1834,47 +1868,47 @@ msgstr ""
 msgid "Whether this submission was ran only on pretests."
 msgstr ""
 
-#: judge/models/contest.py:813
+#: judge/models/contest.py:877
 msgid "contest submission"
 msgstr ""
 
-#: judge/models/contest.py:814
+#: judge/models/contest.py:878
 msgid "contest submissions"
 msgstr ""
 
-#: judge/models/contest.py:822
+#: judge/models/contest.py:886
 msgid "rank"
 msgstr ""
 
-#: judge/models/contest.py:823
+#: judge/models/contest.py:887
 msgid "rating"
 msgstr ""
 
-#: judge/models/contest.py:824
+#: judge/models/contest.py:888
 msgid "raw rating"
 msgstr ""
 
-#: judge/models/contest.py:825
+#: judge/models/contest.py:889
 msgid "contest performance"
 msgstr ""
 
-#: judge/models/contest.py:826
+#: judge/models/contest.py:890
 msgid "last rated"
 msgstr ""
 
-#: judge/models/contest.py:830
+#: judge/models/contest.py:894
 msgid "contest rating"
 msgstr ""
 
-#: judge/models/contest.py:831
+#: judge/models/contest.py:895
 msgid "contest ratings"
 msgstr ""
 
-#: judge/models/contest.py:851
+#: judge/models/contest.py:915
 msgid "contest moss result"
 msgstr ""
 
-#: judge/models/contest.py:852
+#: judge/models/contest.py:916
 msgid "contest moss results"
 msgstr ""
 
@@ -2896,100 +2930,100 @@ msgstr ""
 msgid "Name displayed in place of username."
 msgstr ""
 
-#: judge/models/profile.py:459
+#: judge/models/profile.py:455
 msgid "Shows in-progress development stuff"
 msgstr ""
 
-#: judge/models/profile.py:460
+#: judge/models/profile.py:456
 msgid "Edit TOTP settings"
 msgstr ""
 
-#: judge/models/profile.py:461
+#: judge/models/profile.py:457
 msgid "Can upload image directly to server via martor"
 msgstr ""
 
-#: judge/models/profile.py:462
+#: judge/models/profile.py:458
 msgid "Can set high problem timelimit"
 msgstr ""
 
-#: judge/models/profile.py:463
+#: judge/models/profile.py:459
 msgid "Can set long contest duration"
 msgstr ""
 
-#: judge/models/profile.py:464
+#: judge/models/profile.py:460
 msgid "Can create unlimitted number of testcases for a problem"
 msgstr ""
 
-#: judge/models/profile.py:465
+#: judge/models/profile.py:461
 msgid "Ban users"
 msgstr ""
 
-#: judge/models/profile.py:467
+#: judge/models/profile.py:463
 msgid "user profile"
 msgstr ""
 
-#: judge/models/profile.py:468
+#: judge/models/profile.py:464
 msgid "user profiles"
 msgstr ""
 
-#: judge/models/profile.py:481
+#: judge/models/profile.py:477
 msgid "device name"
 msgstr ""
 
-#: judge/models/profile.py:482
+#: judge/models/profile.py:478
 msgid "credential ID"
 msgstr ""
 
-#: judge/models/profile.py:483
+#: judge/models/profile.py:479
 msgid "public key"
 msgstr ""
 
-#: judge/models/profile.py:484
+#: judge/models/profile.py:480
 msgid "sign counter"
 msgstr ""
 
-#: judge/models/profile.py:502
+#: judge/models/profile.py:498
 #, python-format
 msgid "WebAuthn credential: %(name)s"
 msgstr ""
 
-#: judge/models/profile.py:505
+#: judge/models/profile.py:501
 msgid "WebAuthn credential"
 msgstr ""
 
-#: judge/models/profile.py:506
+#: judge/models/profile.py:502
 msgid "WebAuthn credentials"
 msgstr ""
 
-#: judge/models/profile.py:513
+#: judge/models/profile.py:509
 msgid "request time"
 msgstr ""
 
-#: judge/models/profile.py:514
+#: judge/models/profile.py:510
 msgid "state"
 msgstr ""
 
-#: judge/models/profile.py:515 templates/organization/requests/tabs.html:4
+#: judge/models/profile.py:511 templates/organization/requests/tabs.html:4
 msgid "Pending"
 msgstr ""
 
-#: judge/models/profile.py:516 templates/organization/requests/tabs.html:10
+#: judge/models/profile.py:512 templates/organization/requests/tabs.html:10
 msgid "Approved"
 msgstr ""
 
-#: judge/models/profile.py:517 templates/organization/requests/tabs.html:13
+#: judge/models/profile.py:513 templates/organization/requests/tabs.html:13
 msgid "Rejected"
 msgstr ""
 
-#: judge/models/profile.py:519
+#: judge/models/profile.py:515
 msgid "reason"
 msgstr ""
 
-#: judge/models/profile.py:522
+#: judge/models/profile.py:518
 msgid "organization join request"
 msgstr ""
 
-#: judge/models/profile.py:523
+#: judge/models/profile.py:519
 msgid "organization join requests"
 msgstr ""
 
@@ -7903,16 +7937,61 @@ msgid "Final score:"
 msgstr ""
 
 #: templates/submission/status-testcases.html:191
-#: templates/submission/status-testcases.html:195
+#: templates/submission/status-testcases.html:220
 #, python-format
 msgid "%(points)s/%(total)s points"
 msgstr ""
 
-#: templates/submission/status-testcases.html:200
+#: templates/submission/status-testcases.html:196
+msgid "Codeforces Score Breakdown"
+msgstr ""
+
+#: templates/submission/status-testcases.html:198
+msgid "Problem maximum points:"
+msgstr ""
+
+#: templates/submission/status-testcases.html:201
+msgid "Submission time:"
+msgstr ""
+
+#: templates/submission/status-testcases.html:202
+#, python-format
+msgid "minute %(min)s"
+msgstr ""
+
+#: templates/submission/status-testcases.html:204
+msgid "Score decay due to time:"
+msgstr ""
+
+#: templates/submission/status-testcases.html:208
+#, python-format
+msgid "Penalty for %(count)s wrong submission(s):"
+msgstr ""
+
+#: templates/submission/status-testcases.html:212
+msgid "Final points gained:"
+msgstr ""
+
+msgid "Reduced due to:"
+msgstr ""
+
+#, python-format
+msgid "minute %(min)s (-%(decay)s)"
+msgstr ""
+
+#, python-format
+msgid "%(count)s wrong (-%(penalty)s)"
+msgstr ""
+
+#, python-format
+msgid "partial AC %(passed)s/%(max)s"
+msgstr ""
+
+#: templates/submission/status-testcases.html:225
 msgid "Passing pretests does not guarantee a full score on system tests."
 msgstr ""
 
-#: templates/submission/status-testcases.html:203
+#: templates/submission/status-testcases.html:228
 msgid "Submission aborted!"
 msgstr ""
 

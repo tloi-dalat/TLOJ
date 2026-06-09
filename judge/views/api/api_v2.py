@@ -683,7 +683,7 @@ class APISubmissionList(APIListView):
             'result': None if hidden else submission.result,
             'contest': None if not submission.contest_object else {
                 'key': submission.contest_object.key,
-                'points': None if hidden else submission.contest.points,
+                'points': None if hidden else submission.contest.contest_points,
                 'virtual_participation_number': submission.contest.participation.virtual,
                 'time_since_start_of_participation': submission.date - submission.contest.participation.real_start,
             },

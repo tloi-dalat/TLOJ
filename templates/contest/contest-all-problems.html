@@ -46,7 +46,14 @@
                     <div>
                         <span><strong>{{ _('Time limit:') }}</strong> {{ problem.time_limit }}s /</span>
                         <span><strong>{{ _('Memory limit:') }}</strong> {{ problem.memory_limit|kbsimpleformat }}</span>
-                        <p><strong>{{ _('Points:') }}</strong> {{ problem.points }}</p>
+                        <p>
+                            <strong>{{ _('Points:') }}</strong>
+                            {% if contest.format_name == 'codeforces' and is_in_contest and not request.participation.ended %}
+                                <span class="codeforces-dynamic-points" data-max-points="{{ problem.points }}">{{ problem.points|floatformat(-2) }}</span>
+                            {% else %}
+                                {{ problem.points }}
+                            {% endif %}
+                        </p>
                     </div>
                 </div>
                 {% include "problem/problem-detail.html" %}
