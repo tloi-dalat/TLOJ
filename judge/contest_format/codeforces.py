@@ -2,7 +2,7 @@ from django.db import connection
 from django.utils.translation import gettext as _, gettext_lazy, ngettext
 
 from judge.contest_format.registry import register_contest_format
-from judge.contest_format.vnoj import VNOJContestFormat, ParticipationInfo, DEFAULT_RANKING_SQL, FROZEN_RANKING_SQL
+from judge.contest_format.vnoj import DEFAULT_RANKING_SQL, FROZEN_RANKING_SQL, ParticipationInfo, VNOJContestFormat
 from judge.timezone import from_database_time, to_database_time
 
 
@@ -72,7 +72,7 @@ class CodeforcesContestFormat(VNOJContestFormat):
                 format_data[str(prob_id)] = {
                     'time': dt_seconds,
                     'points': points_gained,
-                    'penalty': wrong_submissions
+                    'penalty': wrong_submissions,
                 }
 
                 if not frozen and participation.contest.frozen_last_minutes != 0:
