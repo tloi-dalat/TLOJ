@@ -67,7 +67,7 @@ jobs:
       run: |
         pip install wheel
         pip install -r requirements.txt
-        cp .ci.settings.py dmoj/local_settings.py
+        printf "DATABASES = {'default': {'ENGINE': 'django.db.backends.sqlite3', 'NAME': ':memory:'}}\nSTATIC_ROOT = '/tmp'\n" > dmoj/local_settings.py
     - name: Check for missing migrations
       run: python manage.py makemigrations --check --dry-run
     - name: Check new migrations are Django-generated
