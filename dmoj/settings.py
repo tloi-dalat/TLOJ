@@ -252,6 +252,11 @@ DMOJ_CAMO_EXCLUDE = ()
 
 DMOJ_PROBLEM_DATA_ROOT = None
 
+# Chunked upload of large problem packages, to bypass Cloudflare's 100s / 100MB request limits
+VNOJ_PROBLEM_DATA_CHUNK_SIZE = 10 * 1024 * 1024  # 10 MB
+# Largest problem package accepted by chunked upload
+CHUNKED_UPLOAD_MAX_BYTES = 1 * 1024 * 1024 * 1024  # 1 GB
+
 DMOJ_PROBLEM_MIN_TIME_LIMIT = 0.01  # seconds
 DMOJ_PROBLEM_MAX_TIME_LIMIT = 60  # seconds
 DMOJ_PROBLEM_MIN_MEMORY_LIMIT = 0  # kilobytes
@@ -498,6 +503,7 @@ INSTALLED_APPS += (
     'django_jinja',
     'martor',
     'adminsortable2',
+    'chunked_upload',
     'django_cleanup.apps.CleanupConfig',
 )
 

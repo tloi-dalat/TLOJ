@@ -14,6 +14,8 @@ from judge.sitemap import sitemaps
 from judge.views import TitledTemplateView, api, blog, comment, contests, language, license, mailgun, organization, \
     preview, problem, problem_download, problem_manage, ranked_submission, register, stats, status, submission, tag, \
     tasks, ticket, two_factor, user, widgets
+from judge.views.chunked_upload import PolygonChunkedUploadCompleteView, PolygonChunkedUploadView, \
+    ProblemDataChunkedUploadCompleteView, ProblemDataChunkedUploadView
 from judge.views.graph_editor import GraphEditorView, ToolsListView
 from judge.views.magazine import MagazinePage
 from judge.views.misc_config import MiscConfigEdit
@@ -118,6 +120,10 @@ urlpatterns = [
         path('/suggest', problem.ProblemSuggest.as_view(), name='problem_suggest'),
         path('/create', problem.ProblemCreate.as_view(), name='problem_create'),
         path('/import-polygon', problem.ProblemImportPolygon.as_view(), name='problem_import_polygon'),
+        path('/import-polygon/upload/chunk', PolygonChunkedUploadView.as_view(),
+             name='polygon_chunked_upload'),
+        path('/import-polygon/upload/complete', PolygonChunkedUploadCompleteView.as_view(),
+             name='polygon_chunked_upload_complete'),
     ])),
 
     path('problem/<str:problem>', include([
@@ -141,6 +147,10 @@ urlpatterns = [
         path('/', lambda _, problem: HttpResponsePermanentRedirect(reverse('problem_detail', args=[problem]))),
 
         path('/test_data', ProblemDataView.as_view(), name='problem_data'),
+        path('/test_data/upload/chunk', ProblemDataChunkedUploadView.as_view(),
+             name='problem_data_chunked_upload'),
+        path('/test_data/upload/complete', ProblemDataChunkedUploadCompleteView.as_view(),
+             name='problem_data_chunked_upload_complete'),
         path('/test_data/init', problem_init_view, name='problem_data_init'),
         path('/test_data/diff', ProblemSubmissionDiff.as_view(), name='problem_submission_diff'),
         path('/data/<path:path>', problem_data_file, name='problem_data_file'),
@@ -201,6 +211,7 @@ urlpatterns = [
 
     path('user', user.UserAboutPage.as_view(), name='user_page'),
     path('edit/profile/', user.edit_profile, name='user_edit_profile'),
+    path('edit/profile/theme/', user.update_theme_api, name='user_update_theme_api'),
     path('data/prepare/', user.UserPrepareData.as_view(), name='user_prepare_data'),
     path('data/download/', user.UserDownloadData.as_view(), name='user_download_data'),
     path('user/<str:user>', include([

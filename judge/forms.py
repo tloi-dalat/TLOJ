@@ -23,8 +23,8 @@ from django.utils.translation import gettext_lazy as _, ngettext_lazy
 from judge.models import BlogPost, Contest, ContestAnnouncement, ContestParticipation, ContestProblem, Language, \
     LanguageLimit, Organization, Problem, Profile, Solution, Submission, Tag, WebAuthnCredential
 from judge.utils.subscription import newsletter_id
-from judge.widgets import AceWidget, HeavySelect2MultipleWidget, HeavySelect2Widget, MartorWidget, \
-    Select2MultipleWidget, Select2Widget
+from judge.widgets import AceWidget, ChunkedFileUploadWidget, HeavySelect2MultipleWidget, HeavySelect2Widget, \
+    MartorWidget, Select2MultipleWidget, Select2Widget
 
 TOTP_CODE_LENGTH = 6
 
@@ -55,13 +55,12 @@ class ProfileForm(ModelForm):
     class Meta:
         model = Profile
         fields = ['about', 'display_badge', 'organizations', 'timezone', 'language', 'ace_theme',
-                  'site_theme', 'user_script']
+                  'user_script']
         widgets = {
             'display_badge': Select2Widget(attrs={'style': 'width:200px'}),
             'timezone': Select2Widget(attrs={'style': 'width:200px'}),
             'language': Select2Widget(attrs={'style': 'width:200px'}),
             'ace_theme': Select2Widget(attrs={'style': 'width:200px'}),
-            'site_theme': Select2Widget(attrs={'style': 'width:200px'}),
         }
 
         # Make sure that users cannot change their `about` in contest mode
@@ -268,10 +267,8 @@ class ProblemEditTypeGroupForm(ModelForm):
 
 class ProblemImportPolygonForm(Form):
     code = CharField(max_length=32, validators=[RegexValidator('^[a-z0-9_]+$', _('Problem code must be ^[a-z0-9_]+$'))])
-    package = forms.FileField(
-        label=_('Package'),
-        widget=forms.FileInput(attrs={'accept': 'application/zip'}),
-    )
+    package = forms.FileField(label=_('Package'), required=False, widget=ChunkedFileUploadWidget)
+    upload_id = forms.CharField(required=False, widget=forms.HiddenInput(attrs={'data-chunked-upload-id': ''}))
     ignore_zero_point_batches = forms.BooleanField(required=False, label=_('Ignore zero-point batches'))
     ignore_zero_point_cases = forms.BooleanField(required=False, label=_('Ignore zero-point cases'))
     append_main_solution_to_tutorial = forms.BooleanField(required=False, initial=True,

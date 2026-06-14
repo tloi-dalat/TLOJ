@@ -31,9 +31,9 @@ from judge.forms import LanguageLimitFormSet, ProblemCloneForm, ProblemEditForm,
     ProblemImportPolygonForm, ProblemImportPolygonStatementFormSet, ProblemSubmitForm, ProposeProblemSolutionFormSet
 from judge.models import Contest, ContestProblem, ContestSubmission, Judge, Language, Problem, ProblemGroup, \
     ProblemTranslation, ProblemType, RuntimeVersion, Solution, Submission, SubmissionSource
-from judge.tasks import on_new_problem
+from judge.tasks import import_polygon_package, on_new_problem
 from judge.template_context import misc_config
-from judge.utils.codeforces_polygon import ImportPolygonError, PolygonImporter
+from judge.utils.celery import redirect_to_task_status
 from judge.utils.infinite_paginator import InfinitePaginationMixin
 from judge.utils.opengraph import generate_opengraph
 from judge.utils.pdfoid import PDF_RENDERING_ENABLED, render_pdf
@@ -1009,13 +1009,24 @@ class ProblemImportPolygon(PermissionRequiredMixin, TitleMixin, FormView):
         context = super().get_context_data(**kwargs)
         context['formset'] = self.get_formset()
         context['site_languages_json'] = mark_safe(json.dumps({code: str(name) for code, name in settings.LANGUAGES}))
+        context['chunk_size'] = settings.VNOJ_PROBLEM_DATA_CHUNK_SIZE
+        context['max_bytes'] = settings.CHUNKED_UPLOAD_MAX_BYTES
         return context
 
     def post(self, request, *args, **kwargs):
+        from chunked_upload.constants import COMPLETE
+        from chunked_upload.models import ChunkedUpload
+
         form = self.get_form()
         formset = self.get_formset()
         if form.is_valid() and formset.is_valid():
-            package = form.cleaned_data['package'].file
+            upload = ChunkedUpload.objects.filter(
+                upload_id=form.cleaned_data['upload_id'], user=request.user, status=COMPLETE,
+            ).first()
+            if upload is None:
+                form.add_error('package', _('Please upload a package.'))
+                return self.render_to_response(self.get_context_data(form=form))
+
             code = form.cleaned_data['code']
             do_update = form.cleaned_data['do_update']
             config = {
@@ -1036,21 +1047,11 @@ class ProblemImportPolygon(PermissionRequiredMixin, TitleMixin, FormView):
                     else:
                         config['polygon_to_site_language_map'][polygon_language] = site_language
 
-            try:
-                importer = PolygonImporter(
-                    package=package,
-                    code=code,
-                    authors=[self.request.profile],
-                    curators=[],
-                    do_update=do_update,
-                    interactive=False,
-                    config=config,
-                )
-                importer.run()
-            except ImportPolygonError as e:
-                return generic_message(request, _('Failed to import problem'), str(e), status=400)
-
-            return HttpResponseRedirect(reverse('problem_detail', args=[code]))
+            result = import_polygon_package.delay(upload.upload_id, code, request.profile.id, do_update, config)
+            return redirect_to_task_status(
+                result, message=_('Importing problem %s...') % code,
+                redirect=reverse('problem_detail', args=[code]),
+            )
 
         return self.render_to_response(self.get_context_data())
 
