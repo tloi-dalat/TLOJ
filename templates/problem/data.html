@@ -11,6 +11,22 @@
         window.testcase_limit = {{testcase_limit}};
         window.testcase_soft_limit = {{testcase_soft_limit}};
 
+        window.chunkedUploadConfig = {
+            uploadUrl: "{{ url('problem_data_chunked_upload', problem.code) }}",
+            completeUrl: "{{ url('problem_data_chunked_upload_complete', problem.code) }}",
+            statusUrl: "{{ url('task_status_ajax') }}",
+            chunkSize: {{ chunk_size }},
+            maxBytes: {{ max_bytes or 0 }},
+            csrfToken: "{{ csrf_token }}",
+            i18n: {
+                uploading: {{ _('Uploading test data...')|htmltojs }},
+                processing: {{ _('Upload complete, processing on server...')|htmltojs }},
+                done: {{ _('Test data uploaded, saving...')|htmltojs }},
+                failed: {{ _('Upload failed:')|htmltojs }},
+                tooLarge: {{ _('This package exceeds the maximum upload size.')|htmltojs }},
+            },
+        };
+
         $(function () {
             function autofill_if_exists($select, file) {
                 if (!$select.val() && ~window.valid_files.indexOf(file))
@@ -564,15 +580,8 @@
             $("#id_problem-data-zipfile").change((event) => {
                 let fileInput = event.target.files[0];
 
-                // 100 MB limit (Cloudflare's request body size limit)
-                if (fileInput && fileInput.size > 100 * 1024 * 1024) {
-                    alert({{ _('File too large!')|htmltojs }} + ' ' +
-                        {{ _('Your file is')|htmltojs }} + ' ' + (fileInput.size / (1024 * 1024)).toFixed(2) + ' MB. ' +
-                        {{ _('Maximum allowed is 100 MB.')|htmltojs }});
-                    event.target.value = "";
-                    return;
-                }
-
+                // Large packages are streamed in 10MB chunks by chunked_upload.js,
+                // so there is no longer a 100MB (Cloudflare) cap on the picked file.
                 var reader = new FileReader();
                 reader.onload = function(ev) {
                     JSZip.loadAsync(ev.target.result).then(function(zip) {
@@ -681,6 +690,7 @@
             padding-bottom: 1em;
             background: #e99;
         }
+
     </style>
 {% endblock %}
 

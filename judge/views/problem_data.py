@@ -25,7 +25,7 @@ from judge.utils.problem_data import ProblemDataCompiler
 from judge.utils.unicode import utf8text
 from judge.utils.views import TitleMixin, add_file_response, generic_message
 from judge.views.problem import ProblemMixin
-from judge.widgets import Select2Widget
+from judge.widgets import ChunkedFileUploadWidget, Select2Widget
 
 mimetypes.init()
 mimetypes.add_type('application/x-yaml', '.yml')
@@ -83,6 +83,8 @@ class ProblemDataForm(ModelForm):
             'checker_args': HiddenInput,
             'checker': Select2Widget(attrs={'style': 'width: 200px'}),
             'grader': Select2Widget(attrs={'style': 'width: 200px'}),
+            # The zip is streamed in chunks out-of-band; the form never carries it.
+            'zipfile': ChunkedFileUploadWidget,
         }
         help_texts = {
             'output_limit': _('Can be left blank. In case the output can be too long (over 20MB), please set this.'),
@@ -220,6 +222,8 @@ class ProblemDataView(TitleMixin, ProblemManagerMixin):
             valid_files = context['valid_files'] = self.get_valid_files(context['data_form'].instance)
             context['data_form'].zip_valid = valid_files is not False
             context['cases_formset'] = self.get_case_formset(valid_files)
+        context['chunk_size'] = settings.VNOJ_PROBLEM_DATA_CHUNK_SIZE
+        context['max_bytes'] = settings.CHUNKED_UPLOAD_MAX_BYTES
         context['valid_files_json'] = mark_safe(json.dumps(context['valid_files']))
         context['valid_files'] = set(context['valid_files'])
         context['all_case_forms'] = chain(context['cases_formset'], [context['cases_formset'].empty_form])

@@ -4,6 +4,21 @@
     {{ form.media.js }}
     <script type="text/javascript" src="{{ static('vnoj/jszip/jszip.min.js') }}"></script>
     <script type="text/javascript">
+        window.chunkedUploadConfig = {
+            uploadUrl: "{{ url('polygon_chunked_upload') }}",
+            completeUrl: "{{ url('polygon_chunked_upload_complete') }}",
+            chunkSize: {{ chunk_size }},
+            maxBytes: {{ max_bytes or 0 }},
+            csrfToken: "{{ csrf_token }}",
+            i18n: {
+                uploading: {{ _('Uploading package...')|htmltojs }},
+                processing: {{ _('Upload complete, finishing...')|htmltojs }},
+                done: {{ _('Package uploaded, starting import...')|htmltojs }},
+                failed: {{ _('Upload failed:')|htmltojs }},
+                tooLarge: {{ _('This package exceeds the maximum upload size.')|htmltojs }},
+            },
+        };
+
         $(function () {
             window.site_languages = {{site_languages_json}};
             window.default_polygon_to_site_language_map = {

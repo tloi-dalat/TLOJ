@@ -1,0 +1,43 @@
+.chunked-upload-status {
+    margin-top: 0.4em;
+    color: #555;
+}
+
+.chunked-upload-status:empty {
+    display: none;
+}
+
+.chunked-upload-status.chunked-upload-error {
+    color: red;
+}
+
+#chunked-upload-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+#chunked-upload-overlay .chunked-upload-modal {
+    min-width: 22em;
+    max-width: 90%;
+    padding: 2em;
+    text-align: center;
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
+}
+
+#chunked-upload-overlay .chunked-upload-modal-title {
+    margin-bottom: 1em;
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+#chunked-upload-overlay .chunked-upload-modal-bar {
+    width: 100%;
+    height: 1.1em;
+}
