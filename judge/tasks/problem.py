@@ -1,11 +1,18 @@
+import os
+import zipfile
+
 from celery import shared_task
 from django.conf import settings
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
-from judge.models import Problem
+from judge.models import Problem, ProblemData, problem_data_storage
+from judge.models.problem_data import _problem_directory_file
+from judge.utils.problem_data import ProblemDataError
 from judge.utils.problems import fast_delete_problem
 
-__all__ = ('problem_garbage_collect',)
+__all__ = ('problem_garbage_collect', 'reassemble_problem_data_zip', 'delete_expired_chunked_uploads',
+           'import_polygon_package')
 
 
 @shared_task
@@ -16,3 +23,74 @@ def problem_garbage_collect():
         if timezone.now() > end:
             break
         fast_delete_problem(problem)
+
+
+@shared_task
+def reassemble_problem_data_zip(upload_id, problem_code):
+    from chunked_upload.models import ChunkedUpload
+
+    chunked_upload = ChunkedUpload.objects.get(upload_id=upload_id)
+    problem = Problem.objects.get(code=problem_code)
+    data = ProblemData.objects.get_or_create(problem=problem)[0]
+
+    name = _problem_directory_file(problem.code, chunked_upload.filename)
+    with chunked_upload.get_uploaded_file() as uploaded_file:
+        saved_name = problem_data_storage.save(name, uploaded_file)
+
+    try:
+        with problem_data_storage.open(saved_name, 'rb') as f:
+            zipfile.ZipFile(f).namelist()
+    except zipfile.BadZipfile:
+        problem_data_storage.delete(saved_name)
+        chunked_upload.delete()
+        raise ProblemDataError(_('The uploaded file is not a valid zip archive.'))
+
+    data.zipfile.name = saved_name
+    data.save()
+
+    chunked_upload.delete()
+    return {'zipfile': saved_name}
+
+
+@shared_task
+def import_polygon_package(upload_id, code, profile_id, do_update, config):
+    from chunked_upload.models import ChunkedUpload
+    from judge.models import Profile
+    from judge.utils.codeforces_polygon import PolygonImporter
+
+    chunked_upload = ChunkedUpload.objects.get(upload_id=upload_id)
+    profile = Profile.objects.get(id=profile_id)
+    try:
+        importer = PolygonImporter(
+            package=chunked_upload.file.path,
+            code=code,
+            authors=[profile],
+            curators=[],
+            do_update=do_update,
+            interactive=False,
+            config=config,
+        )
+        importer.run()
+    finally:
+        chunked_upload.delete()
+
+
+@shared_task
+def delete_expired_chunked_uploads():
+    from chunked_upload.models import ChunkedUpload
+    from chunked_upload.settings import EXPIRATION_DELTA, UPLOAD_PATH
+
+    cutoff = timezone.now() - EXPIRATION_DELTA
+    for upload in ChunkedUpload.objects.filter(created_on__lte=cutoff):
+        upload.delete()
+
+    prefix = UPLOAD_PATH.split('%', 1)[0].strip('/\\')
+    base_dir = os.path.join(ChunkedUpload._meta.get_field('file').storage.location, prefix)
+    if os.path.isdir(base_dir):
+        for root, dirs, files in os.walk(base_dir, topdown=False):
+            if os.path.abspath(root) == os.path.abspath(base_dir):
+                continue
+            try:
+                os.rmdir(root)
+            except OSError:
+                pass
