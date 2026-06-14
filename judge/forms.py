@@ -267,8 +267,6 @@ class ProblemEditTypeGroupForm(ModelForm):
 
 class ProblemImportPolygonForm(Form):
     code = CharField(max_length=32, validators=[RegexValidator('^[a-z0-9_]+$', _('Problem code must be ^[a-z0-9_]+$'))])
-    # The package is streamed in chunks out-of-band; the form carries only the
-    # resulting upload id, not the (potentially huge) file itself.
     package = forms.FileField(label=_('Package'), required=False, widget=ChunkedFileUploadWidget)
     upload_id = forms.CharField(required=False, widget=forms.HiddenInput(attrs={'data-chunked-upload-id': ''}))
     ignore_zero_point_batches = forms.BooleanField(required=False, label=_('Ignore zero-point batches'))
