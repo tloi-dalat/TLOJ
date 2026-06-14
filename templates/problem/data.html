@@ -580,8 +580,6 @@
             $("#id_problem-data-zipfile").change((event) => {
                 let fileInput = event.target.files[0];
 
-                // Large packages are streamed in 10MB chunks by chunked_upload.js,
-                // so there is no longer a 100MB (Cloudflare) cap on the picked file.
                 var reader = new FileReader();
                 reader.onload = function(ev) {
                     JSZip.loadAsync(ev.target.result).then(function(zip) {
@@ -690,7 +688,6 @@
             padding-bottom: 1em;
             background: #e99;
         }
-
     </style>
 {% endblock %}
 

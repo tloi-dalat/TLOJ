@@ -124,7 +124,6 @@
 
                 return postForm(cfg.uploadUrl, fd, {'Content-Range': range}).then(function (data) {
                     uploadId = data.upload_id || uploadId;
-                    // Resume from the server's authoritative offset.
                     var next = typeof data.offset === 'number' ? data.offset : end;
                     showStage(cfg.i18n.uploading, next / total * 100);
                     return sendChunk(next);
