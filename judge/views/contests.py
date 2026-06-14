@@ -110,10 +110,13 @@ class ContestList(InfinitePaginationMixin, TitleMixin, ContestListMixin, ListVie
         queryset = super().get_queryset().select_related('organization')
         if self.request.user.is_authenticated:
             user_id = self.request.profile.id
+            authors_exists = Contest.authors.through.objects.filter(contest_id=OuterRef('pk'), profile_id=user_id)
+            curators_exists = Contest.curators.through.objects.filter(contest_id=OuterRef('pk'), profile_id=user_id)
+            testers_exists = Contest.testers.through.objects.filter(contest_id=OuterRef('pk'), profile_id=user_id)
             queryset = queryset.annotate(
-                has_author=Exists(Contest.authors.through.objects.filter(contest_id=OuterRef('pk'), profile_id=user_id)),
-                has_curator=Exists(Contest.curators.through.objects.filter(contest_id=OuterRef('pk'), profile_id=user_id)),
-                has_tester=Exists(Contest.testers.through.objects.filter(contest_id=OuterRef('pk'), profile_id=user_id)),
+                has_author=Exists(authors_exists),
+                has_curator=Exists(curators_exists),
+                has_tester=Exists(testers_exists),
             )
         return queryset
 
