@@ -13,7 +13,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMix
 from django.core.cache import cache
 from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist, PermissionDenied
 from django.db import IntegrityError
-from django.db.models import BooleanField, Case, Count, F, FloatField, IntegerField, Max, Min, Q, Sum, Value, When
+from django.db.models import (
+    BooleanField, Case, Count, Exists, F, FloatField, IntegerField, Max, Min, OuterRef, Q, Sum, Value, When,
+    prefetch_related_objects,
+)
 from django.db.models.expressions import CombinedExpression
 from django.db.models.query import Prefetch
 from django.http import Http404, HttpResponse, HttpResponseForbidden, HttpResponseRedirect
@@ -104,7 +107,15 @@ class ContestList(InfinitePaginationMixin, TitleMixin, ContestListMixin, ListVie
         return timezone.now()
 
     def _get_queryset(self):
-        return super().get_queryset().prefetch_related('tags', 'organization', 'authors', 'curators', 'testers')
+        queryset = super().get_queryset().select_related('organization')
+        if self.request.user.is_authenticated:
+            user_id = self.request.profile.id
+            queryset = queryset.annotate(
+                has_author=Exists(Contest.authors.through.objects.filter(contest_id=OuterRef('pk'), profile_id=user_id)),
+                has_curator=Exists(Contest.curators.through.objects.filter(contest_id=OuterRef('pk'), profile_id=user_id)),
+                has_tester=Exists(Contest.testers.through.objects.filter(contest_id=OuterRef('pk'), profile_id=user_id)),
+            )
+        return queryset
 
     def get_queryset(self):
         self.search_query = None
@@ -121,25 +132,37 @@ class ContestList(InfinitePaginationMixin, TitleMixin, ContestListMixin, ListVie
 
     def get_context_data(self, **kwargs):
         context = super(ContestList, self).get_context_data(**kwargs)
+        past_contests = list(context['past_contests'])
+        current_and_future = list(self._get_queryset().exclude(end_time__lt=self._now))
+        all_contests = past_contests + current_and_future
+
+        prefetches = ['tags']
+        if self.request.user.is_authenticated:
+            prefetches.append(Prefetch('users',
+                                       queryset=ContestParticipation.objects.filter(
+                                           user=self.request.profile, virtual=0),
+                                       to_attr='user_participation'))
+
+        prefetch_related_objects(all_contests, *prefetches)
+
         present, active, future = [], [], []
         finished = set()
-        for contest in self._get_queryset().exclude(end_time__lt=self._now):
+        for contest in current_and_future:
             if contest.start_time > self._now:
                 future.append(contest)
             else:
                 present.append(contest)
 
         if self.request.user.is_authenticated:
-            for participation in ContestParticipation.objects.filter(virtual=0, user=self.request.profile,
-                                                                     contest_id__in=present) \
-                    .select_related('contest') \
-                    .prefetch_related('contest__authors', 'contest__curators', 'contest__testers') \
-                    .annotate(key=F('contest__key')):
-                if participation.ended:
-                    finished.add(participation.contest.key)
-                else:
-                    active.append(participation)
-                    present.remove(participation.contest)
+            for contest in list(present):
+                if hasattr(contest, 'user_participation') and contest.user_participation:
+                    participation = contest.user_participation[0]
+                    participation.contest = contest
+                    if participation.ended:
+                        finished.add(contest.key)
+                    else:
+                        active.append(participation)
+                        present.remove(contest)
 
         active.sort(key=attrgetter('end_time', 'key'))
         present.sort(key=attrgetter('end_time', 'key'))
