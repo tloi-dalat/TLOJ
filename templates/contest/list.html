@@ -146,7 +146,7 @@
         <td><span>Already joined</span></td>
     {% else %}
         <td>
-            {% if contest.key in finished_contests or request.profile in contest.authors.all() or request.profile in contest.curators.all() or request.profile in contest.testers.all() %}
+            {% if contest.key in finished_contests or contest.has_author or contest.has_curator or contest.has_tester %}
                 <form action="{{ url('contest_join', contest.key) }}" method="post">
                     {% csrf_token %}
                     <input type="submit" class="unselectable button full participate-button spectate-warning"
@@ -165,7 +165,7 @@
 
 {% macro contest_register(contest, request) %}
     <td>
-        {% if request.profile not in contest.authors.all() and request.profile not in contest.curators.all() and request.profile not in contest.testers.all() %}
+        {% if not contest.has_author and not contest.has_curator and not contest.has_tester %}
             {% if request.profile and contest.id in request.profile.registered_contest_ids %}
                 <span style="color: #87ab69"><b>{{ _('Already registered') }}</b></span>
             {% elif not contest.can_register %}

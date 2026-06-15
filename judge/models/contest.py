@@ -274,6 +274,8 @@ class Contest(models.Model):
             return False
         if user.has_perm('judge.see_private_contest') or user.has_perm('judge.edit_all_contest'):
             return True
+        if getattr(self, 'has_author', False) or getattr(self, 'has_curator', False):
+            return True
         if user.profile.id in self.editor_ids:
             return True
         if self.view_contest_scoreboard.filter(id=user.profile.id).exists():
@@ -386,16 +388,15 @@ class Contest(models.Model):
 
     @cached_property
     def author_ids(self):
-        return Contest.authors.through.objects.filter(contest=self).values_list('profile_id', flat=True)
+        return [profile.id for profile in self.authors.all()]
 
     @cached_property
     def editor_ids(self):
-        return self.author_ids.union(
-            Contest.curators.through.objects.filter(contest=self).values_list('profile_id', flat=True))
+        return set(self.author_ids) | set(profile.id for profile in self.curators.all())
 
     @cached_property
     def tester_ids(self):
-        return Contest.testers.through.objects.filter(contest=self).values_list('profile_id', flat=True)
+        return [profile.id for profile in self.testers.all()]
 
     @classmethod
     def get_id_secret(cls, contest_id):
