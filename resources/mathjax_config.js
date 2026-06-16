@@ -2,7 +2,7 @@ window.MathJax = {
     loader: {
         load: ['[tex]/color'],
         paths: {
-            mathjax: '/static/vnoj/mathjax/3.2.0/es5'
+            mathjax: '/static/mathjax/4.1.2'
         }
     },
     tex: {
@@ -13,6 +13,9 @@ window.MathJax = {
             ['~', '~'],
             ['\\(', '\\)']
         ]
+    },
+    chtml: {
+        fontURL: '/static/mathjax/4.1.2/output/chtml/fonts/mathjax-newcm/chtml/woff2'
     },
     options: {
         enableMenu: false
