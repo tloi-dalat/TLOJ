@@ -270,11 +270,7 @@ class ProblemImportPolygonForm(Form):
     code = CharField(max_length=32, validators=[RegexValidator('^[a-z0-9_]+$', _('Problem code must be ^[a-z0-9_]+$'))])
     package = forms.FileField(label=_('Package'), required=False, widget=ChunkedFileUploadWidget)
     upload_id = forms.CharField(required=False, widget=forms.HiddenInput(attrs={'data-chunked-upload-id': ''}))
-    problem_id = forms.IntegerField(
-        required=False, min_value=1, label=_('Problem ID'),
-        help_text=format_html(_('Please share the problem to user <strong>{}</strong> first'),
-                              settings.VNOJ_POLYGON_API_USERNAME),
-    )
+    problem_id = forms.IntegerField(required=False, min_value=1, label=_('Problem ID'))
     ignore_zero_point_batches = forms.BooleanField(required=False, label=_('Ignore zero-point batches'))
     ignore_zero_point_cases = forms.BooleanField(required=False, label=_('Ignore zero-point cases'))
     append_main_solution_to_tutorial = forms.BooleanField(required=False, initial=True,
@@ -284,6 +280,10 @@ class ProblemImportPolygonForm(Form):
 
     def __init__(self, code=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['problem_id'].help_text = format_html(
+            _('Please share the problem to user <strong>{}</strong> first'),
+            settings.VNOJ_POLYGON_API_USERNAME,
+        )
         if code is not None:
             self.fields['code'].initial = code
             self.fields['code'].disabled = True
