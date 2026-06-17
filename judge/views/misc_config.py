@@ -11,8 +11,8 @@ from judge.views.widgets import static_uploader
 
 
 class MiscConfigForm(forms.Form):
-    logo = forms.FileField(help_text='The site logo e.g. the image in the top left corner.')
-    favicon = forms.FileField(help_text='The site favicon')
+    logo = forms.FileField(help_text=_('The site logo e.g. the image in the top left corner.'))
+    favicon = forms.FileField(help_text=_('The site favicon'))
 
 
 class MiscConfigEdit(TitleMixin, FormView):

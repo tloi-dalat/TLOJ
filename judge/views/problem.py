@@ -31,7 +31,7 @@ from judge.forms import LanguageLimitFormSet, ProblemCloneForm, ProblemEditForm,
     ProblemImportPolygonForm, ProblemImportPolygonStatementFormSet, ProblemSubmitForm, ProposeProblemSolutionFormSet
 from judge.models import Contest, ContestProblem, ContestSubmission, Judge, Language, Problem, ProblemGroup, \
     ProblemTranslation, ProblemType, RuntimeVersion, Solution, Submission, SubmissionSource
-from judge.tasks import import_polygon_package, on_new_problem
+from judge.tasks import import_polygon_package, import_polygon_package_from_api, on_new_problem
 from judge.template_context import misc_config
 from judge.utils.celery import redirect_to_task_status
 from judge.utils.infinite_paginator import InfinitePaginationMixin
@@ -1020,15 +1020,31 @@ class ProblemImportPolygon(PermissionRequiredMixin, TitleMixin, FormView):
         form = self.get_form()
         formset = self.get_formset()
         if form.is_valid() and formset.is_valid():
+            code = form.cleaned_data['code']
+            do_update = form.cleaned_data['do_update']
+            problem_id = form.cleaned_data['problem_id']
+
+            if problem_id:
+                config = {
+                    'ignore_zero_point_batches': form.cleaned_data['ignore_zero_point_batches'],
+                    'ignore_zero_point_cases': form.cleaned_data['ignore_zero_point_cases'],
+                    'append_main_solution_to_tutorial': form.cleaned_data['append_main_solution_to_tutorial'],
+                }
+                result = import_polygon_package_from_api.delay(
+                    problem_id, code, request.profile.id, do_update, config,
+                )
+                return redirect_to_task_status(
+                    result, message=_('Importing problem %s...') % code,
+                    redirect=reverse('problem_detail', args=[code]),
+                )
+
             upload = ChunkedUpload.objects.filter(
                 upload_id=form.cleaned_data['upload_id'], user=request.user, status=COMPLETE,
             ).first()
             if upload is None:
-                form.add_error('package', _('Please upload a package.'))
+                form.add_error('package', _('Please upload a package or enter a problem ID.'))
                 return self.render_to_response(self.get_context_data(form=form))
 
-            code = form.cleaned_data['code']
-            do_update = form.cleaned_data['do_update']
             config = {
                 'ignore_zero_point_batches': form.cleaned_data['ignore_zero_point_batches'],
                 'ignore_zero_point_cases': form.cleaned_data['ignore_zero_point_cases'],
