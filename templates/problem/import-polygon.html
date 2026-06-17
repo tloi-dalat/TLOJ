@@ -29,6 +29,33 @@
             $('#statements-table').hide();
             $('#id_main_tutorial_language').parent().parent().hide();
 
+            var $packageRow = $('#id_package').closest('tr');
+            var $polygonRow = $('#id_problem_id').closest('tr');
+
+            $('#id_code').closest('tr').after(
+                $('<tr>')
+                    .append($('<th>').text({{ _('Import type:')|htmltojs }}))
+                    .append($('<td>').append($('#import-method-selector').show())),
+            );
+            function applyImportMethod(method) {
+                if (method === 'polygon') {
+                    $packageRow.hide();
+                    $polygonRow.show();
+                    $('#id_package').val('');
+                    $('#id_upload_id').val('');
+                    $('#statements-table').hide();
+                    $('#id_main_tutorial_language').parent().parent().hide();
+                } else {
+                    $polygonRow.hide();
+                    $packageRow.show();
+                    $('#id_problem_id').val('');
+                }
+            }
+            $('input[name=import_method]').change(function () {
+                applyImportMethod(this.value);
+            });
+            applyImportMethod($('input[name=import_method]:checked').val());
+
             $("#id_package").change(function (event) {
                 let fileInput = event.target.files[0];
                 var reader = new FileReader();
@@ -120,6 +147,18 @@
 {% block media %}
     {{ form.media.css }}
     <link rel="stylesheet" type="text/css" href="{{ static('ui_form.css') }}">
+    <style>
+        #import-method-selector label {
+            display: inline-block;
+            font-weight: normal;
+            margin-right: 2em;
+        }
+        #import-method-selector input[type=radio] {
+            width: auto;
+            margin: 0 0.35em 0 0;
+            vertical-align: middle;
+        }
+    </style>
 {% endblock %}
 
 {% macro form_as_row(form) -%}
@@ -138,6 +177,14 @@
         {% endif %}
         {% csrf_token %}
         {{ formset.management_form }}
+        <span id="import-method-selector" style="display: none;">
+            <label>
+                <input type="radio" name="import_method" value="package" checked> {{ _('Upload package') }}
+            </label>
+            <label>
+                <input type="radio" name="import_method" value="polygon"> {{ _('Enter problem ID') }}
+            </label>
+        </span>
         <table class="django-as-table">{{ form.as_table() }}</table>
         <table class="table" id="statements-table">
             <thead>
