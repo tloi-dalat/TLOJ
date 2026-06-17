@@ -257,6 +257,12 @@ VNOJ_PROBLEM_DATA_CHUNK_SIZE = 10 * 1024 * 1024  # 10 MB
 # Largest problem package accepted by chunked upload
 CHUNKED_UPLOAD_MAX_BYTES = 1 * 1024 * 1024 * 1024  # 1 GB
 
+# Shared Codeforces Polygon account used to import problems shared to it via the Polygon API
+VNOJ_POLYGON_API_URL = 'https://polygon.codeforces.com/api'
+VNOJ_POLYGON_API_KEY = None
+VNOJ_POLYGON_API_SECRET = None
+VNOJ_POLYGON_API_USERNAME = None
+
 DMOJ_PROBLEM_MIN_TIME_LIMIT = 0.01  # seconds
 DMOJ_PROBLEM_MAX_TIME_LIMIT = 60  # seconds
 DMOJ_PROBLEM_MIN_MEMORY_LIMIT = 0  # kilobytes
