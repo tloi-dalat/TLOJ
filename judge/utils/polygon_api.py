@@ -64,7 +64,6 @@ class PolygonClient:
         return max(ready, key=lambda p: p.get('creationTimeSeconds', 0))['id']
 
     def download_package(self, problem_id, package_id, dest_path, package_type='linux'):
-        """Download a package zip to dest_path. ``linux`` packages contain generated tests."""
         response = self._request('problem.package', {
             'problemId': problem_id,
             'packageId': package_id,
