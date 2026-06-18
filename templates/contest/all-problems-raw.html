@@ -1,0 +1,136 @@
+{% set math_engine = math_engine or 'jax' %}
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="{{ urljoin(url, static('style.css')) }}">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <style>
+        html {
+            background: white;
+        }
+
+        body {
+            background: white;
+        }
+
+        .problem-page {
+            page-break-after: always;
+            box-sizing: border-box;
+        }
+
+        .problem-page:last-child {
+            page-break-after: avoid;
+        }
+
+        tr {
+            page-break-inside: avoid;
+        }
+
+        #info-table {
+            width: auto;
+            background: white;
+        }
+
+        #info-table td {
+            text-align: left;
+        }
+
+        #info-table td.value {
+            min-width: 10em;
+        }
+
+        #info-table td.key {
+            font-weight: bold;
+        }
+
+        .lang-limit {
+            margin-left: 1.5em;
+        }
+
+        .lang-name:after {
+            content: ": ";
+        }
+
+        .problem-info-entry {
+            vertical-align: top;
+            padding: 0.6em;
+            display: inline-block;
+            text-align: left;
+        }
+
+        .content-description table {
+            border-collapse: collapse;
+            width: auto;
+            max-width: 100%;
+            margin: 1em auto;
+            color: black !important;
+            background-color: white !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+
+        .content-description table,
+        .content-description tr,
+        .content-description td,
+        .content-description th {
+            page-break-inside: auto !important;
+        }
+
+        .content-description th,
+        .content-description td {
+            border: 1px solid #ccc !important;
+            padding: 8px 12px !important;
+            color: black !important;
+            background: white !important;
+            background-color: white !important;
+        }
+
+        .content-description th {
+            font-weight: bold;
+            background-color: #f0f0f0 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+    </style>
+</head>
+
+<body>
+{% for item in problems_data %}
+    <div class="problem-page">
+        <h2 style="display: inline-block;">{{ item.problem_name }}</h2>
+        <hr>
+        <div align="center" style="position: relative;">
+            <div class="problem-info-entry">
+                <b>{{ _('Time limit:') }}</b> {{ item.problem.time_limit }}s
+                {% for name, limit in item.problem.language_time_limit %}
+                    <div class="lang-limit">
+                        <span class="lang-name">{{ name }}</span>
+                        <span>{{ limit }}s</span>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="problem-info-entry">
+                <b>{{ _('Memory limit:') }}</b> {{ item.problem.memory_limit|kbsimpleformat}}
+                {% for name, limit in item.problem.language_memory_limit %}
+                    <div class="lang-limit">
+                        <span class="lang-name">{{ name }}</span>
+                        <span>{{ limit|kbsimpleformat }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        <hr style="clear: both;">
+        <div class="content-description printing">
+            {{ item.description|markdown(item.problem.markdown_style, 'tex')|reference|absolutify(url)|str|safe }}
+        </div>
+    </div>
+{% endfor %}
+<script type="text/javascript" src="{{ urljoin(url, static('mathjax_config.js')) }}"></script>
+<script type="text/javascript" src="{{ urljoin(url, static('vnoj/mathjax/3.2.0/es5/tex-chtml.min.js')) }}"></script>
+<script type="text/javascript">
+    MathJax.typesetPromise().then(function () {
+        document.body.classList.add('math-loaded');
+    });
+</script>
+</body>
+</html>
