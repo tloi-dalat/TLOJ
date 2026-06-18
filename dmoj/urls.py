@@ -254,7 +254,9 @@ urlpatterns = [
     path('contest/<str:contest>', include([
         path('', contests.ContestDetail.as_view(), name='contest_view'),
         path('/all', contests.ContestAllProblems.as_view(), name='contest_all_problems'),
-        path('/all/raw', xframe_options_sameorigin(contests.ContestAllProblemsRaw.as_view()), name='contest_all_problems_raw'),
+        path('/all/raw',
+             xframe_options_sameorigin(contests.ContestAllProblemsRaw.as_view()),
+             name='contest_all_problems_raw'),
         path('/all/pdf', contests.ContestAllProblemsPdf.as_view(), name='contest_all_problems_pdf'),
         path('/all/pdf/<slug:language>', contests.ContestAllProblemsPdf.as_view(), name='contest_all_problems_pdf'),
         path('/edit', contests.EditContest.as_view(), name='contest_edit'),
