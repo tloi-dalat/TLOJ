@@ -6,8 +6,8 @@
     {% set tab = 'detail' %}
     {% include "contest/contest-tabs.html" %}
     {% if contest.is_organization_private and contest.organization %}
-        <span class="organization-tags">
-            <span class="organization-tag">
+        <span class="organization-tags" style="display: block; margin: 10px 0 15px 0;">
+            <span class="organization-tag" style="transform: none; margin: 0;">
                 <a href="{{ contest.organization.get_absolute_url() }}">
                     <i class="fa fa-lock"></i> {{ contest.organization.name }}
                 </a>
