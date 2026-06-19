@@ -8,35 +8,42 @@
 {% endblock %}
 
 {% block body %}
-    <table id="judge-versions" class="table">
-        <tr>
-            <th></th>
-            {% for judge in judges %}
-                <th>{{ judge }}</th>
-            {% endfor %}
-        </tr>
-        {% for language in languages %}
+    <style>
+        #judge-versions tr:first-child {
+            position: static !important;
+        }
+    </style>
+    <div class="h-scrollable-table">
+        <table id="judge-versions" class="table" style="border-collapse: separate; border-radius: 8px; overflow: hidden;">
             <tr>
-                <th>{{ language.name }}</th>
+                <th></th>
                 {% for judge in judges %}
-                    {% set versions = matrix[judge][language.id] %}
-                    <td class="version version-
-                        {%- if not versions -%}
-                            blank
-                        {%- elif versions.is_latest -%}
-                            latest
-                        {%- else -%}
-                            outdated
-                        {%- endif %}">
-                        {%- for version in versions -%}
-                            {{ version.name }}{% if version.version %}&nbsp;{{ version.version }}{% endif %}
-                            {% if not loop.last %}<br>{% endif %}
-                        {%- else -%}
-                            &mdash;
-                        {%- endfor -%}
-                    </td>
+                    <th>{{ judge }}</th>
                 {% endfor %}
             </tr>
-        {% endfor %}
-    </table>
+            {% for language in languages %}
+                <tr>
+                    <th>{{ language.name }}</th>
+                    {% for judge in judges %}
+                        {% set versions = matrix[judge][language.id] %}
+                        <td class="version version-
+                            {%- if not versions -%}
+                                blank
+                            {%- elif versions.is_latest -%}
+                                latest
+                            {%- else -%}
+                                outdated
+                            {%- endif %}">
+                            {%- for version in versions -%}
+                                {{ version.name }}{% if version.version %}&nbsp;{{ version.version }}{% endif %}
+                                {% if not loop.last %}<br>{% endif %}
+                            {%- else -%}
+                                &mdash;
+                            {%- endfor -%}
+                        </td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
 {% endblock %}
