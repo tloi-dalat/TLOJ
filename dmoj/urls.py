@@ -16,7 +16,7 @@ from judge.views import TitledTemplateView, api, blog, comment, contests, langua
     tasks, ticket, two_factor, user, widgets
 from judge.views.chunked_upload import PolygonChunkedUploadCompleteView, PolygonChunkedUploadView, \
     ProblemDataChunkedUploadCompleteView, ProblemDataChunkedUploadView
-from judge.views.graph_editor import GraphEditorView, ToolsListView
+from judge.views.graph_editor import GraphEditorView, GeometryWidgetView, ToolsListView
 from judge.views.magazine import MagazinePage
 from judge.views.misc_config import MiscConfigEdit
 from judge.views.problem_data import ProblemDataView, ProblemSubmissionDiff, \
@@ -360,6 +360,7 @@ urlpatterns = [
 
     path('tools/', ToolsListView.as_view(), name='tools_list'),
     path('tool/graph_editor', GraphEditorView.as_view(), name='graph_editor'),
+    path('tool/geometry_widget', GeometryWidgetView.as_view(), name='geometry_widget'),
 
     path('license/<str:key>', license.LicenseDetail.as_view(), name='license'),
 

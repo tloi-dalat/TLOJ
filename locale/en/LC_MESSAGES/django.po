@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-17 18:03+0000\n"
+"POT-Creation-Date: 2026-06-21 05:22+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -575,7 +575,7 @@ msgstr ""
 msgid "Ties will be broken by the time of the last score altering submission."
 msgstr ""
 
-#: judge/contest_format/default.py:18
+#: judge/contest_format/default.py:18 templates/tools/geometry_widget.html:696
 msgid "Default"
 msgstr ""
 
@@ -4094,6 +4094,10 @@ msgstr ""
 msgid "Graph Editor"
 msgstr ""
 
+#: judge/views/graph_editor.py:21 templates/tools/list.html:27
+msgid "Geometry Widget"
+msgstr ""
+
 #: judge/views/language.py:12 templates/status/judge-status-table.html:10
 #: templates/status/status-tabs.html:6
 msgid "Runtimes"
@@ -4922,6 +4926,7 @@ msgid "Currently:"
 msgstr ""
 
 #: judge/widgets/chunked_upload.py:27 templates/contest/ranking.html:496
+#: templates/tools/geometry_widget.html:501
 msgid "Clear"
 msgstr ""
 
@@ -8193,6 +8198,267 @@ msgstr ""
 msgid "Reopen ticket"
 msgstr ""
 
+#: templates/tools/geometry_widget.html:421
+msgid "Drawing Tools"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:424
+#: templates/tools/geometry_widget.html:426
+#: templates/tools/geometry_widget.html:1832
+msgid "Select & Pan"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:428
+#: templates/tools/geometry_widget.html:430
+#: templates/tools/geometry_widget.html:1833
+msgid "Add Point"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:432
+#: templates/tools/geometry_widget.html:434
+#: templates/tools/geometry_widget.html:1834
+msgid "Add Segment"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:436
+#: templates/tools/geometry_widget.html:438
+#: templates/tools/geometry_widget.html:1835
+msgid "Add Line"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:440
+#: templates/tools/geometry_widget.html:442
+#: templates/tools/geometry_widget.html:1836
+msgid "Add Ray"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:444
+#: templates/tools/geometry_widget.html:446
+#: templates/tools/geometry_widget.html:1837
+msgid "Add Vector"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:448
+#: templates/tools/geometry_widget.html:450
+#: templates/tools/geometry_widget.html:1838
+msgid "Add Circle"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:452
+#: templates/tools/geometry_widget.html:454
+#: templates/tools/geometry_widget.html:1839
+msgid "Add Polygon"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:459
+msgid "Select Preset"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:460
+msgid "Triangle Centroid"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:461
+msgid "Incircle & Circumcircle"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:462
+msgid "Convex Hull"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:466
+msgid "Advanced Options"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:470
+msgid "Show grid"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:474
+msgid "Snap to grid"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:478
+msgid "Lock all points"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:482
+msgid "Auto-label points"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:490
+msgid "Properties Inspector"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:492
+msgid "Click on a point to inspect and edit coordinates, color, or label"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:497
+msgid "Geometry Markup"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:502
+msgid "Export PNG"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:509
+msgid "Geometry canvas"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:512
+msgid "Undo"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:513
+msgid "Redo"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:514
+msgid "Zoom In"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:515
+msgid "Zoom Out"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:516
+msgid "Reset View"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:682
+msgid "Custom..."
+msgstr ""
+
+#: templates/tools/geometry_widget.html:686
+#: templates/tools/geometry_widget.html:1439
+msgid "Point"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:694
+msgid "Color"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:697
+msgid "Red"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:698
+msgid "Green"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:699
+msgid "Blue"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:700
+msgid "Orange"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:701
+msgid "Purple"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:702
+msgid "Gray"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:705
+msgid "X"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:708
+msgid "Y"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:1439
+msgid "Drag to move."
+msgstr ""
+
+#: templates/tools/geometry_widget.html:1442
+msgid "Segment"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:1442
+msgid "Length"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:1444
+msgid "Circle"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:1444
+msgid "centered at"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:1444
+msgid "Radius"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:1448
+msgid "Select and drag points to edit. Right-click drag to pan."
+msgstr ""
+
+#: templates/tools/geometry_widget.html:1450
+msgid "Click anywhere on the canvas to place a point."
+msgstr ""
+
+#: templates/tools/geometry_widget.html:1452
+msgid "Click a point and drag to draw a line segment."
+msgstr ""
+
+#: templates/tools/geometry_widget.html:1454
+msgid "Click and drag to draw an infinite line."
+msgstr ""
+
+#: templates/tools/geometry_widget.html:1456
+msgid "Click and drag to draw a ray."
+msgstr ""
+
+#: templates/tools/geometry_widget.html:1458
+msgid "Click and drag to draw a vector arrow."
+msgstr ""
+
+#: templates/tools/geometry_widget.html:1460
+msgid "Click center and drag to draw a circle."
+msgstr ""
+
+#: templates/tools/geometry_widget.html:1462
+msgid "Click vertices. Click the first vertex or double-click to close."
+msgstr ""
+
+#: templates/tools/geometry_widget.html:1910
+msgid "Clear all points and shapes"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:1911
+msgid "Export current drawing as a PNG image"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:1925
+msgid "Undo last action"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:1926
+msgid "Redo next action"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:1927
+msgid "Zoom in"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:1928
+msgid "Zoom out"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:1929
+msgid "Reset view to fit all points"
+msgstr ""
+
+#: templates/tools/geometry_widget.html:2020
+msgid "Label already exists!"
+msgstr ""
+
 #: templates/tools/graph_editor.html:129
 msgid "Graph type"
 msgstr ""
@@ -8223,6 +8489,10 @@ msgstr ""
 
 #: templates/tools/list.html:23
 msgid "Visualize and edit graphs interactively"
+msgstr ""
+
+#: templates/tools/list.html:29
+msgid "Interactive 2D geometry plotting"
 msgstr ""
 
 #: templates/urlshortener/confirm_delete.html:65

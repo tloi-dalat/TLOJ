@@ -1,0 +1,2110 @@
+{% extends "base.html" %}
+{% block title_row %}{% endblock %}
+
+{% block media %}
+<style>
+  html,
+  body.gw-active {
+    overflow: hidden;
+  }
+
+  #gw-wrap {
+    display: grid;
+    grid-template-columns: minmax(18rem, 22rem) minmax(0, 1fr);
+    gap: 0.75rem;
+    height: calc(100vh - 10.5rem);
+    min-height: 35rem;
+    overflow: hidden;
+    padding: 0.25rem 0 0.5rem;
+  }
+
+  #gw-sidebar {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
+    overflow-y: auto;
+  }
+
+  #gw-sidebar .sidebox {
+    flex: 0 0 auto;
+    padding-bottom: 0.5em !important;
+    margin-bottom: 0.5rem;
+  }
+
+  #gw-sidebar .sidebox.gw-input-box {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 10rem;
+  }
+
+  #gw-sidebar .gw-input-box .sidebox-content {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  #gw-input {
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 8rem;
+    box-sizing: border-box;
+    resize: none;
+    font-family: Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+    font-size: 0.88rem;
+  }
+
+  .gw-option-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.15rem 0;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  #gw-canvas-wrap {
+    position: relative;
+    height: 100%;
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #fff;
+  }
+
+  #gw-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+  }
+
+  body[data-theme="dark"] #gw-canvas-wrap {
+    border-color: #3b3b3b;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    body[data-theme="auto"] #gw-canvas-wrap {
+      border-color: #3b3b3b;
+    }
+  }
+
+  .gw-tools-list {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+
+  .gw-tool-item {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    color: #333;
+    transition: all 0.15s ease;
+  }
+
+  body[data-theme="dark"] .gw-tool-item {
+    color: #e0e0e0;
+  }
+
+  .gw-tool-item:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  body[data-theme="dark"] .gw-tool-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .gw-tool-item.active {
+    background: #007aff;
+    color: #fff !important;
+  }
+
+  .gw-tool-item span {
+    display: none;
+  }
+
+  #gw-zoom-controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 10;
+  }
+
+  .gw-zoom-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background: #fff;
+    color: #333;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    transition: all 0.15s ease;
+  }
+
+  .gw-zoom-btn:hover {
+    background: #f0f0f0;
+  }
+
+  .gw-zoom-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  .gw-tool-item i,
+  .gw-tool-item svg,
+  .gw-zoom-btn i,
+  .gw-action-btn i {
+    color: #000000 !important;
+    fill: #000000;
+  }
+
+  body[data-theme="dark"] .gw-tool-item i,
+  body[data-theme="dark"] .gw-tool-item svg,
+  body[data-theme="dark"] .gw-zoom-btn i,
+  body[data-theme="dark"] .gw-action-btn i {
+    color: #ffffff !important;
+    fill: #ffffff;
+  }
+
+  .gw-tool-item.active i,
+  .gw-tool-item.active svg {
+    color: #ffffff !important;
+    fill: #ffffff;
+  }
+
+  .gw-tool-item svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  .fa-mouse-pointer {
+    display: inline-block;
+    width: 1.1rem;
+    height: 1.1rem;
+    vertical-align: middle;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 512'><path fill='black' d='M302.189 329.126H196.105l55.831 135.993c3.889 9.428-.555 19.999-9.983 23.887l-43.031 17.75c-9.428 3.889-19.999-.555-23.887-9.983l-55.831-135.993-99.29 99.29C9.22 470.825 0 463.213 0 448V16c0-15.213 9.22-22.825 19.937-12.088l288 288c11.198 11.197 3.4 37.214-15.748 37.214z'/></svg>");
+  }
+
+  .fa-mouse-pointer::before {
+    content: "" !important;
+    display: none !important;
+  }
+
+  body[data-theme="dark"] .fa-mouse-pointer {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 512'><path fill='white' d='M302.189 329.126H196.105l55.831 135.993c3.889 9.428-.555 19.999-9.983 23.887l-43.031 17.75c-9.428 3.889-19.999-.555-23.887-9.983l-55.831-135.993-99.29 99.29C9.22 470.825 0 463.213 0 448V16c0-15.213 9.22-22.825 19.937-12.088l288 288c11.198 11.197 3.4 37.214-15.748 37.214z'/></svg>");
+  }
+
+  .gw-tool-item.active .fa-mouse-pointer {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 512'><path fill='white' d='M302.189 329.126H196.105l55.831 135.993c3.889 9.428-.555 19.999-9.983 23.887l-43.031 17.75c-9.428 3.889-19.999-.555-23.887-9.983l-55.831-135.993-99.29 99.29C9.22 470.825 0 463.213 0 448V16c0-15.213 9.22-22.825 19.937-12.088l288 288c11.198 11.197 3.4 37.214-15.748 37.214z'/></svg>");
+  }
+
+  @media (prefers-color-scheme: dark) {
+    body[data-theme="auto"] .fa-mouse-pointer {
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 512'><path fill='white' d='M302.189 329.126H196.105l55.831 135.993c3.889 9.428-.555 19.999-9.983 23.887l-43.031 17.75c-9.428 3.889-19.999-.555-23.887-9.983l-55.831-135.993-99.29 99.29C9.22 470.825 0 463.213 0 448V16c0-15.213 9.22-22.825 19.937-12.088l288 288c11.198 11.197 3.4 37.214-15.748 37.214z'/></svg>");
+    }
+  }
+
+  body[data-theme="dark"] .gw-zoom-btn {
+    background: #2a2a2a;
+    border-color: #444;
+    color: #e0e0e0;
+  }
+
+  body[data-theme="dark"] .gw-zoom-btn:hover {
+    background: #3a3a3a;
+  }
+
+  #gw-inspector-content input,
+  #gw-inspector-content select {
+    background: #fff;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 4px;
+  }
+
+  body[data-theme="dark"] #gw-inspector-content input,
+  body[data-theme="dark"] #gw-inspector-content select {
+    background: #2a2a2a;
+    color: #e0e0e0;
+    border-color: #444;
+  }
+
+  #gw-sidebar .sidebox-content {
+    padding: 10px !important;
+  }
+
+  .gw-btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  #gw-inline-editor {
+    display: none;
+    position: absolute;
+    z-index: 20;
+    padding: 2px 4px;
+    font-size: 0.85rem;
+    border: 1px solid #007aff;
+    border-radius: 4px;
+    outline: none;
+    background: #fff;
+    color: #000;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    width: 60px;
+    text-align: center;
+  }
+
+  body[data-theme="dark"] #gw-inline-editor {
+    background: #2a2a2a;
+    color: #fff;
+    border-color: #007aff;
+  }
+
+
+
+  .gw-btn-row .gw-action-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 8px 6px;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background: #fafafa;
+    cursor: pointer;
+    color: #333;
+    text-align: center;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  body[data-theme="dark"] .gw-btn-row .gw-action-btn {
+    background: #2a2a2a;
+    border-color: #444;
+    color: #e0e0e0;
+  }
+
+  .gw-select {
+    width: 100%;
+    padding: 6px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    margin-bottom: 0.5rem;
+    background: #fff;
+    color: #333;
+  }
+
+  body[data-theme="dark"] .gw-select {
+    background: #2a2a2a;
+    border-color: #444;
+    color: #e0e0e0;
+  }
+
+  #gw-coords-overlay {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.8rem;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  #gw-instructions-overlay {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.75);
+    color: #fff;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    pointer-events: none;
+    z-index: 10;
+    text-align: center;
+    white-space: nowrap;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  }
+
+  @media (max-width: 900px) {
+    html,
+    body.gw-active {
+      overflow: auto !important;
+    }
+
+    #gw-wrap {
+      display: flex;
+      flex-direction: column;
+      height: auto;
+      overflow: visible;
+      padding: 0.5rem 0.75rem;
+      box-sizing: border-box;
+    }
+
+    #gw-sidebar {
+      display: contents;
+    }
+
+    #gw-tools-box {
+      order: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    #gw-canvas-wrap {
+      order: 2;
+      height: 60vh;
+      min-height: 280px;
+      margin-bottom: 0.5rem;
+    }
+
+    #gw-inspector-box {
+      order: 3;
+      margin-bottom: 0.5rem;
+    }
+
+    #gw-sidebar .sidebox.gw-input-box {
+      order: 4;
+      display: block;
+      height: auto;
+      min-height: auto;
+      margin-bottom: 0.5rem;
+    }
+
+    #gw-sidebar .gw-input-box .sidebox-content {
+      display: block;
+      height: auto;
+      min-height: auto;
+    }
+
+    #gw-input {
+      height: auto;
+      min-height: 8rem;
+    }
+
+    #gw-instructions-overlay {
+      left: 8px;
+      right: 8px;
+      transform: none;
+      white-space: normal;
+      max-width: none;
+      border-radius: 8px;
+    }
+  }
+
+</style>
+{% endblock %}
+
+{% block body %}
+<div id="gw-wrap">
+  <aside id="gw-sidebar">
+
+    <div class="sidebox" id="gw-tools-box">
+      <h3>{{ _('Drawing Tools') }} <i class="fa fa-pencil" style="float:right; margin: 0.2em 0.4em 0 0;"></i></h3>
+      <div class="sidebox-content">
+        <div class="gw-tools-list">
+          <button class="gw-tool-item active" data-tool="select" title="{{ _('Select & Pan')|safe }}">
+            <i class="fa fa-mouse-pointer"></i>
+            <span>{{ _('Select & Pan')|safe }}</span>
+          </button>
+          <button class="gw-tool-item" data-tool="point" title="{{ _('Add Point')|safe }}">
+            <i class="fa fa-circle"></i>
+            <span>{{ _('Add Point')|safe }}</span>
+          </button>
+          <button class="gw-tool-item" data-tool="segment" title="{{ _('Add Segment')|safe }}">
+            <i class="fa fa-minus"></i>
+            <span>{{ _('Add Segment')|safe }}</span>
+          </button>
+          <button class="gw-tool-item" data-tool="line" title="{{ _('Add Line')|safe }}">
+            <i class="fa fa-arrows-h"></i>
+            <span>{{ _('Add Line')|safe }}</span>
+          </button>
+          <button class="gw-tool-item" data-tool="ray" title="{{ _('Add Ray')|safe }}">
+            <i class="fa fa-arrow-right"></i>
+            <span>{{ _('Add Ray')|safe }}</span>
+          </button>
+          <button class="gw-tool-item" data-tool="vector" title="{{ _('Add Vector')|safe }}">
+            <i class="fa fa-long-arrow-right"></i>
+            <span>{{ _('Add Vector')|safe }}</span>
+          </button>
+          <button class="gw-tool-item" data-tool="circle" title="{{ _('Add Circle')|safe }}">
+            <i class="fa fa-circle-o"></i>
+            <span>{{ _('Add Circle')|safe }}</span>
+          </button>
+          <button class="gw-tool-item" data-tool="polygon" title="{{ _('Add Polygon')|safe }}">
+            <i class="fa fa-star-o"></i>
+            <span>{{ _('Add Polygon')|safe }}</span>
+          </button>
+        </div>
+        <div style="margin-top: 0.75rem;">
+          <select class="gw-select" id="gw-presets" style="margin-bottom: 0;">
+            <option value="">-- {{ _('Select Preset') }} --</option>
+            <option value="centroid">{{ _('Triangle Centroid') }}</option>
+            <option value="circles">{{ _('Incircle & Circumcircle') }}</option>
+            <option value="hull">{{ _('Convex Hull') }}</option>
+          </select>
+        </div>
+        <details style="margin-top: 0.75rem; font-size: 0.85rem; cursor: pointer;">
+          <summary style="color: #666; font-weight: bold; padding: 2px 0;">{{ _('Advanced Options') }}</summary>
+          <div style="margin-top: 0.5rem; display: flex; flex-direction: column; gap: 6px; padding-left: 4px;">
+            <label class="gw-option-row">
+              <input type="checkbox" id="gw-show-grid" checked>
+              <span>{{ _('Show grid') }}</span>
+            </label>
+            <label class="gw-option-row">
+              <input type="checkbox" id="gw-snap-grid" checked>
+              <span>{{ _('Snap to grid') }}</span>
+            </label>
+            <label class="gw-option-row">
+              <input type="checkbox" id="gw-lock-points">
+              <span>{{ _('Lock all points') }}</span>
+            </label>
+            <label class="gw-option-row">
+              <input type="checkbox" id="gw-auto-label" checked>
+              <span>{{ _('Auto-label points') }}</span>
+            </label>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <div class="sidebox" id="gw-inspector-box" style="display: none;">
+      <h3>{{ _('Properties Inspector') }} <i class="fa fa-info-circle" style="float:right; margin: 0.2em 0.4em 0 0;"></i></h3>
+      <div class="sidebox-content" id="gw-inspector-content">
+        <span style="color:#888; font-size:0.85rem;">{{ _('Click on a point to inspect and edit coordinates, color, or label') }}</span>
+      </div>
+    </div>
+
+    <div class="sidebox gw-input-box">
+      <h3>{{ _('Geometry Markup') }} <i class="fa fa-code" style="float:right; margin: 0.2em 0.4em 0 0;"></i></h3>
+      <div class="sidebox-content">
+        <textarea id="gw-input" placeholder="point 0.00 0.00 A&#10;point 4.00 3.00 B&#10;segment A B"></textarea>
+        <div class="gw-btn-row">
+          <button class="gw-action-btn" id="btn-clear" title="{{ _('Clear') }}"><i class="fa fa-trash"></i></button>
+          <button class="gw-action-btn" id="btn-export-png" title="{{ _('Export PNG') }}"><i class="fa fa-image"></i></button>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+  <section id="gw-canvas-wrap" aria-label="{{ _('Geometry canvas') }}">
+    <canvas id="gw-canvas"></canvas>
+    <div id="gw-zoom-controls">
+      <button class="gw-zoom-btn" id="btn-canvas-undo" title="{{ _('Undo') }}"><i class="fa fa-undo"></i></button>
+      <button class="gw-zoom-btn" id="btn-canvas-redo" title="{{ _('Redo') }}"><i class="fa fa-repeat"></i></button>
+      <button class="gw-zoom-btn" id="btn-canvas-zoom-in" title="{{ _('Zoom In') }}"><i class="fa fa-plus"></i></button>
+      <button class="gw-zoom-btn" id="btn-canvas-zoom-out" title="{{ _('Zoom Out') }}"><i class="fa fa-minus"></i></button>
+      <button class="gw-zoom-btn" id="btn-canvas-reset-zoom" title="{{ _('Reset View') }}"><i class="fa fa-home"></i></button>
+    </div>
+    <div id="gw-coords-overlay">X: 0.00, Y: 0.00</div>
+    <div id="gw-instructions-overlay"></div>
+    <input type="text" id="gw-inline-editor" />
+  </section>
+</div>
+{% endblock %}
+
+{% block bodyend %}
+<script>
+(function () {
+  'use strict';
+
+  document.body.classList.add('gw-active');
+  window.addEventListener('beforeunload', function () {
+    document.body.classList.remove('gw-active');
+  });
+
+  const canvas = document.getElementById('gw-canvas');
+  const wrap = document.getElementById('gw-canvas-wrap');
+  const ctx = canvas.getContext('2d');
+  const inputEl = document.getElementById('gw-input');
+  const coordsOverlay = document.getElementById('gw-coords-overlay');
+  const presetsEl = document.getElementById('gw-presets');
+  const showGridCb = document.getElementById('gw-show-grid');
+  const snapGridCb = document.getElementById('gw-snap-grid');
+  const lockPointsCb = document.getElementById('gw-lock-points');
+  const autoLabelCb = document.getElementById('gw-auto-label');
+  const instEl = document.getElementById('gw-instructions-overlay');
+
+  let points = [];
+  let primitives = [];
+  let selectedPoint = null;
+  let activeEditorPt = null;
+
+  let historyList = [];
+  let historyIndex = -1;
+
+  let zoom = 40;
+  let panX = 0;
+  let panY = 0;
+  let dpr = window.devicePixelRatio || 1;
+  let canvasW = 0;
+  let canvasH = 0;
+
+  let activeTool = 'select';
+  let isDragging = false;
+  let draggedPoint = null;
+  let isPanning = false;
+  let panStartMouse = { x: 0, y: 0 };
+  let panStartOffset = { x: 0, y: 0 };
+  let isResizingCircle = false;
+  let resizingCirclePrim = null;
+  let resizingCircleCenter = null;
+
+  let drawStartPoint = null;
+  let drawCurrentCoords = null;
+  let polygonVertices = [];
+
+  function toScreenX(x) {
+    return canvasW / 2 + panX + x * zoom;
+  }
+
+  function toScreenY(y) {
+    return canvasH / 2 + panY - y * zoom;
+  }
+
+  function toCartesianX(cx) {
+    return (cx - (canvasW / 2 + panX)) / zoom;
+  }
+
+  function toCartesianY(cy) {
+    return ((canvasH / 2 + panY) - cy) / zoom;
+  }
+
+  function getNextLabel() {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    for (let i = 0; i < letters.length; i++) {
+      let l = letters[i];
+      if (!points.some(p => p.label === l)) return l;
+    }
+    let index = 1;
+    while (true) {
+      for (let i = 0; i < letters.length; i++) {
+        let l = letters[i] + index;
+        if (!points.some(p => p.label === l)) return l;
+      }
+      index++;
+    }
+  }
+
+  function isDark() {
+    const theme = document.body.getAttribute('data-theme') || 'light';
+    if (theme === 'light') return false;
+    if (theme === 'dark') return true;
+    if (theme === 'auto') {
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return document.body.classList.contains('dark-mode') || document.body.classList.contains('theme-dark');
+  }
+
+  const MAX_HISTORY = 100;
+  function saveHistory(text) {
+    if (historyIndex >= 0 && historyList[historyIndex] === text) {
+      return;
+    }
+    historyList = historyList.slice(0, historyIndex + 1);
+    historyList.push(text);
+    if (historyList.length > MAX_HISTORY) {
+      historyList.shift();
+    }
+    historyIndex = historyList.length - 1;
+    updateUndoRedoButtons();
+  }
+
+  function undo() {
+    if (historyIndex > 0) {
+      historyIndex--;
+      inputEl.value = historyList[historyIndex];
+      syncTextToCanvas();
+      updateUndoRedoButtons();
+    }
+  }
+
+  function redo() {
+    if (historyIndex < historyList.length - 1) {
+      historyIndex++;
+      inputEl.value = historyList[historyIndex];
+      syncTextToCanvas();
+      updateUndoRedoButtons();
+    }
+  }
+
+  function updateUndoRedoButtons() {
+    const undoBtn = document.getElementById('btn-canvas-undo');
+    const redoBtn = document.getElementById('btn-canvas-redo');
+    if (undoBtn) undoBtn.disabled = (historyIndex <= 0);
+    if (redoBtn) redoBtn.disabled = (historyIndex >= historyList.length - 1);
+  }
+
+  function selectSelectTool() {
+    activeTool = 'select';
+    document.querySelectorAll('.gw-tool-item').forEach(b => {
+      b.classList.remove('active');
+      if (b.getAttribute('data-tool') === 'select') {
+        b.classList.add('active');
+      }
+    });
+    polygonVertices = [];
+    drawStartPoint = null;
+    drawCurrentCoords = null;
+    updateInstructions(0, 0);
+  }
+
+  function updateInspector() {
+    const el = document.getElementById('gw-inspector-content');
+    const box = document.getElementById('gw-inspector-box');
+    if (selectedPoint) {
+      box.style.display = 'block';
+
+      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      let labelOptionsHtml = '';
+      labelOptionsHtml += `<option value="${selectedPoint.label}" selected>${selectedPoint.label}</option>`;
+      for (let i = 0; i < letters.length; i++) {
+        let l = letters[i];
+        if (l !== selectedPoint.label && !points.some(p => p.label === l)) {
+          labelOptionsHtml += `<option value="${l}">${l}</option>`;
+        }
+      }
+      labelOptionsHtml += `<option value="__custom__">{{ _('Custom...') }}</option>`;
+
+      el.innerHTML = `
+        <div style="display:grid; grid-template-columns: auto 1fr auto 1fr; gap: 8px; align-items: center;">
+          <span style="font-weight:bold; font-size:0.9rem;">{{ _('Point') }}:</span>
+          <div style="display:flex; width:100%; box-sizing:border-box;">
+            <select id="inspect-label-select" style="width:100%; padding:4px; box-sizing:border-box;">
+              ${labelOptionsHtml}
+            </select>
+            <input type="text" id="inspect-label" value="${selectedPoint.label}" style="width:100%; display:none; padding:4px; box-sizing:border-box;" />
+          </div>
+          
+          <span style="font-weight:bold; font-size:0.9rem;">{{ _('Color') }}:</span>
+          <select id="inspect-color" style="width:100%; box-sizing:border-box; padding:4px;">
+            <option value="" ${selectedPoint.color===''?'selected':''}>{{ _('Default') }}</option>
+            <option value="red" ${selectedPoint.color==='red'?'selected':''}>{{ _('Red') }}</option>
+            <option value="green" ${selectedPoint.color==='green'?'selected':''}>{{ _('Green') }}</option>
+            <option value="blue" ${selectedPoint.color==='blue'?'selected':''}>{{ _('Blue') }}</option>
+            <option value="orange" ${selectedPoint.color==='orange'?'selected':''}>{{ _('Orange') }}</option>
+            <option value="purple" ${selectedPoint.color==='purple'?'selected':''}>{{ _('Purple') }}</option>
+            <option value="gray" ${selectedPoint.color==='gray'?'selected':''}>{{ _('Gray') }}</option>
+          </select>
+          
+          <span style="font-weight:bold; font-size:0.9rem;">{{ _('X') }}:</span>
+          <input type="number" step="any" id="inspect-x" value="${selectedPoint.x.toFixed(2)}" style="width:100%; box-sizing:border-box; padding:4px;" />
+          
+          <span style="font-weight:bold; font-size:0.9rem;">{{ _('Y') }}:</span>
+          <div style="display:flex; gap: 4px; align-items:center; width:100%;">
+            <input type="number" step="any" id="inspect-y" value="${selectedPoint.y.toFixed(2)}" style="flex:1; width:100%; box-sizing:border-box; padding:4px; min-width:0;" />
+            <button id="btn-inspect-delete" class="gw-action-btn" style="background:#ff3b30; color:#fff; border-color:#ff3b30; padding:4px 8px; border-radius:4px; cursor:pointer; flex:0 0 auto; margin:0;"><i class="fa fa-trash"></i></button>
+          </div>
+        </div>
+      `;
+
+      const labelSelect = document.getElementById('inspect-label-select');
+      const labelInput = document.getElementById('inspect-label');
+
+      labelSelect.addEventListener('change', function (e) {
+        if (e.target.value === '__custom__') {
+          labelSelect.style.display = 'none';
+          labelInput.style.display = 'block';
+          labelInput.focus();
+        } else {
+          const oldLabel = selectedPoint.label;
+          const newLabel = e.target.value;
+          if (newLabel && !points.some(p => p !== selectedPoint && p.label === newLabel)) {
+            selectedPoint.label = newLabel;
+            primitives.forEach(prim => {
+              if (prim.pRefs) {
+                prim.pRefs = prim.pRefs.map(ref => ref === oldLabel ? newLabel : ref);
+              }
+            });
+            syncCanvasToText();
+            render();
+          }
+        }
+      });
+
+      labelInput.addEventListener('input', function (e) {
+        const oldLabel = selectedPoint.label;
+        const newLabel = e.target.value.trim();
+        if (newLabel && !points.some(p => p !== selectedPoint && p.label === newLabel)) {
+          selectedPoint.label = newLabel;
+          primitives.forEach(prim => {
+            if (prim.pRefs) {
+              prim.pRefs = prim.pRefs.map(ref => ref === oldLabel ? newLabel : ref);
+            }
+          });
+          syncCanvasToText();
+          render();
+        }
+      });
+
+      document.getElementById('inspect-color').addEventListener('change', function (e) {
+        selectedPoint.color = e.target.value;
+        syncCanvasToText();
+        render();
+      });
+
+      document.getElementById('inspect-x').addEventListener('input', function (e) {
+        const val = parseFloat(e.target.value);
+        if (!isNaN(val)) {
+          selectedPoint.x = val;
+          syncCanvasToText();
+          render();
+        }
+      });
+
+      document.getElementById('inspect-y').addEventListener('input', function (e) {
+        const val = parseFloat(e.target.value);
+        if (!isNaN(val)) {
+          selectedPoint.y = val;
+          syncCanvasToText();
+          render();
+        }
+      });
+
+      document.getElementById('btn-inspect-delete').addEventListener('click', function () {
+        points = points.filter(p => p !== selectedPoint);
+        primitives = primitives.filter(prim => {
+          if (prim.pRefs) {
+            return !prim.pRefs.includes(selectedPoint.label);
+          }
+          return true;
+        });
+        selectedPoint = null;
+        updateInspector();
+        syncCanvasToText();
+        saveHistory(inputEl.value);
+        render();
+      });
+    } else {
+      box.style.display = 'none';
+      el.innerHTML = '';
+    }
+  }
+
+  function parseText(text) {
+    const lines = text.split('\n');
+    const parsedPoints = [];
+    const parsedPrimitives = [];
+    const labelMap = new Map();
+    let autoPointCounter = 1;
+
+    for (let line of lines) {
+      line = line.trim();
+      if (!line || line.startsWith('#') || line.startsWith('//')) continue;
+      const tokens = line.split(/\s+/);
+      const cmd = tokens[0].toLowerCase();
+
+      if (cmd === 'point' || cmd === 'pt') {
+        let x = parseFloat(tokens[1]);
+        let y = parseFloat(tokens[2]);
+        if (isNaN(x) || isNaN(y)) continue;
+        let label = tokens[3] || ('P' + autoPointCounter++);
+        let color = tokens[4] || '';
+        const pt = { x, y, label, color };
+        parsedPoints.push(pt);
+        labelMap.set(label, pt);
+      } else if (cmd === 'segment') {
+        if (tokens.length >= 5 && !isNaN(parseFloat(tokens[1]))) {
+          let x1 = parseFloat(tokens[1]);
+          let y1 = parseFloat(tokens[2]);
+          let x2 = parseFloat(tokens[3]);
+          let y2 = parseFloat(tokens[4]);
+          let color = tokens[5] || '';
+          parsedPrimitives.push({ type: 'segment', coords: [x1, y1, x2, y2], color });
+        } else if (tokens.length >= 3) {
+          let p1 = tokens[1];
+          let p2 = tokens[2];
+          let color = tokens[3] || '';
+          parsedPrimitives.push({ type: 'segment', pRefs: [p1, p2], color });
+        }
+      } else if (cmd === 'line') {
+        if (tokens.length === 4 && !isNaN(parseFloat(tokens[1]))) {
+          let a = parseFloat(tokens[1]);
+          let b = parseFloat(tokens[2]);
+          let c = parseFloat(tokens[3]);
+          parsedPrimitives.push({ type: 'line', a, b, c });
+        } else if (tokens.length >= 5 && !isNaN(parseFloat(tokens[1]))) {
+          let x1 = parseFloat(tokens[1]);
+          let y1 = parseFloat(tokens[2]);
+          let x2 = parseFloat(tokens[3]);
+          let y2 = parseFloat(tokens[4]);
+          let color = tokens[5] || '';
+          parsedPrimitives.push({ type: 'line', coords: [x1, y1, x2, y2], color });
+        } else if (tokens.length >= 3) {
+          let p1 = tokens[1];
+          let p2 = tokens[2];
+          let color = tokens[3] || '';
+          parsedPrimitives.push({ type: 'line', pRefs: [p1, p2], color });
+        }
+      } else if (cmd === 'ray') {
+        if (tokens.length >= 5 && !isNaN(parseFloat(tokens[1]))) {
+          let x1 = parseFloat(tokens[1]);
+          let y1 = parseFloat(tokens[2]);
+          let x2 = parseFloat(tokens[3]);
+          let y2 = parseFloat(tokens[4]);
+          let color = tokens[5] || '';
+          parsedPrimitives.push({ type: 'ray', coords: [x1, y1, x2, y2], color });
+        } else if (tokens.length >= 3) {
+          let p1 = tokens[1];
+          let p2 = tokens[2];
+          let color = tokens[3] || '';
+          parsedPrimitives.push({ type: 'ray', pRefs: [p1, p2], color });
+        }
+      } else if (cmd === 'vector') {
+        if (tokens.length >= 5 && !isNaN(parseFloat(tokens[1]))) {
+          let x1 = parseFloat(tokens[1]);
+          let y1 = parseFloat(tokens[2]);
+          let x2 = parseFloat(tokens[3]);
+          let y2 = parseFloat(tokens[4]);
+          let color = tokens[5] || '';
+          parsedPrimitives.push({ type: 'vector', coords: [x1, y1, x2, y2], color });
+        } else if (tokens.length >= 3) {
+          let p1 = tokens[1];
+          let p2 = tokens[2];
+          let color = tokens[3] || '';
+          parsedPrimitives.push({ type: 'vector', pRefs: [p1, p2], color });
+        }
+      } else if (cmd === 'circle') {
+        if (tokens.length >= 4 && !isNaN(parseFloat(tokens[1])) && !isNaN(parseFloat(tokens[2])) && !isNaN(parseFloat(tokens[3]))) {
+          let x = parseFloat(tokens[1]);
+          let y = parseFloat(tokens[2]);
+          let r = parseFloat(tokens[3]);
+          let color = tokens[4] || '';
+          parsedPrimitives.push({ type: 'circle', coords: [x, y], r, color });
+        } else if (tokens.length >= 3) {
+          let p1 = tokens[1];
+          let param = tokens[2];
+          let color = tokens[3] || '';
+          if (!isNaN(parseFloat(param))) {
+            parsedPrimitives.push({ type: 'circle', pRefs: [p1], r: parseFloat(param), color });
+          } else {
+            parsedPrimitives.push({ type: 'circle', pRefs: [p1, param], color });
+          }
+        }
+      } else if (cmd === 'polygon') {
+        let color = '';
+        let lastTok = tokens[tokens.length - 1];
+        let isLastColor = isNaN(parseFloat(lastTok)) && !labelMap.has(lastTok) && !tokens.slice(1, tokens.length - 1).includes(lastTok);
+        if (isLastColor && tokens.length > 2) {
+          color = tokens[tokens.length - 1];
+          tokens.pop();
+        }
+        let allCoords = true;
+        for (let i = 1; i < tokens.length; i++) {
+          if (isNaN(parseFloat(tokens[i]))) {
+            allCoords = false;
+            break;
+          }
+        }
+        if (allCoords && tokens.length > 2) {
+          let coords = [];
+          for (let i = 1; i < tokens.length; i++) {
+            coords.push(parseFloat(tokens[i]));
+          }
+          parsedPrimitives.push({ type: 'polygon', coords, color });
+        } else if (tokens.length > 1) {
+          let pRefs = tokens.slice(1);
+          parsedPrimitives.push({ type: 'polygon', pRefs, color });
+        }
+      } else {
+        if (tokens.length >= 2 && !isNaN(parseFloat(tokens[0])) && !isNaN(parseFloat(tokens[1]))) {
+          let x = parseFloat(tokens[0]);
+          let y = parseFloat(tokens[1]);
+          let label = tokens[2] || ('P' + autoPointCounter++);
+          let color = tokens[3] || '';
+          const pt = { x, y, label, color };
+          parsedPoints.push(pt);
+          labelMap.set(label, pt);
+        } else if (tokens.length >= 3 && isNaN(parseFloat(tokens[0])) && !isNaN(parseFloat(tokens[1])) && !isNaN(parseFloat(tokens[2]))) {
+          let label = tokens[0];
+          let x = parseFloat(tokens[1]);
+          let y = parseFloat(tokens[2]);
+          let color = tokens[3] || '';
+          const pt = { x, y, label, color };
+          parsedPoints.push(pt);
+          labelMap.set(label, pt);
+        }
+      }
+    }
+    return { points: parsedPoints, primitives: parsedPrimitives };
+  }
+
+  function generateText() {
+    let text = '';
+    for (let pt of points) {
+      let colorStr = pt.color ? ' ' + pt.color : '';
+      text += `point ${pt.x.toFixed(2)} ${pt.y.toFixed(2)} ${pt.label}${colorStr}\n`;
+    }
+    for (let prim of primitives) {
+      let colorStr = prim.color ? ' ' + prim.color : '';
+      if (prim.type === 'segment') {
+        if (prim.pRefs) {
+          text += `segment ${prim.pRefs[0]} ${prim.pRefs[1]}${colorStr}\n`;
+        } else {
+          text += `segment ${prim.coords[0].toFixed(2)} ${prim.coords[1].toFixed(2)} ${prim.coords[2].toFixed(2)} ${prim.coords[3].toFixed(2)}${colorStr}\n`;
+        }
+      } else if (prim.type === 'line') {
+        if (prim.pRefs) {
+          text += `line ${prim.pRefs[0]} ${prim.pRefs[1]}${colorStr}\n`;
+        } else if (prim.coords) {
+          text += `line ${prim.coords[0].toFixed(2)} ${prim.coords[1].toFixed(2)} ${prim.coords[2].toFixed(2)} ${prim.coords[3].toFixed(2)}${colorStr}\n`;
+        } else {
+          text += `line ${prim.a.toFixed(2)} ${prim.b.toFixed(2)} ${prim.c.toFixed(2)}\n`;
+        }
+      } else if (prim.type === 'ray') {
+        if (prim.pRefs) {
+          text += `ray ${prim.pRefs[0]} ${prim.pRefs[1]}${colorStr}\n`;
+        } else {
+          text += `ray ${prim.coords[0].toFixed(2)} ${prim.coords[1].toFixed(2)} ${prim.coords[2].toFixed(2)} ${prim.coords[3].toFixed(2)}${colorStr}\n`;
+        }
+      } else if (prim.type === 'vector') {
+        if (prim.pRefs) {
+          text += `vector ${prim.pRefs[0]} ${prim.pRefs[1]}${colorStr}\n`;
+        } else {
+          text += `vector ${prim.coords[0].toFixed(2)} ${prim.coords[1].toFixed(2)} ${prim.coords[2].toFixed(2)} ${prim.coords[3].toFixed(2)}${colorStr}\n`;
+        }
+      } else if (prim.type === 'circle') {
+        if (prim.pRefs) {
+          if (prim.pRefs.length === 2) {
+            text += `circle ${prim.pRefs[0]} ${prim.pRefs[1]}${colorStr}\n`;
+          } else {
+            text += `circle ${prim.pRefs[0]} ${prim.r.toFixed(2)}${colorStr}\n`;
+          }
+        } else {
+          text += `circle ${prim.coords[0].toFixed(2)} ${prim.coords[1].toFixed(2)} ${prim.r.toFixed(2)}${colorStr}\n`;
+        }
+      } else if (prim.type === 'polygon') {
+        if (prim.pRefs) {
+          text += `polygon ${prim.pRefs.join(' ')}${colorStr}\n`;
+        } else {
+          text += `polygon ${prim.coords.map(n => n.toFixed(2)).join(' ')}${colorStr}\n`;
+        }
+      }
+    }
+    return text;
+  }
+
+  function resizeCanvas() {
+    const nextDpr = window.devicePixelRatio || 1;
+    const width = Math.max(1, wrap.clientWidth);
+    const height = Math.max(1, wrap.clientHeight);
+
+    if (canvasW === width && canvasH === height && dpr === nextDpr) {
+      return;
+    }
+
+    dpr = nextDpr;
+    canvasW = width;
+    canvasH = height;
+
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function findPoint(label) {
+    return points.find(p => p.label === label);
+  }
+
+  function drawInfiniteLine(a, b, c, xMin, xMax, yMin, yMax) {
+    let pts = [];
+    if (Math.abs(b) > 1e-7) {
+      let y1 = -(a * xMin + c) / b;
+      if (y1 >= yMin && y1 <= yMax) pts.push({ x: xMin, y: y1 });
+      let y2 = -(a * xMax + c) / b;
+      if (y2 >= yMin && y2 <= yMax) pts.push({ x: xMax, y: y2 });
+    }
+    if (Math.abs(a) > 1e-7) {
+      let x1 = -(b * yMin + c) / a;
+      if (x1 >= xMin && x1 <= xMax) pts.push({ x: x1, y: yMin });
+      let x2 = -(b * yMax + c) / a;
+      if (x2 >= xMin && x2 <= xMax) pts.push({ x: x2, y: yMax });
+    }
+    pts = pts.filter((v, i, self) => self.findIndex(t => Math.hypot(t.x - v.x, t.y - v.y) < 1e-5) === i);
+    if (pts.length >= 2) {
+      ctx.beginPath();
+      ctx.moveTo(toScreenX(pts[0].x), toScreenY(pts[0].y));
+      ctx.lineTo(toScreenX(pts[1].x), toScreenY(pts[1].y));
+      ctx.stroke();
+    }
+  }
+
+  function drawArrowhead(fromX, fromY, toX, toY) {
+    const angle = Math.atan2(toY - fromY, toX - fromX);
+    const arrowLength = 12;
+    const arrowAngle = Math.PI / 6;
+    ctx.beginPath();
+    ctx.moveTo(toX, toY);
+    ctx.lineTo(toX - arrowLength * Math.cos(angle - arrowAngle), toY - arrowLength * Math.sin(angle - arrowAngle));
+    ctx.lineTo(toX - arrowLength * Math.cos(angle + arrowAngle), toY - arrowLength * Math.sin(angle + arrowAngle));
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function render() {
+    const dark = isDark();
+    ctx.fillStyle = dark ? '#1e1e1e' : '#ffffff';
+    ctx.fillRect(0, 0, canvasW, canvasH);
+
+    const xMin = toCartesianX(0);
+    const xMax = toCartesianX(canvasW);
+    const yMin = toCartesianY(canvasH);
+    const yMax = toCartesianY(0);
+
+    if (showGridCb.checked) {
+      const minPixelSpacing = 50;
+      const val = minPixelSpacing / zoom;
+      const exponent = Math.floor(Math.log10(val));
+      const fraction = val / Math.pow(10, exponent);
+      let step;
+      if (fraction < 1.5) step = 1 * Math.pow(10, exponent);
+      else if (fraction < 3.5) step = 2 * Math.pow(10, exponent);
+      else if (fraction < 7.5) step = 5 * Math.pow(10, exponent);
+      else step = 10 * Math.pow(10, exponent);
+
+      ctx.strokeStyle = dark ? '#2d2d2d' : '#e8e8e8';
+      ctx.lineWidth = 1;
+      ctx.font = '10px sans-serif';
+      ctx.fillStyle = dark ? '#888888' : '#888888';
+
+      const startX = Math.ceil(xMin / step) * step;
+      for (let x = startX; x <= xMax; x += step) {
+        if (Math.abs(x) < 1e-9) continue;
+        const sx = toScreenX(x);
+        ctx.beginPath();
+        ctx.moveTo(sx, 0);
+        ctx.lineTo(sx, canvasH);
+        ctx.stroke();
+
+        let sy = toScreenY(0);
+        if (sy < 15) sy = 15;
+        if (sy > canvasH - 5) sy = canvasH - 5;
+        ctx.fillText(x.toFixed(exponent < 0 ? -exponent : 0), sx + 4, sy - 4);
+      }
+
+      const startY = Math.ceil(yMin / step) * step;
+      for (let y = startY; y <= yMax; y += step) {
+        if (Math.abs(y) < 1e-9) continue;
+        const sy = toScreenY(y);
+        ctx.beginPath();
+        ctx.moveTo(0, sy);
+        ctx.lineTo(canvasW, sy);
+        ctx.stroke();
+
+        let sx = toScreenX(0);
+        if (sx < 5) sx = 5;
+        if (sx > canvasW - 35) sx = canvasW - 35;
+        ctx.fillText(y.toFixed(exponent < 0 ? -exponent : 0), sx + 4, sy - 4);
+      }
+
+      ctx.strokeStyle = dark ? '#d0d0d0' : '#000000';
+      ctx.lineWidth = 1.5;
+      const originScreenX = toScreenX(0);
+      const originScreenY = toScreenY(0);
+
+      if (originScreenX >= 0 && originScreenX <= canvasW) {
+        ctx.beginPath();
+        ctx.moveTo(originScreenX, 0);
+        ctx.lineTo(originScreenX, canvasH);
+        ctx.stroke();
+      }
+
+      if (originScreenY >= 0 && originScreenY <= canvasH) {
+        ctx.beginPath();
+        ctx.moveTo(0, originScreenY);
+        ctx.lineTo(canvasW, originScreenY);
+        ctx.stroke();
+      }
+    }
+
+    for (let prim of primitives) {
+      ctx.strokeStyle = prim.color || (dark ? '#4a90e2' : '#007aff');
+      ctx.fillStyle = prim.color || (dark ? '#4a90e2' : '#007aff');
+      ctx.lineWidth = 2;
+
+      let x1, y1, x2, y2, r;
+
+      if (prim.pRefs) {
+        if (prim.type === 'polygon') {
+          ctx.beginPath();
+          let first = true;
+          for (let ref of prim.pRefs) {
+            let p = findPoint(ref);
+            if (p) {
+              let sx = toScreenX(p.x);
+              let sy = toScreenY(p.y);
+              if (first) {
+                ctx.moveTo(sx, sy);
+                first = false;
+              } else {
+                ctx.lineTo(sx, sy);
+              }
+            }
+          }
+          if (!first) {
+            ctx.closePath();
+            ctx.stroke();
+            ctx.fillStyle = prim.color ? (prim.color + '22') : 'rgba(0,122,255,0.1)';
+            ctx.fill();
+          }
+          continue;
+        }
+
+        let p1 = findPoint(prim.pRefs[0]);
+        if (!p1) continue;
+        x1 = p1.x;
+        y1 = p1.y;
+
+        if (prim.pRefs.length > 1) {
+          let p2 = findPoint(prim.pRefs[1]);
+          if (!p2) continue;
+          x2 = p2.x;
+          y2 = p2.y;
+        }
+
+        if (prim.type === 'circle') {
+          if (prim.pRefs.length === 2) {
+            r = Math.hypot(x2 - x1, y2 - y1);
+          } else {
+            r = prim.r;
+          }
+        }
+      } else if (prim.coords) {
+        if (prim.type === 'polygon') {
+          ctx.beginPath();
+          for (let i = 0; i < prim.coords.length; i += 2) {
+            let sx = toScreenX(prim.coords[i]);
+            let sy = toScreenY(prim.coords[i + 1]);
+            if (i === 0) ctx.moveTo(sx, sy);
+            else ctx.lineTo(sx, sy);
+          }
+          if (prim.coords.length >= 4) {
+            ctx.closePath();
+            ctx.stroke();
+            ctx.fillStyle = prim.color ? (prim.color + '22') : 'rgba(0,122,255,0.1)';
+            ctx.fill();
+          }
+          continue;
+        }
+
+        x1 = prim.coords[0];
+        y1 = prim.coords[1];
+        if (prim.coords.length > 2) {
+          x2 = prim.coords[2];
+          y2 = prim.coords[3];
+        }
+        if (prim.type === 'circle') {
+          r = prim.r;
+        }
+      } else if (prim.type === 'line' && prim.a !== undefined) {
+        drawInfiniteLine(prim.a, prim.b, prim.c, xMin, xMax, yMin, yMax);
+        continue;
+      }
+
+      if (prim.type === 'segment') {
+        ctx.beginPath();
+        ctx.moveTo(toScreenX(x1), toScreenY(y1));
+        ctx.lineTo(toScreenX(x2), toScreenY(y2));
+        ctx.stroke();
+      } else if (prim.type === 'line') {
+        let a = y1 - y2;
+        let b = x2 - x1;
+        let c = x1 * y2 - x2 * y1;
+        drawInfiniteLine(a, b, c, xMin, xMax, yMin, yMax);
+      } else if (prim.type === 'ray') {
+        let dx = x2 - x1;
+        let dy = y2 - y1;
+        let len = Math.hypot(dx, dy);
+        if (len > 1e-9) {
+          let rx = x1 + (dx / len) * 10000;
+          let ry = y1 + (dy / len) * 10000;
+          ctx.beginPath();
+          ctx.moveTo(toScreenX(x1), toScreenY(y1));
+          ctx.lineTo(toScreenX(rx), toScreenY(ry));
+          ctx.stroke();
+        }
+      } else if (prim.type === 'vector') {
+        let sx1 = toScreenX(x1);
+        let sy1 = toScreenY(y1);
+        let sx2 = toScreenX(x2);
+        let sy2 = toScreenY(y2);
+        ctx.beginPath();
+        ctx.moveTo(sx1, sy1);
+        ctx.lineTo(sx2, sy2);
+        ctx.stroke();
+        drawArrowhead(sx1, sy1, sx2, sy2);
+      } else if (prim.type === 'circle') {
+        ctx.beginPath();
+        ctx.arc(toScreenX(x1), toScreenY(y1), r * zoom, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    }
+
+    if (drawStartPoint && drawCurrentCoords) {
+      ctx.strokeStyle = dark ? '#ffffff' : '#000000';
+      ctx.fillStyle = dark ? '#ffffff' : '#000000';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([5, 5]);
+
+      let sx1 = toScreenX(drawStartPoint.x);
+      let sy1 = toScreenY(drawStartPoint.y);
+      let sx2 = toScreenX(drawCurrentCoords.x);
+      let sy2 = toScreenY(drawCurrentCoords.y);
+
+      if (activeTool === 'segment') {
+        ctx.beginPath();
+        ctx.moveTo(sx1, sy1);
+        ctx.lineTo(sx2, sy2);
+        ctx.stroke();
+      } else if (activeTool === 'line') {
+        let a = drawStartPoint.y - drawCurrentCoords.y;
+        let b = drawCurrentCoords.x - drawStartPoint.x;
+        let c = drawStartPoint.x * drawCurrentCoords.y - drawCurrentCoords.x * drawStartPoint.y;
+        drawInfiniteLine(a, b, c, xMin, xMax, yMin, yMax);
+      } else if (activeTool === 'ray') {
+        let dx = drawCurrentCoords.x - drawStartPoint.x;
+        let dy = drawCurrentCoords.y - drawStartPoint.y;
+        let len = Math.hypot(dx, dy);
+        if (len > 1e-9) {
+          let rx = drawStartPoint.x + (dx / len) * 10000;
+          let ry = drawStartPoint.y + (dy / len) * 10000;
+          ctx.beginPath();
+          ctx.moveTo(sx1, sy1);
+          ctx.lineTo(toScreenX(rx), toScreenY(ry));
+          ctx.stroke();
+        }
+      } else if (activeTool === 'vector') {
+        ctx.beginPath();
+        ctx.moveTo(sx1, sy1);
+        ctx.lineTo(sx2, sy2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        drawArrowhead(sx1, sy1, sx2, sy2);
+      } else if (activeTool === 'circle') {
+        let r = Math.hypot(drawCurrentCoords.x - drawStartPoint.x, drawCurrentCoords.y - drawStartPoint.y);
+        ctx.beginPath();
+        ctx.arc(sx1, sy1, r * zoom, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+    }
+
+    if (activeTool === 'polygon' && polygonVertices.length > 0) {
+      ctx.strokeStyle = dark ? '#ffffff' : '#000000';
+      ctx.fillStyle = 'rgba(128,128,128,0.15)';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(toScreenX(polygonVertices[0].x), toScreenY(polygonVertices[0].y));
+      for (let i = 1; i < polygonVertices.length; i++) {
+        ctx.lineTo(toScreenX(polygonVertices[i].x), toScreenY(polygonVertices[i].y));
+      }
+      if (drawCurrentCoords) {
+        ctx.lineTo(toScreenX(drawCurrentCoords.x), toScreenY(drawCurrentCoords.y));
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    for (let pt of points) {
+      ctx.fillStyle = pt.color || (dark ? '#007aff' : '#007aff');
+      ctx.beginPath();
+      ctx.arc(toScreenX(pt.x), toScreenY(pt.y), 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      if (selectedPoint === pt) {
+        ctx.strokeStyle = '#ffdd57';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(toScreenX(pt.x), toScreenY(pt.y), 8, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      ctx.font = 'bold 12px sans-serif';
+      ctx.strokeStyle = dark ? '#1e1e1e' : '#ffffff';
+      ctx.lineWidth = 3;
+      ctx.strokeText(pt.label, toScreenX(pt.x) + 8, toScreenY(pt.y) - 8);
+      ctx.fillStyle = dark ? '#e0e0e0' : '#333333';
+      ctx.fillText(pt.label, toScreenX(pt.x) + 8, toScreenY(pt.y) - 8);
+    }
+  }
+
+  function getPointNear(cx, cy, threshold = 8) {
+    for (let pt of points) {
+      let sx = toScreenX(pt.x);
+      let sy = toScreenY(pt.y);
+      if (Math.hypot(sx - cx, sy - cy) <= threshold) {
+        return pt;
+      }
+    }
+    return null;
+  }
+
+  function distToSegmentPixels(mx, my, p1, p2) {
+    const sx1 = toScreenX(p1.x), sy1 = toScreenY(p1.y);
+    const sx2 = toScreenX(p2.x), sy2 = toScreenY(p2.y);
+    const l2 = Math.pow(sx1 - sx2, 2) + Math.pow(sy1 - sy2, 2);
+    if (l2 === 0) return Math.hypot(mx - sx1, my - sy1);
+    let t = ((mx - sx1) * (sx2 - sx1) + (my - sy1) * (sy2 - sy1)) / l2;
+    t = Math.max(0, Math.min(1, t));
+    return Math.hypot(mx - (sx1 + t * (sx2 - sx1)), my - (sy1 + t * (sy2 - sy1)));
+  }
+
+  function distToCirclePixels(mx, my, center, rVal) {
+    const sx = toScreenX(center.x), sy = toScreenY(center.y);
+    const dist = Math.hypot(mx - sx, my - sy);
+    return Math.abs(dist - rVal * zoom);
+  }
+
+  function getHoveredObject(mx, my) {
+    let nearPt = getPointNear(mx, my, 8);
+    if (nearPt) {
+      return { type: 'point', obj: nearPt };
+    }
+    for (let prim of primitives) {
+      if (prim.type === 'segment') {
+        let p1, p2;
+        if (prim.pRefs) {
+          p1 = findPoint(prim.pRefs[0]);
+          p2 = findPoint(prim.pRefs[1]);
+        } else if (prim.coords) {
+          p1 = { x: prim.coords[0], y: prim.coords[1] };
+          p2 = { x: prim.coords[2], y: prim.coords[3] };
+        }
+        if (p1 && p2) {
+          if (distToSegmentPixels(mx, my, p1, p2) <= 6) {
+            return { type: 'segment', obj: prim, p1, p2 };
+          }
+        }
+      } else if (prim.type === 'circle') {
+        let center, rVal;
+        if (prim.pRefs) {
+          center = findPoint(prim.pRefs[0]);
+          if (prim.pRefs.length === 2) {
+            let p2 = findPoint(prim.pRefs[1]);
+            rVal = p2 && center ? Math.hypot(p2.x - center.x, p2.y - center.y) : 0;
+          } else {
+            rVal = prim.r;
+          }
+        } else if (prim.coords) {
+          center = { x: prim.coords[0], y: prim.coords[1] };
+          rVal = prim.r;
+        }
+        if (center && rVal > 0) {
+          if (distToCirclePixels(mx, my, center, rVal) <= 6) {
+            return { type: 'circle', obj: prim, center, rVal };
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  function snap(val, step) {
+    return Math.round(val / step) * step;
+  }
+
+  function getSnapStep() {
+    const minPixelSpacing = 50;
+    const val = minPixelSpacing / zoom;
+    const exponent = Math.floor(Math.log10(val));
+    const fraction = val / Math.pow(10, exponent);
+    let step;
+    if (fraction < 1.5) step = 1 * Math.pow(10, exponent);
+    else if (fraction < 3.5) step = 2 * Math.pow(10, exponent);
+    else if (fraction < 7.5) step = 5 * Math.pow(10, exponent);
+    else step = 10 * Math.pow(10, exponent);
+    return step / 2;
+  }
+
+  function updateInstructions(cx, cy) {
+    const hoverInfo = getHoveredObject(cx, cy);
+    if (hoverInfo) {
+      if (hoverInfo.type === 'point') {
+        instEl.textContent = `{{ _('Point') }} ${hoverInfo.obj.label}: (${hoverInfo.obj.x.toFixed(2)}, ${hoverInfo.obj.y.toFixed(2)}). {{ _('Drag to move.') }}`;
+      } else if (hoverInfo.type === 'segment') {
+        const len = Math.hypot(hoverInfo.p1.x - hoverInfo.p2.x, hoverInfo.p1.y - hoverInfo.p2.y);
+        instEl.textContent = `{{ _('Segment') }} ${hoverInfo.p1.label}-${hoverInfo.p2.label}. {{ _('Length') }}: ${len.toFixed(2)}.`;
+      } else if (hoverInfo.type === 'circle') {
+        instEl.textContent = `{{ _('Circle') }} {{ _('centered at') }} ${hoverInfo.center.label}. {{ _('Radius') }}: ${hoverInfo.rVal.toFixed(2)}.`;
+      }
+    } else {
+      if (activeTool === 'select') {
+        instEl.textContent = "{{ _('Select and drag points to edit. Right-click drag to pan.') }}";
+      } else if (activeTool === 'point') {
+        instEl.textContent = "{{ _('Click anywhere on the canvas to place a point.') }}";
+      } else if (activeTool === 'segment') {
+        instEl.textContent = "{{ _('Click a point and drag to draw a line segment.') }}";
+      } else if (activeTool === 'line') {
+        instEl.textContent = "{{ _('Click and drag to draw an infinite line.') }}";
+      } else if (activeTool === 'ray') {
+        instEl.textContent = "{{ _('Click and drag to draw a ray.') }}";
+      } else if (activeTool === 'vector') {
+        instEl.textContent = "{{ _('Click and drag to draw a vector arrow.') }}";
+      } else if (activeTool === 'circle') {
+        instEl.textContent = "{{ _('Click center and drag to draw a circle.') }}";
+      } else if (activeTool === 'polygon') {
+        instEl.textContent = "{{ _('Click vertices. Click the first vertex or double-click to close.') }}";
+      }
+    }
+  }
+
+  function handlePointerDown(e) {
+    const inlineEditor = document.getElementById('gw-inline-editor');
+    if (inlineEditor && inlineEditor.style.display === 'block') {
+      inlineEditor.blur();
+    }
+    const rect = canvas.getBoundingClientRect();
+    const cx = e.clientX - rect.left;
+    const cy = e.clientY - rect.top;
+    const cartX = toCartesianX(cx);
+    const cartY = toCartesianY(cy);
+
+    const hoverInfo = activeTool === 'select' ? getHoveredObject(cx, cy) : null;
+    const isOnCircleEdge = hoverInfo && hoverInfo.type === 'circle';
+
+    if ((e.button === 2 && !(activeTool === 'select' && (getPointNear(cx, cy) || isOnCircleEdge))) || (e.button === 0 && activeTool === 'select' && !getPointNear(cx, cy) && !isOnCircleEdge)) {
+      isPanning = true;
+      panStartMouse = { x: cx, y: cy };
+      panStartOffset = { x: panX, y: panY };
+      selectedPoint = null;
+      updateInspector();
+      e.preventDefault();
+      return;
+    }
+
+    if (e.button !== 0) return;
+    let nearPt = getPointNear(cx, cy);
+
+    if (activeTool === 'select') {
+      if (nearPt && !lockPointsCb.checked) {
+        isDragging = true;
+        draggedPoint = nearPt;
+        selectedPoint = nearPt;
+        updateInspector();
+      } else if (isOnCircleEdge && !lockPointsCb.checked) {
+        isResizingCircle = true;
+        resizingCirclePrim = hoverInfo.obj;
+        resizingCircleCenter = hoverInfo.center;
+        e.preventDefault();
+      }
+    } else if (activeTool === 'point') {
+      let finalX = cartX;
+      let finalY = cartY;
+      if (snapGridCb.checked) {
+        const sStep = getSnapStep();
+        finalX = snap(finalX, sStep);
+        finalY = snap(finalY, sStep);
+      }
+      const label = autoLabelCb.checked ? getNextLabel() : 'P' + (points.length + 1);
+      const newPt = { x: finalX, y: finalY, label, color: '' };
+      points.push(newPt);
+      selectedPoint = newPt;
+      updateInspector();
+      syncCanvasToText();
+      saveHistory(inputEl.value);
+      selectSelectTool();
+      render();
+    } else if (['segment', 'line', 'ray', 'vector', 'circle'].includes(activeTool)) {
+      let finalX = cartX;
+      let finalY = cartY;
+      if (snapGridCb.checked) {
+        const sStep = getSnapStep();
+        finalX = snap(finalX, sStep);
+        finalY = snap(finalY, sStep);
+      }
+      if (!nearPt) {
+        const label = autoLabelCb.checked ? getNextLabel() : 'P' + (points.length + 1);
+        nearPt = { x: finalX, y: finalY, label, color: '' };
+        points.push(nearPt);
+        syncCanvasToText();
+        saveHistory(inputEl.value);
+      }
+      drawStartPoint = nearPt;
+      drawCurrentCoords = { x: finalX, y: finalY };
+      selectedPoint = nearPt;
+      updateInspector();
+      render();
+    } else if (activeTool === 'polygon') {
+      let finalX = cartX;
+      let finalY = cartY;
+      if (snapGridCb.checked) {
+        const sStep = getSnapStep();
+        finalX = snap(finalX, sStep);
+        finalY = snap(finalY, sStep);
+      }
+      if (polygonVertices.length > 2 && nearPt === polygonVertices[0]) {
+        primitives.push({ type: 'polygon', pRefs: polygonVertices.map(v => v.label), color: '' });
+        selectedPoint = null;
+        updateInspector();
+        syncCanvasToText();
+        saveHistory(inputEl.value);
+        selectSelectTool();
+      } else {
+        if (!nearPt) {
+          const label = autoLabelCb.checked ? getNextLabel() : 'P' + (points.length + 1);
+          nearPt = { x: finalX, y: finalY, label, color: '' };
+          points.push(nearPt);
+          syncCanvasToText();
+          saveHistory(inputEl.value);
+        }
+        if (!polygonVertices.includes(nearPt)) {
+          polygonVertices.push(nearPt);
+        }
+        selectedPoint = nearPt;
+        updateInspector();
+      }
+      render();
+    }
+  }
+
+  function handlePointerMove(e) {
+    const rect = canvas.getBoundingClientRect();
+    const cx = e.clientX - rect.left;
+    const cy = e.clientY - rect.top;
+    const cartX = toCartesianX(cx);
+    const cartY = toCartesianY(cy);
+
+    coordsOverlay.textContent = `X: ${cartX.toFixed(2)}, Y: ${cartY.toFixed(2)}`;
+    updateInstructions(cx, cy);
+
+    let nearPt = getPointNear(cx, cy);
+    if (activeTool === 'select' && !isDragging && !isPanning && !isResizingCircle) {
+      if (nearPt) {
+        canvas.style.cursor = 'pointer';
+      } else {
+        const hoverInfo = getHoveredObject(cx, cy);
+        canvas.style.cursor = (hoverInfo && hoverInfo.type === 'circle') ? 'ew-resize' : 'crosshair';
+      }
+    }
+
+    if (isResizingCircle && resizingCirclePrim && resizingCircleCenter) {
+      const newRadius = Math.hypot(cartX - resizingCircleCenter.x, cartY - resizingCircleCenter.y);
+      if (resizingCirclePrim.pRefs && resizingCirclePrim.pRefs.length === 2) {
+        const edgePt = findPoint(resizingCirclePrim.pRefs[1]);
+        if (edgePt) {
+          const angle = Math.atan2(cartY - resizingCircleCenter.y, cartX - resizingCircleCenter.x);
+          edgePt.x = resizingCircleCenter.x + newRadius * Math.cos(angle);
+          edgePt.y = resizingCircleCenter.y + newRadius * Math.sin(angle);
+        }
+      } else {
+        resizingCirclePrim.r = Math.max(0.01, newRadius);
+      }
+      syncCanvasToText();
+      render();
+    } else if (isDragging && draggedPoint) {
+      let finalX = cartX;
+      let finalY = cartY;
+      if (snapGridCb.checked) {
+        const sStep = getSnapStep();
+        finalX = snap(finalX, sStep);
+        finalY = snap(finalY, sStep);
+      }
+      draggedPoint.x = finalX;
+      draggedPoint.y = finalY;
+      if (draggedPoint === selectedPoint) {
+        const xInput = document.getElementById('inspect-x');
+        const yInput = document.getElementById('inspect-y');
+        if (xInput) xInput.value = finalX.toFixed(2);
+        if (yInput) yInput.value = finalY.toFixed(2);
+      }
+      syncCanvasToText();
+      render();
+    } else if (isPanning) {
+      panX = panStartOffset.x + (cx - panStartMouse.x) * 0.3;
+      panY = panStartOffset.y + (cy - panStartMouse.y) * 0.3;
+      render();
+    } else if (drawStartPoint) {
+      let finalX = cartX;
+      let finalY = cartY;
+      if (snapGridCb.checked) {
+        const sStep = getSnapStep();
+        finalX = snap(finalX, sStep);
+        finalY = snap(finalY, sStep);
+      }
+      drawCurrentCoords = { x: finalX, y: finalY };
+      render();
+    } else if (activeTool === 'polygon' && polygonVertices.length > 0) {
+      let finalX = cartX;
+      let finalY = cartY;
+      if (snapGridCb.checked) {
+        const sStep = getSnapStep();
+        finalX = snap(finalX, sStep);
+        finalY = snap(finalY, sStep);
+      }
+      drawCurrentCoords = { x: finalX, y: finalY };
+      render();
+    }
+  }
+
+  function handlePointerUp(e) {
+    if (isResizingCircle) {
+      isResizingCircle = false;
+      resizingCirclePrim = null;
+      resizingCircleCenter = null;
+      saveHistory(inputEl.value);
+    }
+    if (isDragging) {
+      isDragging = false;
+      draggedPoint = null;
+      saveHistory(inputEl.value);
+    }
+    if (isPanning) {
+      isPanning = false;
+    }
+    if (drawStartPoint && drawCurrentCoords) {
+      const rect = canvas.getBoundingClientRect();
+      const cx = e.clientX - rect.left;
+      const cy = e.clientY - rect.top;
+      let nearPt = getPointNear(cx, cy);
+
+      let finalX = drawCurrentCoords.x;
+      let finalY = drawCurrentCoords.y;
+
+      if (!nearPt) {
+        const label = autoLabelCb.checked ? getNextLabel() : 'P' + (points.length + 1);
+        nearPt = { x: finalX, y: finalY, label, color: '' };
+        points.push(nearPt);
+      }
+
+      if (nearPt !== drawStartPoint) {
+        primitives.push({ type: activeTool, pRefs: [drawStartPoint.label, nearPt.label], color: '' });
+        selectedPoint = nearPt;
+        updateInspector();
+        syncCanvasToText();
+        saveHistory(inputEl.value);
+        selectSelectTool();
+      }
+
+      drawStartPoint = null;
+      drawCurrentCoords = null;
+      render();
+    }
+  }
+
+  function handleWheel(e) {
+    const inlineEditor = document.getElementById('gw-inline-editor');
+    if (inlineEditor && inlineEditor.style.display === 'block') {
+      inlineEditor.blur();
+    }
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const cx = e.clientX - rect.left;
+    const cy = e.clientY - rect.top;
+
+    const cartX = toCartesianX(cx);
+    const cartY = toCartesianY(cy);
+
+    let delta = e.deltaY;
+    if (Math.abs(delta) > 120) {
+      delta = Math.sign(delta) * 120;
+    }
+    const factor = Math.exp(-delta * 0.0003);
+    zoom = Math.max(2, Math.min(1000, zoom * factor));
+
+    panX = cx - canvasW / 2 - cartX * zoom;
+    panY = canvasH / 2 - cy + cartY * zoom;
+
+    render();
+  }
+
+  function renamePoint(nearPt) {
+    const editor = document.getElementById('gw-inline-editor');
+    if (!editor) return;
+
+    activeEditorPt = nearPt;
+    const sx = toScreenX(nearPt.x);
+    const sy = toScreenY(nearPt.y);
+
+    editor.value = nearPt.label;
+    editor.style.display = 'block';
+    editor.style.left = Math.round(sx - 30) + 'px';
+    editor.style.top = Math.round(sy - 12) + 'px';
+
+    setTimeout(() => {
+      editor.focus();
+      editor.select();
+    }, 10);
+  }
+
+  function handleDblClick(e) {
+    if (activeTool === 'polygon' && polygonVertices.length >= 3) {
+      primitives.push({ type: 'polygon', pRefs: polygonVertices.map(v => v.label), color: '' });
+      syncCanvasToText();
+      saveHistory(inputEl.value);
+      selectSelectTool();
+      render();
+    } else if (activeTool === 'select') {
+      const rect = canvas.getBoundingClientRect();
+      const cx = e.clientX - rect.left;
+      const cy = e.clientY - rect.top;
+      const nearPt = getPointNear(cx, cy);
+      if (nearPt) {
+        renamePoint(nearPt);
+      }
+    }
+  }
+
+  function syncTextToCanvas() {
+    const text = inputEl.value;
+    const oldSelectedLabel = selectedPoint ? selectedPoint.label : null;
+    const parsed = parseText(text);
+    points = parsed.points;
+    primitives = parsed.primitives;
+    if (oldSelectedLabel) {
+      selectedPoint = points.find(p => p.label === oldSelectedLabel) || null;
+    } else {
+      selectedPoint = null;
+    }
+    updateInspector();
+    render();
+  }
+
+  function syncCanvasToText() {
+    inputEl.value = generateText();
+  }
+
+  function fitViewport() {
+    if (points.length === 0) {
+      zoom = 40;
+      panX = 0;
+      panY = 0;
+      return;
+    }
+    let minX = Infinity, maxX = -Infinity;
+    let minY = Infinity, maxY = -Infinity;
+    for (let p of points) {
+      if (p.x < minX) minX = p.x;
+      if (p.x > maxX) maxX = p.x;
+      if (p.y < minY) minY = p.y;
+      if (p.y > maxY) maxY = p.y;
+    }
+    let dx = maxX - minX;
+    let dy = maxY - minY;
+    dx = Math.max(dx, 2) * 1.5;
+    dy = Math.max(dy, 2) * 1.5;
+    zoom = Math.min(canvasW / dx, canvasH / dy);
+    zoom = Math.max(5, Math.min(200, zoom));
+    panX = -((minX + maxX) / 2) * zoom;
+    panY = ((minY + maxY) / 2) * zoom;
+  }
+
+  let inputHistoryTimeout = null;
+  inputEl.addEventListener('input', function () {
+    syncTextToCanvas();
+    clearTimeout(inputHistoryTimeout);
+    inputHistoryTimeout = setTimeout(function () {
+      saveHistory(inputEl.value);
+    }, 500);
+  });
+
+  const toolBtns = document.querySelectorAll('.gw-tool-item');
+  toolBtns.forEach(btn => {
+    btn.addEventListener('click', function () {
+      toolBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeTool = btn.getAttribute('data-tool');
+      polygonVertices = [];
+      drawStartPoint = null;
+      drawCurrentCoords = null;
+      updateInstructions(0, 0);
+      render();
+    });
+
+    btn.addEventListener('mouseenter', function () {
+      const tool = btn.getAttribute('data-tool');
+      let text = '';
+      if (tool === 'select') text = "{{ _('Select & Pan')|safe }}";
+      else if (tool === 'point') text = "{{ _('Add Point')|safe }}";
+      else if (tool === 'segment') text = "{{ _('Add Segment')|safe }}";
+      else if (tool === 'line') text = "{{ _('Add Line')|safe }}";
+      else if (tool === 'ray') text = "{{ _('Add Ray')|safe }}";
+      else if (tool === 'vector') text = "{{ _('Add Vector')|safe }}";
+      else if (tool === 'circle') text = "{{ _('Add Circle')|safe }}";
+      else if (tool === 'polygon') text = "{{ _('Add Polygon')|safe }}";
+      instEl.textContent = text;
+    });
+
+    btn.addEventListener('mouseleave', function () {
+      updateInstructions(0, 0);
+    });
+  });
+
+  presetsEl.addEventListener('change', function () {
+    const val = presetsEl.value;
+    selectedPoint = null;
+    updateInspector();
+    if (val === 'centroid') {
+      inputEl.value = 'point -3.00 4.00 A red\npoint -5.00 -2.00 B green\npoint 4.00 -1.00 C blue\nsegment A B\nsegment B C\nsegment C A\npoint -0.50 -1.50 M\npoint -0.50 1.50 N\npoint -4.00 1.00 P\nsegment A M #888888\nsegment B N #888888\nsegment C P #888888\npoint -1.33 0.33 G orange';
+    } else if (val === 'circles') {
+      inputEl.value = 'point 0.00 4.00 A red\npoint -3.00 -1.00 B green\npoint 5.00 -1.00 C blue\nsegment A B\nsegment B C\nsegment C A\npoint 0.55 0.82 I\ncircle I 1.82 orange\npoint 0.88 0.75 O\ncircle O 4.14 purple';
+    } else if (val === 'hull') {
+      inputEl.value = 'point -2.00 3.00 A\npoint -4.00 1.00 B\npoint -3.00 -2.00 C\npoint 1.00 -3.00 D\npoint 4.00 -1.00 E\npoint 3.00 2.00 F\npoint 0.00 4.00 G\npoint -1.00 1.00 P1 #888888\npoint 1.00 2.00 P2 #888888\npoint 2.00 0.00 P3 #888888\npoint 0.00 -1.00 P4 #888888\npolygon A B C D E F G green';
+    }
+    if (val) {
+      syncTextToCanvas();
+      fitViewport();
+      render();
+      saveHistory(inputEl.value);
+    }
+  });
+
+  document.getElementById('btn-clear').addEventListener('click', function () {
+    inputEl.value = '';
+    points = [];
+    primitives = [];
+    polygonVertices = [];
+    drawStartPoint = null;
+    drawCurrentCoords = null;
+    selectedPoint = null;
+    updateInspector();
+    render();
+    saveHistory(inputEl.value);
+  });
+
+  document.getElementById('btn-canvas-undo').addEventListener('click', undo);
+  document.getElementById('btn-canvas-redo').addEventListener('click', redo);
+
+  document.getElementById('btn-canvas-zoom-in').addEventListener('click', function () {
+    zoom = Math.max(2, Math.min(1000, zoom * 1.25));
+    render();
+  });
+
+  document.getElementById('btn-canvas-zoom-out').addEventListener('click', function () {
+    zoom = Math.max(2, Math.min(1000, zoom / 1.25));
+    render();
+  });
+
+  document.getElementById('btn-canvas-reset-zoom').addEventListener('click', function () {
+    fitViewport();
+    render();
+  });
+
+  document.getElementById('btn-export-png').addEventListener('click', function () {
+    const link = document.createElement('a');
+    link.download = 'geometry_widget.png';
+    link.href = canvas.toDataURL();
+    link.click();
+  });
+
+  const actionBtns = document.querySelectorAll('.gw-action-btn');
+  actionBtns.forEach(btn => {
+    btn.addEventListener('mouseenter', function () {
+      const id = btn.id;
+      let text = '';
+      if (id === 'btn-clear') text = "{{ _('Clear all points and shapes') }}";
+      else if (id === 'btn-export-png') text = "{{ _('Export current drawing as a PNG image') }}";
+      instEl.textContent = text;
+    });
+
+    btn.addEventListener('mouseleave', function () {
+      updateInstructions(0, 0);
+    });
+  });
+
+  const canvasZoomBtns = document.querySelectorAll('.gw-zoom-btn');
+  canvasZoomBtns.forEach(btn => {
+    btn.addEventListener('mouseenter', function () {
+      const id = btn.id;
+      let text = '';
+      if (id === 'btn-canvas-undo') text = "{{ _('Undo last action') }}";
+      else if (id === 'btn-canvas-redo') text = "{{ _('Redo next action') }}";
+      else if (id === 'btn-canvas-zoom-in') text = "{{ _('Zoom in') }}";
+      else if (id === 'btn-canvas-zoom-out') text = "{{ _('Zoom out') }}";
+      else if (id === 'btn-canvas-reset-zoom') text = "{{ _('Reset view to fit all points') }}";
+      instEl.textContent = text;
+    });
+
+    btn.addEventListener('mouseleave', function () {
+      updateInstructions(0, 0);
+    });
+  });
+
+  [showGridCb, snapGridCb, lockPointsCb, autoLabelCb].forEach(cb => {
+    cb.addEventListener('change', render);
+  });
+
+  canvas.addEventListener('pointerdown', handlePointerDown);
+  canvas.addEventListener('pointermove', handlePointerMove);
+  canvas.addEventListener('pointerup', handlePointerUp);
+  canvas.addEventListener('pointerleave', handlePointerUp);
+  canvas.addEventListener('dblclick', handleDblClick);
+  canvas.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    if (activeTool === 'select') {
+      const rect = canvas.getBoundingClientRect();
+      const cx = e.clientX - rect.left;
+      const cy = e.clientY - rect.top;
+      const nearPt = getPointNear(cx, cy);
+      if (nearPt) {
+        renamePoint(nearPt);
+      }
+    }
+  });
+
+
+
+  window.addEventListener('resize', function () {
+    resizeCanvas();
+    render();
+  });
+
+  window.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      selectSelectTool();
+      render();
+      return;
+    }
+    const activeEl = document.activeElement;
+    const isInput = activeEl && (
+      activeEl.tagName === 'INPUT' ||
+      activeEl.tagName === 'TEXTAREA' ||
+      activeEl.tagName === 'SELECT' ||
+      activeEl.isContentEditable
+    );
+    if ((e.key === 'Delete' || e.key === 'Backspace') && selectedPoint && !isInput) {
+      e.preventDefault();
+      points = points.filter(p => p !== selectedPoint);
+      primitives = primitives.filter(prim => {
+        if (prim.pRefs) {
+          return !prim.pRefs.includes(selectedPoint.label);
+        }
+        return true;
+      });
+      selectedPoint = null;
+      updateInspector();
+      syncCanvasToText();
+      saveHistory(inputEl.value);
+      render();
+      return;
+    }
+    const isUndo = (e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z';
+    const isRedo = (e.ctrlKey || e.metaKey) && (
+      (e.shiftKey && e.key.toLowerCase() === 'z') ||
+      (e.key.toLowerCase() === 'y')
+    );
+    if (isUndo) {
+      e.preventDefault();
+      undo();
+    } else if (isRedo) {
+      e.preventDefault();
+      redo();
+    }
+  });
+
+  const editorEl = document.getElementById('gw-inline-editor');
+  if (editorEl) {
+    editorEl.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const newLabel = editorEl.value.trim();
+        if (newLabel && activeEditorPt) {
+          if (newLabel !== activeEditorPt.label) {
+            if (points.some(p => p !== activeEditorPt && p.label === newLabel)) {
+              alert("{{ _('Label already exists!') }}");
+              editorEl.focus();
+              editorEl.select();
+              return;
+            }
+            const oldLabel = activeEditorPt.label;
+            activeEditorPt.label = newLabel;
+            primitives.forEach(prim => {
+              if (prim.pRefs) {
+                prim.pRefs = prim.pRefs.map(ref => ref === oldLabel ? newLabel : ref);
+              }
+            });
+            selectedPoint = activeEditorPt;
+            updateInspector();
+            syncCanvasToText();
+            saveHistory(inputEl.value);
+            render();
+          }
+        }
+        editorEl.style.display = 'none';
+        activeEditorPt = null;
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        editorEl.style.display = 'none';
+        activeEditorPt = null;
+      }
+    });
+
+    editorEl.addEventListener('blur', function () {
+      setTimeout(() => {
+        if (document.activeElement !== editorEl) {
+          if (activeEditorPt) {
+            const newLabel = editorEl.value.trim();
+            if (newLabel && newLabel !== activeEditorPt.label && !points.some(p => p !== activeEditorPt && p.label === newLabel)) {
+              const oldLabel = activeEditorPt.label;
+              activeEditorPt.label = newLabel;
+              primitives.forEach(prim => {
+                if (prim.pRefs) {
+                  prim.pRefs = prim.pRefs.map(ref => ref === oldLabel ? newLabel : ref);
+                }
+              });
+              selectedPoint = activeEditorPt;
+              updateInspector();
+              syncCanvasToText();
+              saveHistory(inputEl.value);
+              render();
+            }
+          }
+          editorEl.style.display = 'none';
+          activeEditorPt = null;
+        }
+      }, 150);
+    });
+  }
+
+  resizeCanvas();
+  updateInspector();
+  updateInstructions(0, 0);
+  presetsEl.value = 'centroid';
+  presetsEl.dispatchEvent(new Event('change'));
+  saveHistory(inputEl.value);
+
+  const themeObserver = new MutationObserver(mutations => {
+    mutations.forEach(mutation => {
+      if (mutation.attributeName === 'data-theme') {
+        render();
+      }
+    });
+  });
+  themeObserver.observe(document.body, { attributes: true });
+
+})();
+</script>
+{% endblock %}

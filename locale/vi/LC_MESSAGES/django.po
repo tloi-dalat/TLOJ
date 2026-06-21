@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dmoj\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-17 18:03+0000\n"
+"POT-Creation-Date: 2026-06-21 05:22+0000\n"
 "PO-Revision-Date: 2020-08-23 18:59\n"
 "Last-Translator: \n"
 "Language-Team: Vietnamese\n"
@@ -571,7 +571,7 @@ msgstr ""
 "Các thí sinh bằng điểm sẽ được phân định bằng thời gian của **lần nộp bài "
 "cuối cùng làm thay đổi kết quả**."
 
-#: judge/contest_format/default.py:18
+#: judge/contest_format/default.py:18 templates/tools/geometry_widget.html:696
 msgid "Default"
 msgstr "Mặc định"
 
@@ -4170,6 +4170,10 @@ msgstr "Các công cụ"
 msgid "Graph Editor"
 msgstr "Vẽ đồ thị"
 
+#: judge/views/graph_editor.py:21 templates/tools/list.html:27
+msgid "Geometry Widget"
+msgstr "Vẽ hình học"
+
 #: judge/views/language.py:12 templates/status/judge-status-table.html:10
 #: templates/status/status-tabs.html:6
 msgid "Runtimes"
@@ -5003,6 +5007,7 @@ msgid "Currently:"
 msgstr "Hiện tại:"
 
 #: judge/widgets/chunked_upload.py:27 templates/contest/ranking.html:496
+#: templates/tools/geometry_widget.html:501
 msgid "Clear"
 msgstr "Đặt lại"
 
@@ -8381,6 +8386,269 @@ msgstr "Đóng ticket"
 msgid "Reopen ticket"
 msgstr "Mở lại ticket"
 
+#: templates/tools/geometry_widget.html:421
+msgid "Drawing Tools"
+msgstr "Công cụ vẽ"
+
+#: templates/tools/geometry_widget.html:424
+#: templates/tools/geometry_widget.html:426
+#: templates/tools/geometry_widget.html:1832
+msgid "Select & Pan"
+msgstr "Chọn và di chuyển"
+
+#: templates/tools/geometry_widget.html:428
+#: templates/tools/geometry_widget.html:430
+#: templates/tools/geometry_widget.html:1833
+msgid "Add Point"
+msgstr "Thêm điểm"
+
+#: templates/tools/geometry_widget.html:432
+#: templates/tools/geometry_widget.html:434
+#: templates/tools/geometry_widget.html:1834
+msgid "Add Segment"
+msgstr "Thêm đoạn thẳng"
+
+#: templates/tools/geometry_widget.html:436
+#: templates/tools/geometry_widget.html:438
+#: templates/tools/geometry_widget.html:1835
+msgid "Add Line"
+msgstr "Thêm đường thẳng"
+
+#: templates/tools/geometry_widget.html:440
+#: templates/tools/geometry_widget.html:442
+#: templates/tools/geometry_widget.html:1836
+msgid "Add Ray"
+msgstr "Thêm tia"
+
+#: templates/tools/geometry_widget.html:444
+#: templates/tools/geometry_widget.html:446
+#: templates/tools/geometry_widget.html:1837
+msgid "Add Vector"
+msgstr "Thêm vectơ"
+
+#: templates/tools/geometry_widget.html:448
+#: templates/tools/geometry_widget.html:450
+#: templates/tools/geometry_widget.html:1838
+msgid "Add Circle"
+msgstr "Thêm đường tròn"
+
+#: templates/tools/geometry_widget.html:452
+#: templates/tools/geometry_widget.html:454
+#: templates/tools/geometry_widget.html:1839
+msgid "Add Polygon"
+msgstr "Thêm đa giác"
+
+#: templates/tools/geometry_widget.html:459
+msgid "Select Preset"
+msgstr "Chọn mẫu dựng sẵn"
+
+#: templates/tools/geometry_widget.html:460
+msgid "Triangle Centroid"
+msgstr "Trọng tâm tam giác"
+
+#: templates/tools/geometry_widget.html:461
+msgid "Incircle & Circumcircle"
+msgstr "Đường tròn nội tiếp & ngoại tiếp"
+
+#: templates/tools/geometry_widget.html:462
+msgid "Convex Hull"
+msgstr "Bao lồi"
+
+#: templates/tools/geometry_widget.html:466
+msgid "Advanced Options"
+msgstr "Tùy chọn nâng cao"
+
+#: templates/tools/geometry_widget.html:470
+msgid "Show grid"
+msgstr "Hiển thị lưới"
+
+#: templates/tools/geometry_widget.html:474
+msgid "Snap to grid"
+msgstr "Hút vào lưới"
+
+#: templates/tools/geometry_widget.html:478
+msgid "Lock all points"
+msgstr "Khóa tất cả điểm"
+
+#: templates/tools/geometry_widget.html:482
+msgid "Auto-label points"
+msgstr "Tự động đặt nhãn điểm"
+
+#: templates/tools/geometry_widget.html:490
+msgid "Properties Inspector"
+msgstr "Thông tin chi tiết"
+
+#: templates/tools/geometry_widget.html:492
+msgid "Click on a point to inspect and edit coordinates, color, or label"
+msgstr "Nhấp vào một điểm để kiểm tra và chỉnh sửa tọa độ, màu sắc hoặc nhãn"
+
+#: templates/tools/geometry_widget.html:497
+msgid "Geometry Markup"
+msgstr "Mã nguồn hình học"
+
+#: templates/tools/geometry_widget.html:502
+msgid "Export PNG"
+msgstr "Xuất ảnh PNG"
+
+#: templates/tools/geometry_widget.html:509
+msgid "Geometry canvas"
+msgstr "Vùng vẽ hình học"
+
+#: templates/tools/geometry_widget.html:512
+msgid "Undo"
+msgstr "Hoàn tác"
+
+#: templates/tools/geometry_widget.html:513
+msgid "Redo"
+msgstr "Làm lại"
+
+#: templates/tools/geometry_widget.html:514
+msgid "Zoom In"
+msgstr "Phóng to"
+
+#: templates/tools/geometry_widget.html:515
+msgid "Zoom Out"
+msgstr "Thu nhỏ"
+
+#: templates/tools/geometry_widget.html:516
+msgid "Reset View"
+msgstr "Đặt lại góc nhìn"
+
+#: templates/tools/geometry_widget.html:682
+msgid "Custom..."
+msgstr "Tùy chỉnh..."
+
+#: templates/tools/geometry_widget.html:686
+#: templates/tools/geometry_widget.html:1439
+msgid "Point"
+msgstr "Điểm"
+
+#: templates/tools/geometry_widget.html:694
+msgid "Color"
+msgstr "Màu sắc"
+
+#: templates/tools/geometry_widget.html:697
+msgid "Red"
+msgstr "Đỏ"
+
+#: templates/tools/geometry_widget.html:698
+msgid "Green"
+msgstr "Lục"
+
+#: templates/tools/geometry_widget.html:699
+msgid "Blue"
+msgstr "Lam"
+
+#: templates/tools/geometry_widget.html:700
+msgid "Orange"
+msgstr "Cam"
+
+#: templates/tools/geometry_widget.html:701
+msgid "Purple"
+msgstr "Tím"
+
+#: templates/tools/geometry_widget.html:702
+msgid "Gray"
+msgstr "Xám"
+
+#: templates/tools/geometry_widget.html:705
+msgid "X"
+msgstr "X"
+
+#: templates/tools/geometry_widget.html:708
+msgid "Y"
+msgstr "Y"
+
+#: templates/tools/geometry_widget.html:1439
+msgid "Drag to move."
+msgstr "Kéo để di chuyển."
+
+#: templates/tools/geometry_widget.html:1442
+msgid "Segment"
+msgstr "Đoạn thẳng"
+
+#: templates/tools/geometry_widget.html:1442
+msgid "Length"
+msgstr "Độ dài"
+
+#: templates/tools/geometry_widget.html:1444
+msgid "Circle"
+msgstr "Đường tròn"
+
+#: templates/tools/geometry_widget.html:1444
+msgid "centered at"
+msgstr "tâm tại"
+
+#: templates/tools/geometry_widget.html:1444
+msgid "Radius"
+msgstr "Bán kính"
+
+#: templates/tools/geometry_widget.html:1448
+msgid "Select and drag points to edit. Right-click drag to pan."
+msgstr ""
+"Chọn và kéo các điểm để chỉnh sửa. Kéo chuột phải để di chuyển góc nhìn."
+
+#: templates/tools/geometry_widget.html:1450
+msgid "Click anywhere on the canvas to place a point."
+msgstr "Nhấp vào bất kỳ đâu trên vùng vẽ để đặt một điểm."
+
+#: templates/tools/geometry_widget.html:1452
+msgid "Click a point and drag to draw a line segment."
+msgstr "Nhấp vào một điểm và kéo để vẽ một đoạn thẳng."
+
+#: templates/tools/geometry_widget.html:1454
+msgid "Click and drag to draw an infinite line."
+msgstr "Nhấp và kéo để vẽ một đường thẳng vô hạn."
+
+#: templates/tools/geometry_widget.html:1456
+msgid "Click and drag to draw a ray."
+msgstr "Nhấp và kéo để vẽ một tia."
+
+#: templates/tools/geometry_widget.html:1458
+msgid "Click and drag to draw a vector arrow."
+msgstr "Nhấp và kéo để vẽ một mũi tên vectơ."
+
+#: templates/tools/geometry_widget.html:1460
+msgid "Click center and drag to draw a circle."
+msgstr "Nhấp vào tâm và kéo để vẽ một đường tròn."
+
+#: templates/tools/geometry_widget.html:1462
+msgid "Click vertices. Click the first vertex or double-click to close."
+msgstr ""
+"Nhấp vào các đỉnh. Nhấp vào đỉnh đầu tiên hoặc nhấp đúp để đóng đa giác."
+
+#: templates/tools/geometry_widget.html:1910
+msgid "Clear all points and shapes"
+msgstr "Xóa tất cả các điểm và hình"
+
+#: templates/tools/geometry_widget.html:1911
+msgid "Export current drawing as a PNG image"
+msgstr "Xuất bản vẽ hiện tại dưới dạng ảnh PNG"
+
+#: templates/tools/geometry_widget.html:1925
+msgid "Undo last action"
+msgstr "Hoàn tác hành động cuối cùng"
+
+#: templates/tools/geometry_widget.html:1926
+msgid "Redo next action"
+msgstr "Làm lại hành động tiếp theo"
+
+#: templates/tools/geometry_widget.html:1927
+msgid "Zoom in"
+msgstr "Phóng to"
+
+#: templates/tools/geometry_widget.html:1928
+msgid "Zoom out"
+msgstr "Thu nhỏ"
+
+#: templates/tools/geometry_widget.html:1929
+msgid "Reset view to fit all points"
+msgstr "Đặt lại góc nhìn để vừa tất cả các điểm"
+
+#: templates/tools/geometry_widget.html:2020
+msgid "Label already exists!"
+msgstr "Nhãn này đã tồn tại!"
+
 #: templates/tools/graph_editor.html:129
 msgid "Graph type"
 msgstr "Kiểu đồ thị"
@@ -8412,6 +8680,10 @@ msgstr "Vùng vẽ đồ thị"
 #: templates/tools/list.html:23
 msgid "Visualize and edit graphs interactively"
 msgstr "Vẽ và chỉnh sửa đồ thị"
+
+#: templates/tools/list.html:29
+msgid "Interactive 2D geometry plotting"
+msgstr "Vẽ hình học 2D tương tác"
 
 #: templates/urlshortener/confirm_delete.html:65
 msgid ""
