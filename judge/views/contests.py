@@ -167,7 +167,7 @@ class ContestList(InfinitePaginationMixin, TitleMixin, ContestListMixin, ListVie
                         active.append(participation)
                         present.remove(contest)
 
-        active.sort(key=attrgetter('end_time', 'key'))
+        active.sort(key=attrgetter('end_time', 'contest.key'))
         present.sort(key=attrgetter('end_time', 'key'))
         future.sort(key=attrgetter('start_time'))
         context['active_participations'] = active
