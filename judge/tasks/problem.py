@@ -1,4 +1,6 @@
 import os
+import shutil
+import tempfile
 import zipfile
 
 from celery import shared_task
@@ -12,7 +14,9 @@ from judge.utils.problem_data import ProblemDataError
 from judge.utils.problems import fast_delete_problem
 
 __all__ = ('problem_garbage_collect', 'reassemble_problem_data_zip', 'delete_expired_chunked_uploads',
-           'import_polygon_package')
+           'import_polygon_package', 'import_polygon_package_from_api')
+
+DEFAULT_POLYGON_TO_SITE_LANGUAGE_MAP = {'english': 'en', 'vietnamese': 'vi'}
 
 
 @shared_task
@@ -73,6 +77,88 @@ def import_polygon_package(upload_id, code, profile_id, do_update, config):
         importer.run()
     finally:
         chunked_upload.delete()
+
+
+def _build_auto_language_config(package_path, base_config):
+    from lxml import etree as ET
+
+    site_codes = {code for code, _ in settings.LANGUAGES}
+    with zipfile.ZipFile(package_path, 'r') as package:
+        if 'problem.xml' not in package.namelist():
+            raise ProblemDataError(_('problem.xml not found in the downloaded package.'))
+        root = ET.fromstring(package.read('problem.xml'))
+
+    languages = [statement.get('language', 'unknown')
+                 for statement in root.findall('.//statement[@type="application/x-tex"]')]
+
+    config = dict(base_config)
+    config['main_statement_language'] = None
+    config['polygon_to_site_language_map'] = {}
+
+    if len(languages) > 1:
+        for language in languages:
+            site_language = DEFAULT_POLYGON_TO_SITE_LANGUAGE_MAP.get(language)
+            if site_language is None and language in site_codes:
+                site_language = language
+            if site_language is None:
+                raise ProblemDataError(
+                    _('Cannot automatically map Polygon language "%s" to a site language. '
+                      'Please upload the package manually to choose mappings.') % language,
+                )
+            if site_language == settings.LANGUAGE_CODE:
+                config['main_statement_language'] = language
+            else:
+                config['polygon_to_site_language_map'][language] = site_language
+
+        if config['main_statement_language'] is None:
+            raise ProblemDataError(
+                _('None of the package statements map to the main site language (%s).') % settings.LANGUAGE_CODE,
+            )
+        config['main_tutorial_language'] = config['main_statement_language']
+
+    return config
+
+
+@shared_task
+def import_polygon_package_from_api(problem_id, code, profile_id, do_update, config):
+    from judge.models import Profile
+    from judge.utils.codeforces_polygon import PolygonImporter
+    from judge.utils.polygon_api import PolygonApiError, PolygonClient
+
+    profile = Profile.objects.get(id=profile_id)
+
+    try:
+        client = PolygonClient(
+            settings.VNOJ_POLYGON_API_URL,
+            settings.VNOJ_POLYGON_API_KEY,
+            settings.VNOJ_POLYGON_API_SECRET,
+        )
+    except PolygonApiError as e:
+        raise ProblemDataError(str(e))
+
+    tmp_dir = tempfile.mkdtemp(prefix='polygon-')
+    package_path = os.path.join(tmp_dir, 'package.zip')
+    try:
+        try:
+            package_id = client.latest_ready_package_id(problem_id)
+            client.download_package(problem_id, package_id, package_path)
+        except PolygonApiError as e:
+            raise ProblemDataError(str(e))
+
+        config = _build_auto_language_config(package_path, config)
+
+        importer = PolygonImporter(
+            package=package_path,
+            code=code,
+            authors=[profile],
+            curators=[],
+            do_update=do_update,
+            interactive=False,
+            config=config,
+        )
+        importer.run()
+    finally:
+        shutil.rmtree(tmp_dir, ignore_errors=True)
 
 
 @shared_task
