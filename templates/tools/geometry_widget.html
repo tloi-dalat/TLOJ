@@ -1,21 +1,36 @@
 {% extends "base.html" %}
 {% block title_row %}{% endblock %}
+{% block title_ruler %}{% endblock %}
 
 {% block media %}
 <style>
   html,
   body.gw-active {
-    overflow: hidden;
+    overflow: auto;
+  }
+
+  body.gw-active footer {
+    display: none !important;
+  }
+
+  body.gw-active #content-body {
+    padding-bottom: 0 !important;
   }
 
   #gw-wrap {
     display: grid;
     grid-template-columns: minmax(18rem, 22rem) minmax(0, 1fr);
     gap: 0.75rem;
-    height: calc(100vh - 10.5rem);
+    height: calc(100vh - 6rem);
     min-height: 35rem;
     overflow: hidden;
     padding: 0.25rem 0 0.5rem;
+  }
+
+  @media (max-height: 700px) {
+    #gw-wrap {
+      min-height: 0;
+    }
   }
 
   #gw-sidebar {
@@ -33,14 +48,14 @@
   }
 
   #gw-sidebar .sidebox.gw-input-box {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     display: flex;
     flex-direction: column;
     min-height: 10rem;
   }
 
   #gw-sidebar .gw-input-box .sidebox-content {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     display: flex;
     flex-direction: column;
     min-height: 0;
@@ -239,7 +254,8 @@
   }
 
   #gw-inspector-content input,
-  #gw-inspector-content select {
+  #gw-inspector-content select,
+  #gw-func-input {
     background: #fff;
     color: #333;
     border: 1px solid #ccc;
@@ -248,7 +264,8 @@
   }
 
   body[data-theme="dark"] #gw-inspector-content input,
-  body[data-theme="dark"] #gw-inspector-content select {
+  body[data-theme="dark"] #gw-inspector-content select,
+  body[data-theme="dark"] #gw-func-input {
     background: #2a2a2a;
     color: #e0e0e0;
     border-color: #444;
@@ -359,11 +376,6 @@
   }
 
   @media (max-width: 900px) {
-    html,
-    body.gw-active {
-      overflow: auto !important;
-    }
-
     #gw-wrap {
       display: flex;
       flex-direction: column;
@@ -427,6 +439,7 @@
 {% endblock %}
 
 {% block body %}
+{% include "mathjax-load.html" %}
 <div id="gw-wrap">
   <aside id="gw-sidebar">
 
@@ -474,6 +487,10 @@
             <option value="circles">{{ _('Incircle & Circumcircle') }}</option>
             <option value="hull">{{ _('Convex Hull') }}</option>
           </select>
+        </div>
+        <div style="margin-top: 0.75rem; display: flex; gap: 6px; align-items: center;">
+          <input type="text" id="gw-func-input" placeholder="y = x^2 - 2*x + 1" style="flex: 1; min-width: 0; padding: 6px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box;" />
+          <button class="gw-action-btn" id="btn-plot-func" style="flex: 0 0 auto; margin: 0; padding: 6px 10px; font-size: 0.85rem; background: #007aff; color: #fff; border-color: #007aff;" title="{{ _('Plot Function') }}">{{ _('Plot') }}</button>
         </div>
         <details style="margin-top: 0.75rem; font-size: 0.85rem; cursor: pointer;">
           <summary style="color: #666; font-weight: bold; padding: 2px 0;">{{ _('Advanced Options') }}</summary>
@@ -560,7 +577,9 @@
   let points = [];
   let primitives = [];
   let selectedPoint = null;
+  let selectedPrimitive = null;
   let activeEditorPt = null;
+  let renderRequested = false;
 
   let historyList = [];
   let historyIndex = -1;
@@ -699,7 +718,7 @@
       labelOptionsHtml += `<option value="__custom__">{{ _('Custom...') }}</option>`;
 
       el.innerHTML = `
-        <div style="display:grid; grid-template-columns: auto 1fr auto 1fr; gap: 8px; align-items: center;">
+        <div style="display:grid; grid-template-columns: auto 1fr; gap: 8px; align-items: center;">
           <span style="font-weight:bold; font-size:0.9rem;">{{ _('Point') }}:</span>
           <div style="display:flex; width:100%; box-sizing:border-box;">
             <select id="inspect-label-select" style="width:100%; padding:4px; box-sizing:border-box;">
@@ -807,9 +826,264 @@
         saveHistory(inputEl.value);
         render();
       });
+    } else if (selectedPrimitive) {
+      box.style.display = 'block';
+      let typeLabel = '';
+      let detailsHtml = '';
+      const pColor = selectedPrimitive.color || '';
+
+      if (selectedPrimitive.type === 'segment') {
+        typeLabel = "{{ _('Segment') }}";
+        let p1, p2;
+        if (selectedPrimitive.pRefs) {
+          p1 = findPoint(selectedPrimitive.pRefs[0]);
+          p2 = findPoint(selectedPrimitive.pRefs[1]);
+        } else if (selectedPrimitive.coords) {
+          p1 = { x: selectedPrimitive.coords[0], y: selectedPrimitive.coords[1] };
+          p2 = { x: selectedPrimitive.coords[2], y: selectedPrimitive.coords[3] };
+        }
+        if (p1 && p2) {
+          const len = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+          detailsHtml = `
+            <div style="grid-column: span 2; display: grid; grid-template-columns: auto 1fr; gap: 8px; font-size: 0.9rem;">
+              <span style="font-weight:bold;">{{ _('Length') }}:</span>
+              <span>${len.toFixed(2)}</span>
+              <span style="font-weight:bold;">{{ _('Endpoints') }}:</span>
+              <span>${selectedPrimitive.pRefs ? `${p1.label}-${p2.label}` : `(${p1.x.toFixed(2)}, ${p1.y.toFixed(2)}) - (${p2.x.toFixed(2)}, ${p2.y.toFixed(2)})`}</span>
+            </div>
+          `;
+        }
+      } else if (selectedPrimitive.type === 'vector') {
+        typeLabel = "{{ _('Vector') }}";
+        let p1, p2;
+        if (selectedPrimitive.pRefs) {
+          p1 = findPoint(selectedPrimitive.pRefs[0]);
+          p2 = findPoint(selectedPrimitive.pRefs[1]);
+        } else if (selectedPrimitive.coords) {
+          p1 = { x: selectedPrimitive.coords[0], y: selectedPrimitive.coords[1] };
+          p2 = { x: selectedPrimitive.coords[2], y: selectedPrimitive.coords[3] };
+        }
+        if (p1 && p2) {
+          const len = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+          const dx = p2.x - p1.x;
+          const dy = p2.y - p1.y;
+          detailsHtml = `
+            <div style="grid-column: span 2; display: grid; grid-template-columns: auto 1fr; gap: 8px; font-size: 0.9rem;">
+              <span style="font-weight:bold;">{{ _('Length') }}:</span>
+              <span>${len.toFixed(2)}</span>
+              <span style="font-weight:bold;">{{ _('Components') }}:</span>
+              <span>(${dx.toFixed(2)}, ${dy.toFixed(2)})</span>
+              <span style="font-weight:bold;">{{ _('Endpoints') }}:</span>
+              <span>${selectedPrimitive.pRefs ? `${p1.label} → ${p2.label}` : `(${p1.x.toFixed(2)}, ${p1.y.toFixed(2)}) → (${p2.x.toFixed(2)}, ${p2.y.toFixed(2)})`}</span>
+            </div>
+          `;
+        }
+      } else if (selectedPrimitive.type === 'circle') {
+        typeLabel = "{{ _('Circle') }}";
+        let center, rVal;
+        if (selectedPrimitive.pRefs) {
+          center = findPoint(selectedPrimitive.pRefs[0]);
+          if (selectedPrimitive.pRefs.length === 2) {
+            let p2 = findPoint(selectedPrimitive.pRefs[1]);
+            rVal = p2 && center ? Math.hypot(p2.x - center.x, p2.y - center.y) : 0;
+          } else {
+            rVal = selectedPrimitive.r;
+          }
+        } else if (selectedPrimitive.coords) {
+          center = { x: selectedPrimitive.coords[0], y: selectedPrimitive.coords[1] };
+          rVal = selectedPrimitive.r;
+        }
+        if (center && rVal !== undefined) {
+          const area = Math.PI * rVal * rVal;
+          detailsHtml = `
+            <div style="grid-column: span 2; display: grid; grid-template-columns: auto 1fr; gap: 8px; font-size: 0.9rem;">
+              <span style="font-weight:bold;">{{ _('Center') }}:</span>
+              <span>${selectedPrimitive.pRefs ? center.label : `(${center.x.toFixed(2)}, ${center.y.toFixed(2)})`}</span>
+              <span style="font-weight:bold;">{{ _('Radius') }}:</span>
+              <span>${rVal.toFixed(2)}</span>
+              <span style="font-weight:bold;">{{ _('Area') }}:</span>
+              <span>${area.toFixed(2)}</span>
+            </div>
+          `;
+        }
+      } else if (selectedPrimitive.type === 'polygon') {
+        typeLabel = "{{ _('Polygon') }}";
+        let pts = [];
+        if (selectedPrimitive.pRefs) {
+          pts = selectedPrimitive.pRefs.map(findPoint).filter(p => !!p);
+        } else if (selectedPrimitive.coords) {
+          for (let i = 0; i < selectedPrimitive.coords.length; i += 2) {
+            pts.push({ x: selectedPrimitive.coords[i], y: selectedPrimitive.coords[i + 1] });
+          }
+        }
+        if (pts.length >= 3) {
+          let perimeter = 0;
+          for (let i = 0; i < pts.length; i++) {
+            let p1 = pts[i];
+            let p2 = pts[(i + 1) % pts.length];
+            perimeter += Math.hypot(p2.x - p1.x, p2.y - p1.y);
+          }
+          let area = 0;
+          for (let i = 0; i < pts.length; i++) {
+            let p1 = pts[i];
+            let p2 = pts[(i + 1) % pts.length];
+            area += p1.x * p2.y - p2.x * p1.y;
+          }
+          area = Math.abs(area) / 2;
+          detailsHtml = `
+            <div style="grid-column: span 2; display: grid; grid-template-columns: auto 1fr; gap: 8px; font-size: 0.9rem;">
+              <span style="font-weight:bold;">{{ _('Vertices') }}:</span>
+              <span>${selectedPrimitive.pRefs ? selectedPrimitive.pRefs.join(' ') : pts.map(p => `(${p.x.toFixed(2)}, ${p.y.toFixed(2)})`).join(' ')}</span>
+              <span style="font-weight:bold;">{{ _('Perimeter') }}:</span>
+              <span>${perimeter.toFixed(2)}</span>
+              <span style="font-weight:bold;">{{ _('Area') }}:</span>
+              <span>${area.toFixed(2)}</span>
+            </div>
+          `;
+        }
+      } else if (selectedPrimitive.type === 'line') {
+        typeLabel = "{{ _('Line') }}";
+        let a = 0, b = 0, c = 0;
+        if (selectedPrimitive.a !== undefined) {
+          a = selectedPrimitive.a;
+          b = selectedPrimitive.b;
+          c = selectedPrimitive.c;
+        } else {
+          let p1, p2;
+          if (selectedPrimitive.pRefs) {
+            p1 = findPoint(selectedPrimitive.pRefs[0]);
+            p2 = findPoint(selectedPrimitive.pRefs[1]);
+          } else if (selectedPrimitive.coords) {
+            p1 = { x: selectedPrimitive.coords[0], y: selectedPrimitive.coords[1] };
+            p2 = { x: selectedPrimitive.coords[2], y: selectedPrimitive.coords[3] };
+          }
+          if (p1 && p2) {
+            a = p1.y - p2.y;
+            b = p2.x - p1.x;
+            c = p1.x * p2.y - p2.x * p1.y;
+          }
+        }
+        let norm = Math.hypot(a, b);
+        if (norm > 0) {
+          a /= norm; b /= norm; c /= norm;
+        }
+        if (a < 0 || (Math.abs(a) < 1e-7 && b < 0)) {
+          a = -a; b = -b; c = -c;
+        }
+        let eq = "";
+        if (Math.abs(a) > 1e-3) eq += `${a.toFixed(2)}x`;
+        if (Math.abs(b) > 1e-3) {
+          if (eq && b > 0) eq += " + ";
+          else if (eq && b < 0) eq += " - ";
+          else if (!eq && b < 0) eq += "-";
+          eq += `${Math.abs(b).toFixed(2)}y`;
+        }
+        if (Math.abs(c) > 1e-3) {
+          if (c > 0) eq += ` + ${c.toFixed(2)}`;
+          else eq += ` - ${Math.abs(c).toFixed(2)}`;
+        }
+        eq += " = 0";
+        detailsHtml = `
+          <div style="grid-column: span 2; display: grid; grid-template-columns: auto 1fr; gap: 8px; font-size: 0.9rem;">
+            <span style="font-weight:bold;">{{ _('Equation') }}:</span>
+            <span>${eq}</span>
+          </div>
+        `;
+      } else if (selectedPrimitive.type === 'ray') {
+        typeLabel = "{{ _('Ray') }}";
+        let p1, p2;
+        if (selectedPrimitive.pRefs) {
+          p1 = findPoint(selectedPrimitive.pRefs[0]);
+          p2 = findPoint(selectedPrimitive.pRefs[1]);
+        } else if (selectedPrimitive.coords) {
+          p1 = { x: selectedPrimitive.coords[0], y: selectedPrimitive.coords[1] };
+          p2 = { x: selectedPrimitive.coords[2], y: selectedPrimitive.coords[3] };
+        }
+        if (p1 && p2) {
+          detailsHtml = `
+            <div style="grid-column: span 2; display: grid; grid-template-columns: auto 1fr; gap: 8px; font-size: 0.9rem;">
+              <span style="font-weight:bold;">{{ _('Origin') }}:</span>
+              <span>${selectedPrimitive.pRefs ? p1.label : `(${p1.x.toFixed(2)}, ${p1.y.toFixed(2)})`}</span>
+              <span style="font-weight:bold;">{{ _('Direction') }}:</span>
+              <span>${selectedPrimitive.pRefs ? `{{ _('passing through') }} ${p2.label}` : `{{ _('passing through') }} (${p2.x.toFixed(2)}, ${p2.y.toFixed(2)})`}</span>
+            </div>
+          `;
+        }
+      } else if (selectedPrimitive.type === 'function') {
+        typeLabel = "{{ _('Function') }}";
+        detailsHtml = `
+          <div style="grid-column: span 2; display: grid; grid-template-columns: auto 1fr; gap: 8px; font-size: 0.9rem; align-items: center;">
+            <span style="font-weight:bold;">{{ _('Equation') }}: </span>
+            <input type="text" id="inspect-func-expr" value="${selectedPrimitive.expr}" style="width:100%; box-sizing:border-box; padding:4px;" />
+            <span style="font-weight:bold; grid-column: span 2; margin-top: 4px;">{{ _('Preview') }}: <span id="inspect-func-preview">\\(${toLatex(selectedPrimitive.expr)}\\)</span></span>
+          </div>
+        `;
+      }
+
+      el.innerHTML = `
+        <div style="display:grid; grid-template-columns: auto 1fr; gap: 8px; align-items: center;">
+          <span style="font-weight:bold; font-size:0.9rem;">${typeLabel}:</span>
+          <div style="display:flex; justify-content:flex-end;">
+            <button id="btn-inspect-prim-delete" class="gw-action-btn" style="background:#ff3b30; color:#fff; border-color:#ff3b30; padding:4px 8px; border-radius:4px; cursor:pointer; margin:0;"><i class="fa fa-trash"></i></button>
+          </div>
+          
+          <span style="font-weight:bold; font-size:0.9rem;">{{ _('Color') }}:</span>
+          <select id="inspect-prim-color" style="width:100%; box-sizing:border-box; padding:4px;">
+            <option value="" ${pColor===''?'selected':''}>{{ _('Default') }}</option>
+            <option value="red" ${pColor==='red'?'selected':''}>{{ _('Red') }}</option>
+            <option value="green" ${pColor==='green'?'selected':''}>{{ _('Green') }}</option>
+            <option value="blue" ${pColor==='blue'?'selected':''}>{{ _('Blue') }}</option>
+            <option value="orange" ${pColor==='orange'?'selected':''}>{{ _('Orange') }}</option>
+            <option value="purple" ${pColor==='purple'?'selected':''}>{{ _('Purple') }}</option>
+            <option value="gray" ${pColor==='gray'?'selected':''}>{{ _('Gray') }}</option>
+          </select>
+          ${detailsHtml}
+        </div>
+      `;
+
+      document.getElementById('inspect-prim-color').addEventListener('change', function (e) {
+        selectedPrimitive.color = e.target.value;
+        syncCanvasToText();
+        render();
+      });
+
+      document.getElementById('btn-inspect-prim-delete').addEventListener('click', function () {
+        primitives = primitives.filter(prim => prim !== selectedPrimitive);
+        selectedPrimitive = null;
+        updateInspector();
+        syncCanvasToText();
+        saveHistory(inputEl.value);
+        render();
+      });
+
+      if (selectedPrimitive.type === 'function') {
+        document.getElementById('inspect-func-expr').addEventListener('input', function (e) {
+          const val = e.target.value.trim();
+          if (val) {
+            let standardised = val;
+            if (standardised.indexOf('=') === -1) {
+              standardised = "y = " + standardised;
+            }
+            selectedPrimitive.expr = standardised;
+            const previewEl = document.getElementById('inspect-func-preview');
+            if (previewEl) {
+              previewEl.textContent = `\\(${toLatex(standardised)}\\)`;
+              if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+                MathJax.typesetPromise([previewEl]).catch(err => {});
+              }
+            }
+            syncCanvasToText();
+            render();
+          }
+        });
+      }
     } else {
       box.style.display = 'none';
       el.innerHTML = '';
+    }
+
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      MathJax.typesetPromise([el]).catch(err => {});
     }
   }
 
@@ -938,6 +1212,18 @@
           let pRefs = tokens.slice(1);
           parsedPrimitives.push({ type: 'polygon', pRefs, color });
         }
+      } else if (cmd === 'function' || cmd === 'plot' || cmd === 'fn') {
+        let exprStr = line.substring(tokens[0].length).trim();
+        let color = '';
+        const lastToken = tokens[tokens.length - 1];
+        if (lastToken.startsWith('#') || ['red', 'green', 'blue', 'orange', 'purple', 'gray'].includes(lastToken.toLowerCase())) {
+          color = lastToken;
+          exprStr = exprStr.substring(0, exprStr.length - lastToken.length).trim();
+        }
+        if (exprStr && exprStr.indexOf('=') === -1) {
+          exprStr = "y = " + exprStr;
+        }
+        parsedPrimitives.push({ type: 'function', expr: exprStr, color });
       } else {
         if (tokens.length >= 2 && !isNaN(parseFloat(tokens[0])) && !isNaN(parseFloat(tokens[1]))) {
           let x = parseFloat(tokens[0]);
@@ -1011,6 +1297,8 @@
         } else {
           text += `polygon ${prim.coords.map(n => n.toFixed(2)).join(' ')}${colorStr}\n`;
         }
+      } else if (prim.type === 'function') {
+        text += `function ${prim.expr}${colorStr}\n`;
       }
     }
     return text;
@@ -1074,6 +1362,14 @@
   }
 
   function render() {
+    if (!renderRequested) {
+      renderRequested = true;
+      requestAnimationFrame(performRender);
+    }
+  }
+
+  function performRender() {
+    renderRequested = false;
     const dark = isDark();
     ctx.fillStyle = dark ? '#1e1e1e' : '#ffffff';
     ctx.fillRect(0, 0, canvasW, canvasH);
@@ -1150,125 +1446,179 @@
     }
 
     for (let prim of primitives) {
-      ctx.strokeStyle = prim.color || (dark ? '#4a90e2' : '#007aff');
-      ctx.fillStyle = prim.color || (dark ? '#4a90e2' : '#007aff');
-      ctx.lineWidth = 2;
+      const isSelected = (prim === selectedPrimitive);
+      const passes = isSelected ? [true, false] : [false];
 
-      let x1, y1, x2, y2, r;
+      for (let isHighlight of passes) {
+        if (isHighlight) {
+          ctx.strokeStyle = '#ffdd57';
+          ctx.fillStyle = 'rgba(255, 221, 87, 0.4)';
+          ctx.lineWidth = 8;
+        } else {
+          ctx.strokeStyle = prim.color || (dark ? '#4a90e2' : '#007aff');
+          ctx.fillStyle = prim.color || (dark ? '#4a90e2' : '#007aff');
+          ctx.lineWidth = 2;
+        }
 
-      if (prim.pRefs) {
-        if (prim.type === 'polygon') {
-          ctx.beginPath();
-          let first = true;
-          for (let ref of prim.pRefs) {
-            let p = findPoint(ref);
-            if (p) {
-              let sx = toScreenX(p.x);
-              let sy = toScreenY(p.y);
-              if (first) {
-                ctx.moveTo(sx, sy);
-                first = false;
-              } else {
-                ctx.lineTo(sx, sy);
+        let x1, y1, x2, y2, r;
+
+        if (prim.pRefs) {
+          if (prim.type === 'polygon') {
+            ctx.beginPath();
+            let first = true;
+            for (let ref of prim.pRefs) {
+              let p = findPoint(ref);
+              if (p) {
+                let sx = toScreenX(p.x);
+                let sy = toScreenY(p.y);
+                if (first) {
+                  ctx.moveTo(sx, sy);
+                  first = false;
+                } else {
+                  ctx.lineTo(sx, sy);
+                }
               }
             }
+            if (!first) {
+              ctx.closePath();
+              ctx.stroke();
+              if (isHighlight) {
+                ctx.fillStyle = 'rgba(255, 221, 87, 0.2)';
+                ctx.fill();
+              } else {
+                ctx.fillStyle = prim.color ? (prim.color + '22') : 'rgba(0,122,255,0.1)';
+                ctx.fill();
+              }
+            }
+            continue;
           }
-          if (!first) {
-            ctx.closePath();
-            ctx.stroke();
-            ctx.fillStyle = prim.color ? (prim.color + '22') : 'rgba(0,122,255,0.1)';
-            ctx.fill();
+
+          let p1 = findPoint(prim.pRefs[0]);
+          if (!p1) continue;
+          x1 = p1.x;
+          y1 = p1.y;
+
+          if (prim.pRefs.length > 1) {
+            let p2 = findPoint(prim.pRefs[1]);
+            if (!p2) continue;
+            x2 = p2.x;
+            y2 = p2.y;
           }
-          continue;
-        }
 
-        let p1 = findPoint(prim.pRefs[0]);
-        if (!p1) continue;
-        x1 = p1.x;
-        y1 = p1.y;
+          if (prim.type === 'circle') {
+            if (prim.pRefs.length === 2) {
+              r = Math.hypot(x2 - x1, y2 - y1);
+            } else {
+              r = prim.r;
+            }
+          }
+        } else if (prim.coords) {
+          if (prim.type === 'polygon') {
+            ctx.beginPath();
+            for (let i = 0; i < prim.coords.length; i += 2) {
+              let sx = toScreenX(prim.coords[i]);
+              let sy = toScreenY(prim.coords[i + 1]);
+              if (i === 0) ctx.moveTo(sx, sy);
+              else ctx.lineTo(sx, sy);
+            }
+            if (prim.coords.length >= 4) {
+              ctx.closePath();
+              ctx.stroke();
+              if (isHighlight) {
+                ctx.fillStyle = 'rgba(255, 221, 87, 0.2)';
+                ctx.fill();
+              } else {
+                ctx.fillStyle = prim.color ? (prim.color + '22') : 'rgba(0,122,255,0.1)';
+                ctx.fill();
+              }
+            }
+            continue;
+          }
 
-        if (prim.pRefs.length > 1) {
-          let p2 = findPoint(prim.pRefs[1]);
-          if (!p2) continue;
-          x2 = p2.x;
-          y2 = p2.y;
-        }
-
-        if (prim.type === 'circle') {
-          if (prim.pRefs.length === 2) {
-            r = Math.hypot(x2 - x1, y2 - y1);
-          } else {
+          x1 = prim.coords[0];
+          y1 = prim.coords[1];
+          if (prim.coords.length > 2) {
+            x2 = prim.coords[2];
+            y2 = prim.coords[3];
+          }
+          if (prim.type === 'circle') {
             r = prim.r;
           }
-        }
-      } else if (prim.coords) {
-        if (prim.type === 'polygon') {
-          ctx.beginPath();
-          for (let i = 0; i < prim.coords.length; i += 2) {
-            let sx = toScreenX(prim.coords[i]);
-            let sy = toScreenY(prim.coords[i + 1]);
-            if (i === 0) ctx.moveTo(sx, sy);
-            else ctx.lineTo(sx, sy);
-          }
-          if (prim.coords.length >= 4) {
-            ctx.closePath();
+        } else if (prim.type === 'line' && prim.a !== undefined) {
+          drawInfiniteLine(prim.a, prim.b, prim.c, xMin, xMax, yMin, yMax);
+          continue;
+        } else if (prim.type === 'function') {
+          const fn = compileExpression(prim.expr);
+          if (fn) {
+            ctx.beginPath();
+            let first = true;
+            for (let sx = 0; sx <= canvasW; sx += 2) {
+              const cx = toCartesianX(sx);
+              try {
+                const cy = fn(cx);
+                if (typeof cy === 'number' && !isNaN(cy) && isFinite(cy)) {
+                  const sy = toScreenY(cy);
+                  if (sy >= -1000 && sy <= canvasH + 1000) {
+                    if (first) {
+                      ctx.moveTo(sx, sy);
+                      first = false;
+                    } else {
+                      ctx.lineTo(sx, sy);
+                    }
+                  } else {
+                    first = true;
+                  }
+                } else {
+                  first = true;
+                }
+              } catch (e) {
+                first = true;
+              }
+            }
             ctx.stroke();
-            ctx.fillStyle = prim.color ? (prim.color + '22') : 'rgba(0,122,255,0.1)';
-            ctx.fill();
           }
           continue;
         }
 
-        x1 = prim.coords[0];
-        y1 = prim.coords[1];
-        if (prim.coords.length > 2) {
-          x2 = prim.coords[2];
-          y2 = prim.coords[3];
-        }
-        if (prim.type === 'circle') {
-          r = prim.r;
-        }
-      } else if (prim.type === 'line' && prim.a !== undefined) {
-        drawInfiniteLine(prim.a, prim.b, prim.c, xMin, xMax, yMin, yMax);
-        continue;
-      }
-
-      if (prim.type === 'segment') {
-        ctx.beginPath();
-        ctx.moveTo(toScreenX(x1), toScreenY(y1));
-        ctx.lineTo(toScreenX(x2), toScreenY(y2));
-        ctx.stroke();
-      } else if (prim.type === 'line') {
-        let a = y1 - y2;
-        let b = x2 - x1;
-        let c = x1 * y2 - x2 * y1;
-        drawInfiniteLine(a, b, c, xMin, xMax, yMin, yMax);
-      } else if (prim.type === 'ray') {
-        let dx = x2 - x1;
-        let dy = y2 - y1;
-        let len = Math.hypot(dx, dy);
-        if (len > 1e-9) {
-          let rx = x1 + (dx / len) * 10000;
-          let ry = y1 + (dy / len) * 10000;
+        if (prim.type === 'segment') {
           ctx.beginPath();
           ctx.moveTo(toScreenX(x1), toScreenY(y1));
-          ctx.lineTo(toScreenX(rx), toScreenY(ry));
+          ctx.lineTo(toScreenX(x2), toScreenY(y2));
+          ctx.stroke();
+        } else if (prim.type === 'line') {
+          let a = y1 - y2;
+          let b = x2 - x1;
+          let c = x1 * y2 - x2 * y1;
+          drawInfiniteLine(a, b, c, xMin, xMax, yMin, yMax);
+        } else if (prim.type === 'ray') {
+          let dx = x2 - x1;
+          let dy = y2 - y1;
+          let len = Math.hypot(dx, dy);
+          if (len > 1e-9) {
+            let rx = x1 + (dx / len) * 10000;
+            let ry = y1 + (dy / len) * 10000;
+            ctx.beginPath();
+            ctx.moveTo(toScreenX(x1), toScreenY(y1));
+            ctx.lineTo(toScreenX(rx), toScreenY(ry));
+            ctx.stroke();
+          }
+        } else if (prim.type === 'vector') {
+          let sx1 = toScreenX(x1);
+          let sy1 = toScreenY(y1);
+          let sx2 = toScreenX(x2);
+          let sy2 = toScreenY(y2);
+          ctx.beginPath();
+          ctx.moveTo(sx1, sy1);
+          ctx.lineTo(sx2, sy2);
+          ctx.stroke();
+          if (!isHighlight) {
+            drawArrowhead(sx1, sy1, sx2, sy2);
+          }
+        } else if (prim.type === 'circle') {
+          ctx.beginPath();
+          ctx.arc(toScreenX(x1), toScreenY(y1), r * zoom, 0, Math.PI * 2);
           ctx.stroke();
         }
-      } else if (prim.type === 'vector') {
-        let sx1 = toScreenX(x1);
-        let sy1 = toScreenY(y1);
-        let sx2 = toScreenX(x2);
-        let sy2 = toScreenY(y2);
-        ctx.beginPath();
-        ctx.moveTo(sx1, sy1);
-        ctx.lineTo(sx2, sy2);
-        ctx.stroke();
-        drawArrowhead(sx1, sy1, sx2, sy2);
-      } else if (prim.type === 'circle') {
-        ctx.beginPath();
-        ctx.arc(toScreenX(x1), toScreenY(y1), r * zoom, 0, Math.PI * 2);
-        ctx.stroke();
       }
     }
 
@@ -1372,6 +1722,60 @@
     return null;
   }
 
+  function compileExpression(expr) {
+    const eqIdx = expr.indexOf('=');
+    const cleanedExpr = eqIdx !== -1 ? expr.substring(eqIdx + 1) : expr;
+    let jsExpr = cleanedExpr.toLowerCase();
+    jsExpr = jsExpr.replace(/\^/g, '**');
+    const MathFunctions = ['sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'sqrt', 'abs', 'log', 'ln', 'exp', 'pow'];
+    MathFunctions.forEach(fn => {
+      const re = new RegExp('\\b' + fn + '\\b', 'g');
+      if (fn === 'ln') {
+        jsExpr = jsExpr.replace(re, 'Math.log');
+      } else if (fn === 'log') {
+        jsExpr = jsExpr.replace(re, 'Math.log10');
+      } else {
+        jsExpr = jsExpr.replace(re, 'Math.' + fn);
+      }
+    });
+    jsExpr = jsExpr.replace(/\bpi\b/g, 'Math.PI');
+    jsExpr = jsExpr.replace(/\be\b/g, 'Math.E');
+    try {
+      return new Function('x', `with(Math) { return (${jsExpr}); }`);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function toLatex(expr) {
+    let latex = expr;
+    latex = latex.replace(/\bsin\b/g, '\\sin');
+    latex = latex.replace(/\bcos\b/g, '\\cos');
+    latex = latex.replace(/\btan\b/g, '\\tan');
+    latex = latex.replace(/\bsqrt\b/g, '\\sqrt');
+    latex = latex.replace(/\bpi\b/g, '\\pi');
+    latex = latex.replace(/(\d+)\*([a-zA-Z])/g, '$1$2');
+    latex = latex.replace(/\*/g, '\\cdot ');
+    return latex;
+  }
+
+  function distToFunctionPixels(mx, my, fn) {
+    let minDist = Infinity;
+    for (let offset = -4; offset <= 4; offset++) {
+      const sx = mx + offset;
+      const cx = toCartesianX(sx);
+      try {
+        const cy = fn(cx);
+        if (typeof cy === 'number' && !isNaN(cy) && isFinite(cy)) {
+          const sy = toScreenY(cy);
+          const dist = Math.hypot(sx - mx, my - sy);
+          if (dist < minDist) minDist = dist;
+        }
+      } catch (e) {}
+    }
+    return minDist;
+  }
+
   function distToSegmentPixels(mx, my, p1, p2) {
     const sx1 = toScreenX(p1.x), sy1 = toScreenY(p1.y);
     const sx2 = toScreenX(p2.x), sy2 = toScreenY(p2.y);
@@ -1380,6 +1784,62 @@
     let t = ((mx - sx1) * (sx2 - sx1) + (my - sy1) * (sy2 - sy1)) / l2;
     t = Math.max(0, Math.min(1, t));
     return Math.hypot(mx - (sx1 + t * (sx2 - sx1)), my - (sy1 + t * (sy2 - sy1)));
+  }
+
+  function distToLinePixels(mx, my, p1, p2) {
+    const sx1 = toScreenX(p1.x), sy1 = toScreenY(p1.y);
+    const sx2 = toScreenX(p2.x), sy2 = toScreenY(p2.y);
+    const num = Math.abs((sx2 - sx1) * (sy1 - my) - (sx1 - mx) * (sy2 - sy1));
+    const den = Math.hypot(sx2 - sx1, sy2 - sy1);
+    if (den === 0) return Math.hypot(mx - sx1, my - sy1);
+    return num / den;
+  }
+
+  function distToRayPixels(mx, my, p1, p2) {
+    const sx1 = toScreenX(p1.x), sy1 = toScreenY(p1.y);
+    const sx2 = toScreenX(p2.x), sy2 = toScreenY(p2.y);
+    const dx = sx2 - sx1;
+    const dy = sy2 - sy1;
+    const l2 = dx * dx + dy * dy;
+    if (l2 === 0) return Math.hypot(mx - sx1, my - sy1);
+    let t = ((mx - sx1) * dx + (my - sy1) * dy) / l2;
+    t = Math.max(0, t);
+    return Math.hypot(mx - (sx1 + t * dx), my - (sy1 + t * dy));
+  }
+
+  function isPointInPolygon(mx, my, pts) {
+    let inside = false;
+    for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+      const xi = toScreenX(pts[i].x), yi = toScreenY(pts[i].y);
+      const xj = toScreenX(pts[j].x), yj = toScreenY(pts[j].y);
+      const intersect = ((yi > my) !== (yj > my))
+          && (mx < (xj - xi) * (my - yi) / (yj - yi) + xi);
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }
+
+  function distToPolygonBoundaryPixels(mx, my, pts) {
+    let minDist = Infinity;
+    for (let i = 0; i < pts.length; i++) {
+      const p1 = pts[i];
+      const p2 = pts[(i + 1) % pts.length];
+      const d = distToSegmentPixels(mx, my, p1, p2);
+      if (d < minDist) minDist = d;
+    }
+    return minDist;
+  }
+
+  function getLinePointsFromABC(a, b, c) {
+    let p1, p2;
+    if (Math.abs(b) > Math.abs(a)) {
+      p1 = { x: 0, y: -c / b };
+      p2 = { x: 1, y: -(a + c) / b };
+    } else {
+      p1 = { x: -c / a, y: 0 };
+      p2 = { x: -(b + c) / a, y: 1 };
+    }
+    return { p1, p2 };
   }
 
   function distToCirclePixels(mx, my, center, rVal) {
@@ -1408,6 +1868,52 @@
             return { type: 'segment', obj: prim, p1, p2 };
           }
         }
+      } else if (prim.type === 'line') {
+        let p1, p2;
+        if (prim.pRefs) {
+          p1 = findPoint(prim.pRefs[0]);
+          p2 = findPoint(prim.pRefs[1]);
+        } else if (prim.coords) {
+          p1 = { x: prim.coords[0], y: prim.coords[1] };
+          p2 = { x: prim.coords[2], y: prim.coords[3] };
+        } else if (prim.a !== undefined) {
+          const pts = getLinePointsFromABC(prim.a, prim.b, prim.c);
+          p1 = pts.p1;
+          p2 = pts.p2;
+        }
+        if (p1 && p2) {
+          if (distToLinePixels(mx, my, p1, p2) <= 6) {
+            return { type: 'line', obj: prim, p1, p2 };
+          }
+        }
+      } else if (prim.type === 'ray') {
+        let p1, p2;
+        if (prim.pRefs) {
+          p1 = findPoint(prim.pRefs[0]);
+          p2 = findPoint(prim.pRefs[1]);
+        } else if (prim.coords) {
+          p1 = { x: prim.coords[0], y: prim.coords[1] };
+          p2 = { x: prim.coords[2], y: prim.coords[3] };
+        }
+        if (p1 && p2) {
+          if (distToRayPixels(mx, my, p1, p2) <= 6) {
+            return { type: 'ray', obj: prim, p1, p2 };
+          }
+        }
+      } else if (prim.type === 'vector') {
+        let p1, p2;
+        if (prim.pRefs) {
+          p1 = findPoint(prim.pRefs[0]);
+          p2 = findPoint(prim.pRefs[1]);
+        } else if (prim.coords) {
+          p1 = { x: prim.coords[0], y: prim.coords[1] };
+          p2 = { x: prim.coords[2], y: prim.coords[3] };
+        }
+        if (p1 && p2) {
+          if (distToSegmentPixels(mx, my, p1, p2) <= 6) {
+            return { type: 'vector', obj: prim, p1, p2 };
+          }
+        }
       } else if (prim.type === 'circle') {
         let center, rVal;
         if (prim.pRefs) {
@@ -1425,6 +1931,27 @@
         if (center && rVal > 0) {
           if (distToCirclePixels(mx, my, center, rVal) <= 6) {
             return { type: 'circle', obj: prim, center, rVal };
+          }
+        }
+      } else if (prim.type === 'polygon') {
+        let pts = [];
+        if (prim.pRefs) {
+          pts = prim.pRefs.map(findPoint).filter(p => !!p);
+        } else if (prim.coords) {
+          for (let i = 0; i < prim.coords.length; i += 2) {
+            pts.push({ x: prim.coords[i], y: prim.coords[i + 1] });
+          }
+        }
+        if (pts.length >= 3) {
+          if (isPointInPolygon(mx, my, pts) || distToPolygonBoundaryPixels(mx, my, pts) <= 6) {
+            return { type: 'polygon', obj: prim, vertices: pts };
+          }
+        }
+      } else if (prim.type === 'function') {
+        const fn = compileExpression(prim.expr);
+        if (fn) {
+          if (distToFunctionPixels(mx, my, fn) <= 6) {
+            return { type: 'function', obj: prim, fn };
           }
         }
       }
@@ -1459,6 +1986,8 @@
         instEl.textContent = `{{ _('Segment') }} ${hoverInfo.p1.label}-${hoverInfo.p2.label}. {{ _('Length') }}: ${len.toFixed(2)}.`;
       } else if (hoverInfo.type === 'circle') {
         instEl.textContent = `{{ _('Circle') }} {{ _('centered at') }} ${hoverInfo.center.label}. {{ _('Radius') }}: ${hoverInfo.rVal.toFixed(2)}.`;
+      } else if (hoverInfo.type === 'function') {
+        instEl.textContent = `{{ _('Function') }}: ${hoverInfo.obj.expr}`;
       }
     } else {
       if (activeTool === 'select') {
@@ -1493,13 +2022,14 @@
     const cartY = toCartesianY(cy);
 
     const hoverInfo = activeTool === 'select' ? getHoveredObject(cx, cy) : null;
-    const isOnCircleEdge = hoverInfo && hoverInfo.type === 'circle';
+    const isOverInteractive = hoverInfo !== null;
 
-    if ((e.button === 2 && !(activeTool === 'select' && (getPointNear(cx, cy) || isOnCircleEdge))) || (e.button === 0 && activeTool === 'select' && !getPointNear(cx, cy) && !isOnCircleEdge)) {
+    if ((e.button === 2 && !isOverInteractive) || (e.button === 0 && activeTool === 'select' && !isOverInteractive)) {
       isPanning = true;
       panStartMouse = { x: cx, y: cy };
       panStartOffset = { x: panX, y: panY };
       selectedPoint = null;
+      selectedPrimitive = null;
       updateInspector();
       e.preventDefault();
       return;
@@ -1509,16 +2039,28 @@
     let nearPt = getPointNear(cx, cy);
 
     if (activeTool === 'select') {
-      if (nearPt && !lockPointsCb.checked) {
-        isDragging = true;
-        draggedPoint = nearPt;
-        selectedPoint = nearPt;
+      if (hoverInfo) {
+        if (hoverInfo.type === 'point') {
+          selectedPoint = hoverInfo.obj;
+          selectedPrimitive = null;
+          if (!lockPointsCb.checked) {
+            isDragging = true;
+            draggedPoint = hoverInfo.obj;
+          }
+        } else if (hoverInfo.type === 'circle') {
+          selectedPrimitive = hoverInfo.obj;
+          selectedPoint = null;
+          if (!lockPointsCb.checked) {
+            isResizingCircle = true;
+            resizingCirclePrim = hoverInfo.obj;
+            resizingCircleCenter = hoverInfo.center;
+          }
+        } else {
+          selectedPrimitive = hoverInfo.obj;
+          selectedPoint = null;
+        }
         updateInspector();
-      } else if (isOnCircleEdge && !lockPointsCb.checked) {
-        isResizingCircle = true;
-        resizingCirclePrim = hoverInfo.obj;
-        resizingCircleCenter = hoverInfo.center;
-        e.preventDefault();
+        render();
       }
     } else if (activeTool === 'point') {
       let finalX = cartX;
@@ -1532,6 +2074,7 @@
       const newPt = { x: finalX, y: finalY, label, color: '' };
       points.push(newPt);
       selectedPoint = newPt;
+      selectedPrimitive = null;
       updateInspector();
       syncCanvasToText();
       saveHistory(inputEl.value);
@@ -1555,6 +2098,7 @@
       drawStartPoint = nearPt;
       drawCurrentCoords = { x: finalX, y: finalY };
       selectedPoint = nearPt;
+      selectedPrimitive = null;
       updateInspector();
       render();
     } else if (activeTool === 'polygon') {
@@ -1568,6 +2112,7 @@
       if (polygonVertices.length > 2 && nearPt === polygonVertices[0]) {
         primitives.push({ type: 'polygon', pRefs: polygonVertices.map(v => v.label), color: '' });
         selectedPoint = null;
+        selectedPrimitive = null;
         updateInspector();
         syncCanvasToText();
         saveHistory(inputEl.value);
@@ -1584,6 +2129,7 @@
           polygonVertices.push(nearPt);
         }
         selectedPoint = nearPt;
+        selectedPrimitive = null;
         updateInspector();
       }
       render();
@@ -1606,7 +2152,11 @@
         canvas.style.cursor = 'pointer';
       } else {
         const hoverInfo = getHoveredObject(cx, cy);
-        canvas.style.cursor = (hoverInfo && hoverInfo.type === 'circle') ? 'ew-resize' : 'crosshair';
+        if (hoverInfo) {
+          canvas.style.cursor = (hoverInfo.type === 'circle') ? 'ew-resize' : 'pointer';
+        } else {
+          canvas.style.cursor = 'crosshair';
+        }
       }
     }
 
@@ -1780,13 +2330,30 @@
   function syncTextToCanvas() {
     const text = inputEl.value;
     const oldSelectedLabel = selectedPoint ? selectedPoint.label : null;
+    let oldPrimType = selectedPrimitive ? selectedPrimitive.type : null;
+    let oldPrimRefs = selectedPrimitive ? selectedPrimitive.pRefs : null;
+    let oldPrimCoords = selectedPrimitive ? selectedPrimitive.coords : null;
     const parsed = parseText(text);
     points = parsed.points;
     primitives = parsed.primitives;
     if (oldSelectedLabel) {
       selectedPoint = points.find(p => p.label === oldSelectedLabel) || null;
+      selectedPrimitive = null;
+    } else if (oldPrimType) {
+      selectedPoint = null;
+      selectedPrimitive = primitives.find(prim => {
+        if (prim.type !== oldPrimType) return false;
+        if (oldPrimRefs && prim.pRefs) {
+          return prim.pRefs.length === oldPrimRefs.length && prim.pRefs.every((v, i) => v === oldPrimRefs[i]);
+        }
+        if (oldPrimCoords && prim.coords) {
+          return prim.coords.length === oldPrimCoords.length && prim.coords.every((v, i) => Math.abs(v - oldPrimCoords[i]) < 1e-4);
+        }
+        return false;
+      }) || null;
     } else {
       selectedPoint = null;
+      selectedPrimitive = null;
     }
     updateInspector();
     render();
@@ -1865,6 +2432,7 @@
   presetsEl.addEventListener('change', function () {
     const val = presetsEl.value;
     selectedPoint = null;
+    selectedPrimitive = null;
     updateInspector();
     if (val === 'centroid') {
       inputEl.value = 'point -3.00 4.00 A red\npoint -5.00 -2.00 B green\npoint 4.00 -1.00 C blue\nsegment A B\nsegment B C\nsegment C A\npoint -0.50 -1.50 M\npoint -0.50 1.50 N\npoint -4.00 1.00 P\nsegment A M #888888\nsegment B N #888888\nsegment C P #888888\npoint -1.33 0.33 G orange';
@@ -1881,6 +2449,40 @@
     }
   });
 
+  const funcInput = document.getElementById('gw-func-input');
+  const plotBtn = document.getElementById('btn-plot-func');
+
+  function triggerPlot() {
+    let expr = funcInput.value.trim();
+    if (expr) {
+      if (expr.indexOf('=') === -1) {
+        expr = "y = " + expr;
+      }
+      const fn = compileExpression(expr);
+      if (fn) {
+        primitives.push({ type: 'function', expr: expr, color: '' });
+        selectedPrimitive = primitives[primitives.length - 1];
+        selectedPoint = null;
+        funcInput.value = '';
+        selectSelectTool();
+        syncCanvasToText();
+        saveHistory(inputEl.value);
+        render();
+        updateInspector();
+      } else {
+        alert("{{ _('Invalid expression!') }}");
+      }
+    }
+  }
+
+  plotBtn.addEventListener('click', triggerPlot);
+  funcInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      triggerPlot();
+    }
+  });
+
   document.getElementById('btn-clear').addEventListener('click', function () {
     inputEl.value = '';
     points = [];
@@ -1889,6 +2491,7 @@
     drawStartPoint = null;
     drawCurrentCoords = null;
     selectedPoint = null;
+    selectedPrimitive = null;
     updateInspector();
     render();
     saveHistory(inputEl.value);
@@ -1995,21 +2598,32 @@
       activeEl.tagName === 'SELECT' ||
       activeEl.isContentEditable
     );
-    if ((e.key === 'Delete' || e.key === 'Backspace') && selectedPoint && !isInput) {
-      e.preventDefault();
-      points = points.filter(p => p !== selectedPoint);
-      primitives = primitives.filter(prim => {
-        if (prim.pRefs) {
-          return !prim.pRefs.includes(selectedPoint.label);
-        }
-        return true;
-      });
-      selectedPoint = null;
-      updateInspector();
-      syncCanvasToText();
-      saveHistory(inputEl.value);
-      render();
-      return;
+    if ((e.key === 'Delete' || e.key === 'Backspace') && !isInput) {
+      if (selectedPoint) {
+        e.preventDefault();
+        points = points.filter(p => p !== selectedPoint);
+        primitives = primitives.filter(prim => {
+          if (prim.pRefs) {
+            return !prim.pRefs.includes(selectedPoint.label);
+          }
+          return true;
+        });
+        selectedPoint = null;
+        updateInspector();
+        syncCanvasToText();
+        saveHistory(inputEl.value);
+        render();
+        return;
+      } else if (selectedPrimitive) {
+        e.preventDefault();
+        primitives = primitives.filter(prim => prim !== selectedPrimitive);
+        selectedPrimitive = null;
+        updateInspector();
+        syncCanvasToText();
+        saveHistory(inputEl.value);
+        render();
+        return;
+      }
     }
     const isUndo = (e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z';
     const isRedo = (e.ctrlKey || e.metaKey) && (
