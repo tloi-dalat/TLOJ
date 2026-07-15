@@ -41,6 +41,19 @@
                         <a href="{{ url('problem_submit', problem.code) }}" class="button" style="display: inline; margin: auto 0;">
                             {{ _('Submit') }}
                         </a>
+                        {% if loop.first %}
+                            {% if has_pdf_render %}
+                                <a id="pdf_link_all" href="{{ url('contest_all_problems_pdf', contest.key) }}" class="view-pdf" style="margin-left: auto; align-self: center; padding-top: 0;">
+                            {% else %}
+                                <a id="pdf_button" class="view-pdf" href="#" style="margin-left: auto; align-self: center; padding-top: 0;">
+                            {% endif %}
+                                <span class="pdf-icon">
+                                    <span class="fa fa-file-pdf-o pdf-icon-logo"></span>
+                                    <span class="pdf-icon-bar"></span>
+                                </span>
+                                {{ _('View as PDF') }}
+                            </a>
+                        {% endif %}
                     </div>
 
                     <div>
@@ -60,4 +73,49 @@
 
 {% block bodyend %}
     {{ super() }}
+    {% if not has_pdf_render %}
+        <style>
+            #raw_problems {
+                visibility: hidden;
+                width: 0;
+                height: 0;
+                position: absolute;
+                left: -999em;
+            }
+        </style>
+        <iframe name="raw_problems" id="raw_problems"></iframe>
+        <script type="text/javascript">
+            $(function() {
+                $('#pdf_button').click(async function(e) {
+                    e.preventDefault();
+                    if (!$('#raw_problems').attr("src")) {
+                        $('#raw_problems').attr("src", "{{ url('contest_all_problems_raw', contest.key) }}");
+                    }
+
+                    while(!$('.math-loaded', frames['raw_problems'].document).length) {
+                        await new Promise(r => setTimeout(r, 200));
+                    }
+                    frames['raw_problems'].print();
+                });
+            });
+        </script>
+    {% endif %}
+    <script type="text/javascript">
+        $(function() {
+            $(window).keydown(function(e) {
+                if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 'P' || e.keyCode === 80)) {
+                    e.preventDefault();
+                    var pdfBtn = $('#pdf_button');
+                    if (pdfBtn.length) {
+                        pdfBtn.click();
+                    } else {
+                        var pdfLinkAll = $('#pdf_link_all');
+                        if (pdfLinkAll.length) {
+                            window.location.href = pdfLinkAll.attr('href');
+                        }
+                    }
+                }
+            });
+        });
+    </script>
 {% endblock %}
