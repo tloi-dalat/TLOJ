@@ -57,6 +57,10 @@
             width: 340px;
         }
 
+        .editor-theme-preview-row td {
+            padding-top: 0.4em;
+        }
+
         .api-token {
             padding-top: 5px;
             font-family: Consolas, Liberation Mono, Monaco, Courier New, monospace;
@@ -87,16 +91,68 @@
             padding-top: 5px;
             font-size: 12px;
         }
+
+        #ace-theme-preview {
+            width: 100%;
+            max-width: 320px;
+            height: 150px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            box-sizing: border-box;
+        }
     </style>
 {% endblock %}
 
 {% block js_media %}
     {% include "timezone/media-js.html" %}
+    <script type="text/javascript" src="{{ ACE_URL }}/ace.js"></script>
     {{ form.media.js }}
     <script type="text/javascript">
         $(function () {
             $('#ace_user_script').on('ace_load', function (e, editor) {
                 editor.getSession().setMode("ace/mode/javascript");
+            });
+
+            ace.config.set('basePath', '{{ ACE_URL }}');
+            ace.config.set('modePath', '{{ ACE_URL }}');
+            ace.config.set('themePath', '{{ ACE_URL }}');
+
+            var aceThemePreview = ace.edit('ace-theme-preview');
+            var aceThemeSelect = $('#id_ace_theme');
+            var aceThemeSample = [
+                'def solve(numbers):',
+                '    total = sum(',
+                '        x * x for x in numbers',
+                '    )',
+                '    return total % 998244353',
+                '',
+                'print(solve([1, 2, 3, 5, 8]))'
+            ].join('\n');
+            var currentSiteTheme = document.body.getAttribute('data-theme');
+
+            function resolvedAcePreviewTheme() {
+                var theme = aceThemeSelect.val();
+                if (theme != 'auto')
+                    return theme;
+                return currentSiteTheme == 'dark' ? 'tomorrow_night' : 'github';
+            }
+
+            function updateAceThemePreview() {
+                aceThemePreview.setTheme('ace/theme/' + resolvedAcePreviewTheme());
+            }
+
+            aceThemePreview.getSession().setMode('ace/mode/python');
+            aceThemePreview.getSession().setUseWrapMode(true);
+            aceThemePreview.setValue(aceThemeSample, -1);
+            aceThemePreview.setReadOnly(true);
+            aceThemePreview.setShowPrintMargin(false);
+            aceThemePreview.renderer.setScrollMargin(8, 8);
+            updateAceThemePreview();
+
+            aceThemeSelect.change(updateAceThemePreview);
+            window.addEventListener('theme-change', function(e) {
+                currentSiteTheme = e.detail.theme;
+                updateAceThemePreview();
             });
 
             $('#disable-2fa-button').click(function () {
@@ -323,6 +379,9 @@
                         <tr>
                             <td><label class="inline-header grayed">{{ _('Editor theme:') }}</label></td>
                             <td><span class="fullwidth">{{ form.ace_theme }}</span></td>
+                        </tr>
+                        <tr class="editor-theme-preview-row">
+                            <td colspan="2"><div id="ace-theme-preview"></div></td>
                         </tr>
                         {% if has_math_config %}
                             <tr>
