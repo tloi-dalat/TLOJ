@@ -192,7 +192,20 @@
             // Handle initial hash in URL
             var hash = window.location.hash;
             if (hash && $(hash).length) {
-                $('.problem-tabs a[href="' + hash + '"]').click();
+                var tabLink = $('.problem-tabs a[href="' + hash + '"]');
+                if (tabLink.length) {
+                    tabLink.click();
+                } 
+                else {
+                    var tabContent = $(hash).closest('.tab-content');
+                    if (tabContent.length) {
+                        var tabId = '#' + tabContent.attr('id');
+                        $('.problem-tabs a[href="' + tabId + '"]').click();
+                        setTimeout(function() {
+                            $(hash)[0].scrollIntoView();
+                        }, 50);
+                    }
+                }
             }
         });
     </script>
