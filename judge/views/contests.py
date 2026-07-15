@@ -120,14 +120,23 @@ class ContestList(InfinitePaginationMixin, TitleMixin, ContestListMixin, ListVie
             )
         return queryset
 
-    def get_queryset(self):
+    def _setup_filters(self):
         self.search_query = None
-        query_set = self._get_queryset().order_by('-end_time', 'key').filter(end_time__lt=self._now)
+        self.selected_tags = [tag for tag in self.request.GET.getlist('tag') if tag]
         if 'search' in self.request.GET:
-            self.search_query = search_query = ' '.join(self.request.GET.getlist('search')).strip()
-            if search_query:
-                query_set = query_set.filter(Q(key__icontains=search_query) | Q(name__icontains=search_query))
-        return query_set
+            self.search_query = ' '.join(self.request.GET.getlist('search')).strip()
+
+    def _apply_filters(self, queryset):
+        if self.search_query:
+            queryset = queryset.filter(Q(key__icontains=self.search_query) | Q(name__icontains=self.search_query))
+        if self.selected_tags:
+            queryset = queryset.filter(tags__name__in=self.selected_tags).distinct()
+        return queryset
+
+    def get_queryset(self):
+        self._setup_filters()
+        query_set = self._get_queryset().order_by('-end_time', 'key').filter(end_time__lt=self._now)
+        return self._apply_filters(query_set)
 
     def get_paginator(self, queryset, per_page, orphans=0, allow_empty_first_page=True, **kwargs):
         return super().get_paginator(queryset, per_page, orphans, allow_empty_first_page,
@@ -136,7 +145,7 @@ class ContestList(InfinitePaginationMixin, TitleMixin, ContestListMixin, ListVie
     def get_context_data(self, **kwargs):
         context = super(ContestList, self).get_context_data(**kwargs)
         past_contests = list(context['past_contests'])
-        current_and_future = list(self._get_queryset().exclude(end_time__lt=self._now))
+        current_and_future = list(self._apply_filters(self._get_queryset().exclude(end_time__lt=self._now)))
         all_contests = past_contests + current_and_future
 
         prefetches = ['tags']
@@ -178,6 +187,8 @@ class ContestList(InfinitePaginationMixin, TitleMixin, ContestListMixin, ListVie
         context['first_page_href'] = '.'
         context['page_suffix'] = '#past-contests'
         context['search_query'] = self.search_query
+        context['contest_tags'] = ContestTag.objects.order_by('name')
+        context['selected_tags'] = self.selected_tags
         context.update(paginate_query_context(self.request))
         return context
 
