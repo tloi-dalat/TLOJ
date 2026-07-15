@@ -35,6 +35,31 @@
                 return confirm({{ _('Are you sure you want to register?')|htmltojs }});
             });
 
+            var $contestFilterForm = $('form#contest-filter-form');
+            var $contestSearch = $('#contest-search');
+            var $contestTagsFilter = $('#contest-tags-filter');
+
+            function prep_contest_filter_form() {
+                $contestSearch.prop('disabled', !$contestSearch.val());
+                $contestTagsFilter.prop('disabled', !$contestTagsFilter.val() || !$contestTagsFilter.val().length);
+            }
+
+            $contestTagsFilter.select2({
+                theme: '{{ DMOJ_SELECT2_THEME }}',
+                multiple: 1,
+                placeholder: {{ _('Filter by tag...')|htmltojs }}
+            }).css({'visibility': 'visible'});
+
+            $contestSearch.keypress(function (e) {
+                if (e.keyCode == 13)
+                    $('#contest-filter-go').click();
+            });
+
+            $('#contest-filter-go').click(function () {
+                prep_contest_filter_form();
+                $contestFilterForm.submit();
+            });
+
             {% if hide_private_contests is not none %}
                 {% if hide_private_contests %}
                     $('#hide-private-contests-checkbox').prop('checked', true);
@@ -313,13 +338,27 @@
         <br>
 
         <h4 id="past-contests">{{ _('Past contests') }}</h4>
-        {% if page_obj or search_query %}
+        {% if page_obj or search_query or selected_tags %}
             <div class="top-pagination-bar">
                 {% include "list-pages.html" %}
                 <div style="display: flex; align-items: center;">
-                    <form id="search-form" name="form" action="" method="get">
-                        <input id="search" type="text" name="search" value="{{ search_query or '' }}"
+                    <form id="contest-filter-form" name="form" action="" method="get" style="display: flex; gap: 0.5em; align-items: center;">
+                        {% if hide_private_contests %}
+                            <input type="hidden" name="hide_private_contests" value="true">
+                        {% endif %}
+                        <input id="contest-search" type="text" name="search" value="{{ search_query or '' }}"
                             placeholder="{{ _('Search contest...') }}">
+                        <select id="contest-tags-filter" name="tag" multiple style="min-width: 14em; visibility: hidden;">
+                            {% for tag in contest_tags %}
+                                <option value="{{ tag.name }}"{% if tag.name in selected_tags %} selected{% endif %}>
+                                    {{ tag.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <a id="contest-filter-go" class="button">{{ _('Go') }}</a>
+                        {% if search_query or selected_tags %}
+                            <a class="button" href="{{ url('contest_list') }}">{{ _('Clear search') }}</a>
+                        {% endif %}
                     </form>
                 </div>
             </div>

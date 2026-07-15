@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from judge.models import Solution
+from judge.models import ContestTag, Solution
 from judge.models.tests.util import (
     create_contest,
     create_contest_problem,
@@ -12,6 +12,121 @@ from judge.models.tests.util import (
     create_solution,
     create_user,
 )
+
+
+class ContestListFilterTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls._now = timezone.now()
+        cls.algorithm_tag = ContestTag.objects.create(name='algorithms', color='#fff')
+        cls.training_tag = ContestTag.objects.create(name='training', color='#000')
+        cls.hidden_tag = ContestTag.objects.create(name='hidden', color='#ccc')
+
+        cls.algorithm_past = create_contest(
+            key='algorithm_past',
+            name='Algorithm Past',
+            start_time=cls._now - timezone.timedelta(days=20),
+            end_time=cls._now - timezone.timedelta(days=10),
+            is_visible=True,
+            tags=('algorithms',),
+        )
+        cls.training_past = create_contest(
+            key='training_past',
+            name='Training Past',
+            start_time=cls._now - timezone.timedelta(days=20),
+            end_time=cls._now - timezone.timedelta(days=9),
+            is_visible=True,
+            tags=('training',),
+        )
+        cls.algorithm_current = create_contest(
+            key='algorithm_current',
+            name='Algorithm Current',
+            start_time=cls._now - timezone.timedelta(days=1),
+            end_time=cls._now + timezone.timedelta(days=1),
+            is_visible=True,
+            tags=('algorithms',),
+        )
+        cls.training_current = create_contest(
+            key='training_current',
+            name='Training Current',
+            start_time=cls._now - timezone.timedelta(days=1),
+            end_time=cls._now + timezone.timedelta(days=1),
+            is_visible=True,
+            tags=('training',),
+        )
+        cls.algorithm_future = create_contest(
+            key='algorithm_future',
+            name='Algorithm Future',
+            start_time=cls._now + timezone.timedelta(days=2),
+            end_time=cls._now + timezone.timedelta(days=3),
+            is_visible=True,
+            tags=('algorithms',),
+        )
+        cls.training_future = create_contest(
+            key='training_future',
+            name='Training Future',
+            start_time=cls._now + timezone.timedelta(days=2),
+            end_time=cls._now + timezone.timedelta(days=3),
+            is_visible=True,
+            tags=('training',),
+        )
+        cls.untagged_past = create_contest(
+            key='untagged_past',
+            name='Untagged Past',
+            start_time=cls._now - timezone.timedelta(days=20),
+            end_time=cls._now - timezone.timedelta(days=8),
+            is_visible=True,
+        )
+        cls.hidden_past = create_contest(
+            key='hidden_past',
+            name='Hidden Past',
+            start_time=cls._now - timezone.timedelta(days=20),
+            end_time=cls._now - timezone.timedelta(days=7),
+            is_visible=False,
+            tags=('hidden',),
+        )
+
+    def _get_url(self):
+        return reverse('contest_list')
+
+    def _contest_keys(self, response, key):
+        return [contest.key for contest in response.context[key]]
+
+    def test_filters_past_contests_by_tag(self):
+        response = self.client.get(self._get_url(), {'tag': 'algorithms'})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('algorithm_past', self._contest_keys(response, 'past_contests'))
+        self.assertNotIn('training_past', self._contest_keys(response, 'past_contests'))
+        self.assertNotIn('untagged_past', self._contest_keys(response, 'past_contests'))
+
+    def test_filters_current_and_future_contests_by_tag(self):
+        response = self.client.get(self._get_url(), {'tag': 'algorithms'})
+
+        self.assertIn('algorithm_current', self._contest_keys(response, 'current_contests'))
+        self.assertIn('algorithm_future', self._contest_keys(response, 'future_contests'))
+        self.assertNotIn('training_current', self._contest_keys(response, 'current_contests'))
+        self.assertNotIn('training_future', self._contest_keys(response, 'future_contests'))
+
+    def test_filters_by_any_selected_tag(self):
+        response = self.client.get(self._get_url(), {'tag': ['algorithms', 'training']})
+
+        past_keys = self._contest_keys(response, 'past_contests')
+        self.assertIn('algorithm_past', past_keys)
+        self.assertIn('training_past', past_keys)
+        self.assertNotIn('untagged_past', past_keys)
+
+    def test_combines_search_and_tag_filters(self):
+        response = self.client.get(self._get_url(), {'search': 'Training', 'tag': 'algorithms'})
+
+        self.assertEqual(self._contest_keys(response, 'past_contests'), [])
+        self.assertEqual(self._contest_keys(response, 'current_contests'), [])
+        self.assertEqual(self._contest_keys(response, 'future_contests'), [])
+
+    def test_tag_filter_uses_visible_contests(self):
+        response = self.client.get(self._get_url(), {'tag': 'hidden'})
+
+        self.assertNotIn('hidden_past', self._contest_keys(response, 'past_contests'))
 
 
 class ContestProblemMakePublicTestCase(TestCase):
