@@ -555,6 +555,7 @@ def edit_profile(request):
         'can_download_data': bool(settings.DMOJ_USER_DATA_DOWNLOAD),
         'has_math_config': bool(settings.MATHOID_URL),
         'ignore_user_script': True,
+        'ACE_URL': settings.ACE_URL,
         'TIMEZONE_MAP': settings.TIMEZONE_MAP,
     })
 
