@@ -120,13 +120,16 @@
             var aceThemePreview = ace.edit('ace-theme-preview');
             var aceThemeSelect = $('#id_ace_theme');
             var aceThemeSample = [
-                'def solve(numbers):',
-                '    total = sum(',
-                '        x * x for x in numbers',
-                '    )',
-                '    return total % 998244353',
+                '#include <bits/stdc++.h>',
                 '',
-                'print(solve([1, 2, 3, 5, 8]))'
+                'using namespace std;',
+                '',
+                'int main() {',
+                '    ios_base::sync_with_stdio(false);',
+                '    cin.tie(NULL);',
+                '',
+                '    return 0;',
+                '}'
             ].join('\n');
             var currentSiteTheme = document.body.getAttribute('data-theme');
 
