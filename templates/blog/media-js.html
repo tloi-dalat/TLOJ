@@ -50,14 +50,10 @@
                     if ($magazineCard.length) {
                         var $upvoteBtn = $magazineCard.find('[data-action="upvote"]');
                         var $downvoteBtn = $magazineCard.find('[data-action="downvote"]');
-                        var $voteCount = $magazineCard.find('#post-score-' + id);
 
-                        // If not already upvoted, increment and set states
+                        // If not already upvoted, set states. ajax_vote already updated the score.
                         if (!$upvoteBtn.hasClass('voted')) {
                             $upvoteBtn.addClass('voted').attr('aria-pressed', 'true');
-                            if ($voteCount.length) {
-                                $voteCount.text(parseInt($voteCount.text()) + 1);
-                            }
                         }
                         // Clear downvote state and disable both to prevent duplicate votes
                         $downvoteBtn.removeClass('voted').attr('aria-pressed', 'false');
@@ -80,14 +76,10 @@
                     if ($magazineCard.length) {
                         var $downvoteBtn = $magazineCard.find('[data-action="downvote"]');
                         var $upvoteBtn = $magazineCard.find('[data-action="upvote"]');
-                        var $voteCount = $magazineCard.find('#post-score-' + id);
 
-                        // If not already downvoted, decrement and set states
+                        // If not already downvoted, set states. ajax_vote already updated the score.
                         if (!$downvoteBtn.hasClass('voted')) {
                             $downvoteBtn.addClass('voted').attr('aria-pressed', 'true');
-                            if ($voteCount.length) {
-                                $voteCount.text(parseInt($voteCount.text()) - 1);
-                            }
                         }
                         // Clear upvote state and disable both to prevent duplicate votes
                         $upvoteBtn.removeClass('voted').attr('aria-pressed', 'false');
