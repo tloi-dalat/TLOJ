@@ -169,7 +169,8 @@ class ModernBlogList(PostListBase):
         tag_slug = self.request.GET.get('tag', '').strip()
         if not tag_slug and settings.VNOJ_MAGAZINE_TAG_SLUG:
             tag_slug = settings.VNOJ_MAGAZINE_TAG_SLUG
-        queryset = queryset.filter(tags__slug=tag_slug).distinct()
+        if tag_slug:
+            queryset = queryset.filter(tags__slug=tag_slug).distinct()
 
         # Sort functionality
         sort_by = self.request.GET.get('sort', 'latest').strip()
