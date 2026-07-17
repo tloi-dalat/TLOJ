@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}{{ object.title }} - Newsletter Archive - {{ SITE_LONG_NAME }}{% endblock %}
-{% block content_title %}Newsletter Archive: {{ object.title }}{% endblock %}
+{% block title %}{{ object.title }} - {{ _('Newsletter Archive') }} - {{ SITE_LONG_NAME }}{% endblock %}
+{% block content_title %}{{ _('Newsletter Archive:') }} {{ object.title }}{% endblock %}
 
 {% block body %}
     <ul>
@@ -9,5 +9,5 @@
         {% endfor %}
     </ul>
     <hr>
-    <p><a href="{{ url('newsletter_list') }}">Back to list</a></p>
+    <p><a href="{{ url('newsletter_list') }}">{{ _('Back to list') }}</a></p>
 {% endblock %}

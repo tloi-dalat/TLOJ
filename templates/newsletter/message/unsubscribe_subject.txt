@@ -1,1 +1,1 @@
-{{ newsletter.title|safe }} - Confirm unsubscription
+{{ newsletter.title|safe }} - {{ _('Confirm unsubscription') }}

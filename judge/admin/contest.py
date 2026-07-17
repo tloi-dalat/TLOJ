@@ -81,8 +81,8 @@ class ContestProblemInline(SortableInlineAdminMixin, admin.TabularInline):
     def rescore_column(self, obj):
         if obj.id is None:
             return ''
-        return format_html('<a class="button rescore-link action-link" href="{}">Rescore</a>',
-                           reverse('admin:judge_contest_rescore', args=(obj.contest.id, obj.id)))
+        return format_html('<a class="button rescore-link action-link" href="{0}">{1}</a>',
+                           reverse('admin:judge_contest_rescore', args=(obj.contest.id, obj.id)), _('Rescore'))
 
 
 class ContestAnnouncementInlineForm(ModelForm):
@@ -100,9 +100,9 @@ class ContestAnnouncementInline(admin.StackedInline):
     @admin.display(description=_('Resend announcement'))
     def resend(self, obj):
         if obj.id is None:
-            return 'Not available'
-        return format_html('<a class="button resend-link action-link" href="{}">Resend</a>',
-                           reverse('admin:judge_contest_resend', args=(obj.contest.id, obj.id)))
+            return _('Not available')
+        return format_html('<a class="button resend-link action-link" href="{0}">{1}</a>',
+                           reverse('admin:judge_contest_resend', args=(obj.contest.id, obj.id)), _('Resend'))
 
 
 class ContestForm(ModelForm):

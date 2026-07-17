@@ -4,15 +4,16 @@ from django.contrib.syndication.views import Feed
 from django.core.cache import cache
 from django.utils import timezone
 from django.utils.feedgenerator import Atom1Feed
+from django.utils.translation import gettext_lazy as _
 
 from judge.jinja2.markdown import markdown
 from judge.models import BlogPost, Comment, Problem
 
 
 class ProblemFeed(Feed):
-    title = 'Recently Added %s Problems' % settings.SITE_NAME
+    title = _('Recently Added %(site_name)s Problems') % {'site_name': settings.SITE_NAME}
     link = '/'
-    description = 'The latest problems added on the %s website' % settings.SITE_LONG_NAME
+    description = _('The latest problems added on the %(site_name)s website') % {'site_name': settings.SITE_LONG_NAME}
 
     def items(self):
         return Problem.get_public_problems().order_by('-date', '-id')[:25]
@@ -40,9 +41,9 @@ class AtomProblemFeed(ProblemFeed):
 
 
 class CommentFeed(Feed):
-    title = 'Latest %s Comments' % settings.SITE_NAME
+    title = _('Latest %(site_name)s Comments') % {'site_name': settings.SITE_NAME}
     link = '/'
-    description = 'The latest comments on the %s website' % settings.SITE_LONG_NAME
+    description = _('The latest comments on the %(site_name)s website') % {'site_name': settings.SITE_LONG_NAME}
 
     def items(self):
         return Comment.most_recent(AnonymousUser(), 25)
@@ -70,9 +71,9 @@ class AtomCommentFeed(CommentFeed):
 
 
 class BlogFeed(Feed):
-    title = 'Latest %s Blog Posts' % settings.SITE_NAME
+    title = _('Latest %(site_name)s Blog Posts') % {'site_name': settings.SITE_NAME}
     link = '/'
-    description = 'The latest blog posts from the %s' % settings.SITE_LONG_NAME
+    description = _('The latest blog posts from %(site_name)s') % {'site_name': settings.SITE_LONG_NAME}
 
     def items(self):
         return BlogPost.objects.filter(

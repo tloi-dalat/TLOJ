@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dmoj\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-17 18:03+0000\n"
+"POT-Creation-Date: 2026-07-17 02:50+0000\n"
 "PO-Revision-Date: 2020-08-23 18:59\n"
 "Last-Translator: \n"
 "Language-Team: Vietnamese\n"
@@ -27,7 +27,7 @@ msgstr "Người ra đề"
 
 #: dmoj/settings.py:101
 msgid "TLOI Team"
-msgstr ""
+msgstr "TLOI Team"
 
 #: dmoj/settings.py:102
 msgid "Staff"
@@ -144,9 +144,21 @@ msgstr "Danh sách bài"
 msgid "Rejudge"
 msgstr "Chấm lại"
 
+#: judge/admin/contest.py:85
+msgid "Rescore"
+msgstr "Tính lại điểm"
+
 #: judge/admin/contest.py:100
 msgid "Resend announcement"
 msgstr "Gửi lại thông báo"
+
+#: judge/admin/contest.py:103
+msgid "Not available"
+msgstr "Không khả dụng"
+
+#: judge/admin/contest.py:105
+msgid "Resend"
+msgstr "Gửi lại"
 
 #: judge/admin/contest.py:144
 msgid "Settings"
@@ -767,6 +779,36 @@ msgstr "Thời gian làm bài: %(duration)s"
 msgid "%(time_limit)s window"
 msgstr ""
 "Thời gian làm bài: %(time_limit)s (bắt đầu tính giờ khi nhấn tham gia kỳ thi)"
+
+#: judge/feed.py:14
+#, python-format
+msgid "Recently Added %(site_name)s Problems"
+msgstr "Các bài mới được thêm trên %(site_name)s"
+
+#: judge/feed.py:16
+#, python-format
+msgid "The latest problems added on the %(site_name)s website"
+msgstr "Các bài mới nhất được thêm trên trang web %(site_name)s"
+
+#: judge/feed.py:44
+#, python-format
+msgid "Latest %(site_name)s Comments"
+msgstr "Bình luận mới nhất trên %(site_name)s"
+
+#: judge/feed.py:46
+#, python-format
+msgid "The latest comments on the %(site_name)s website"
+msgstr "Các bình luận mới nhất trên trang web %(site_name)s"
+
+#: judge/feed.py:74
+#, python-format
+msgid "Latest %(site_name)s Blog Posts"
+msgstr "Bài blog mới nhất trên %(site_name)s"
+
+#: judge/feed.py:76
+#, python-format
+msgid "The latest blog posts from %(site_name)s"
+msgstr "Các bài blog mới nhất từ %(site_name)s"
 
 #: judge/forms.py:36
 #, python-brace-format
@@ -2389,7 +2431,7 @@ msgstr "Đề xuất bài mới"
 msgid "Edit problems with full markup"
 msgstr "Sửa bài với quyền Markdown đầy đủ"
 
-#: judge/models/problem.py:661 templates/problem/problem.html:328
+#: judge/models/problem.py:661 templates/problem/problem.html:341
 msgid "Clone problem"
 msgstr "Nhân bản bài"
 
@@ -2742,6 +2784,10 @@ msgid ""
 "organization."
 msgstr ""
 "Ảnh này sẽ thay thế logo mặc định của trang khi thành viên xem tổ chức."
+
+#: judge/models/profile.py:70
+msgid "Total used credit this month"
+msgstr "Tổng credit đã dùng trong tháng này"
 
 #: judge/models/profile.py:71
 msgid "Remaining purchased credits"
@@ -3547,17 +3593,21 @@ msgstr "Đường dẫn tới đề bài"
 msgid "Original OJ of the problem"
 msgstr "Online Judge gốc"
 
-#: judge/models/tag.py:40 judge/models/tag.py:51
+#: judge/models/tag.py:40 judge/models/tag.py:51 templates/tag/problem.html:42
 msgid "Tag"
-msgstr "Tag"
+msgstr "Thẻ"
 
-#: judge/models/tag.py:50
+#: judge/models/tag.py:50 templates/tag/problem.html:43
 msgid "Assigner"
-msgstr "Người giao"
+msgstr "Người gán"
 
 #: judge/models/tests/test_submission.py:103
 msgid "AC"
 msgstr "AC"
+
+#: judge/models/ticket.py:10 judge/views/ticket.py:42
+msgid "Link to the issue"
+msgstr "Liên kết tới vấn đề"
 
 #: judge/models/ticket.py:20
 msgid "ticket title"
@@ -3649,7 +3699,7 @@ msgstr "Tệp đã tải lên không phải là tệp zip hợp lệ."
 
 #: judge/tasks/problem.py:88
 msgid "problem.xml not found in the downloaded package."
-msgstr ""
+msgstr "Không tìm thấy `problem.xml` trong gói đã tải xuống."
 
 #: judge/tasks/problem.py:105
 #, python-format
@@ -3657,11 +3707,14 @@ msgid ""
 "Cannot automatically map Polygon language \"%s\" to a site language. Please "
 "upload the package manually to choose mappings."
 msgstr ""
+"Không thể tự động ánh xạ ngôn ngữ Polygon \"%s\" sang ngôn ngữ của trang "
+"web. Vui lòng tải gói lên thủ công để chọn ánh xạ."
 
 #: judge/tasks/problem.py:115
 #, python-format
 msgid "None of the package statements map to the main site language (%s)."
 msgstr ""
+"Không có câu lệnh nào trong gói khớp với ngôn ngữ chính của trang web (%s)."
 
 #: judge/tasks/submission.py:53
 msgid "Modifying submissions"
@@ -3835,23 +3888,23 @@ msgstr "Blog - Trang %d"
 msgid "Blog"
 msgstr "Blog"
 
-#: judge/views/blog.py:373 judge/views/blog.py:376
+#: judge/views/blog.py:374 judge/views/blog.py:377
 msgid "Creating new blog post"
 msgstr "Tạo blog mới"
 
-#: judge/views/blog.py:394 judge/views/contests.py:1297
+#: judge/views/blog.py:395 judge/views/contests.py:1297
 #: judge/views/organization.py:395 judge/views/organization.py:699
 #: judge/views/organization.py:723 judge/views/problem.py:948
 #: judge/views/problem.py:988 judge/views/tag.py:182
 msgid "Created on site"
 msgstr "Tạo trên trang web"
 
-#: judge/views/blog.py:408 judge/views/blog.py:447 judge/views/contests.py:296
+#: judge/views/blog.py:409 judge/views/blog.py:448 judge/views/contests.py:296
 #: judge/views/contests.py:1308
 msgid "Permission denied"
 msgstr "Từ chối quyền"
 
-#: judge/views/blog.py:409
+#: judge/views/blog.py:410
 #, python-format
 msgid ""
 "You cannot create blog post.\n"
@@ -3860,17 +3913,17 @@ msgstr ""
 "Không thể tạo blog.\n"
 "Lưu ý: Bạn cần giải ít nhất %d bài để có thể tạo blog."
 
-#: judge/views/blog.py:423 judge/views/blog.py:426
+#: judge/views/blog.py:424 judge/views/blog.py:427
 msgid "Updating blog post"
 msgstr "Cập nhật blog"
 
-#: judge/views/blog.py:441 judge/views/comment.py:142
+#: judge/views/blog.py:442 judge/views/comment.py:142
 #: judge/views/contests.py:1366 judge/views/organization.py:438
 #: judge/views/problem.py:1156
 msgid "Edited from site"
 msgstr "Chỉnh sửa từ trang web"
 
-#: judge/views/blog.py:448
+#: judge/views/blog.py:449
 msgid "You cannot edit blog post."
 msgstr "Bạn không thể chỉnh sửa blog."
 
@@ -4715,7 +4768,7 @@ msgid "Comparing submission %(first)s with %(second)s"
 msgstr "So sánh bài nộp %(first)s và %(second)s"
 
 #: judge/views/submission.py:356 judge/views/submission.py:357
-#: templates/problem/problem.html:279 templates/problem/problem.html:288
+#: templates/problem/problem.html:292 templates/problem/problem.html:301
 msgid "All submissions"
 msgstr "Danh sách bài nộp"
 
@@ -4802,10 +4855,6 @@ msgstr "Thêm tag %s từ trang web"
 #: judge/views/ticket.py:34 judge/views/ticket.py:41
 msgid "Ticket title"
 msgstr "Tiêu đề của ticket"
-
-#: judge/views/ticket.py:42
-msgid "Link to the issue"
-msgstr "URL tới vấn đề"
 
 #: judge/views/ticket.py:43
 msgid "Issue description"
@@ -5247,7 +5296,7 @@ msgstr "Thành viên"
 
 #: templates/base.html:286
 msgid "Toggle Dark/Light Mode"
-msgstr ""
+msgstr "Chuyển chế độ Sáng/Tối"
 
 #: templates/base.html:297
 msgid "Report issue"
@@ -5316,6 +5365,10 @@ msgstr "Blog"
 #: templates/user/comment.html:42 templates/user/comment.html:51
 msgid "Please log in to vote"
 msgstr "Hãy đăng nhập để bình chọn"
+
+#: templates/blog/blog-post.html:28
+msgid "Sticky"
+msgstr "Ghim"
 
 #: templates/blog/blog-post.html:34
 #, python-brace-format
@@ -5582,7 +5635,7 @@ msgstr ""
 msgid "Post!"
 msgstr "Đăng!"
 
-#: templates/comments/list.html:3 templates/problem/problem.html:535
+#: templates/comments/list.html:3 templates/problem/problem.html:548
 #: templates/user/prepare-data.html:98 templates/user/user-tabs.html:13
 msgid "Comments"
 msgstr "Bình luận"
@@ -5669,7 +5722,7 @@ msgstr "Đã sao chép!"
 
 #: templates/contest/access_code.html:40 templates/contest/list.html:197
 #: templates/contest/list.html:237 templates/contest/list.html:277
-#: templates/contest/list.html:327 templates/problem/problem.html:460
+#: templates/contest/list.html:327 templates/problem/problem.html:473
 msgid "Contest"
 msgid_plural "Contests"
 msgstr[0] "Kỳ thi"
@@ -5718,22 +5771,22 @@ msgstr "Nhập mã mới cho kỳ thi nhân bản:"
 msgid "Clone!"
 msgstr "Nhân bản!"
 
-#: templates/contest/contest-all-problems.html:42
+#: templates/contest/contest-all-problems.html:42 templates/user/ban.html:7
 msgid "Submit"
 msgstr "Nộp bài"
 
 #: templates/contest/contest-all-problems.html:47
-#: templates/problem/problem.html:345 templates/problem/raw.html:95
+#: templates/problem/problem.html:358 templates/problem/raw.html:95
 msgid "Time limit:"
 msgstr "Giới hạn thời gian:"
 
 #: templates/contest/contest-all-problems.html:48
-#: templates/problem/problem.html:357 templates/problem/raw.html:104
+#: templates/problem/problem.html:370 templates/problem/raw.html:104
 msgid "Memory limit:"
 msgstr "Giới hạn bộ nhớ:"
 
 #: templates/contest/contest-all-problems.html:49
-#: templates/problem/problem.html:335
+#: templates/problem/problem.html:348
 msgid "Points:"
 msgstr "Điểm:"
 
@@ -6054,7 +6107,7 @@ msgid "Add an announcement"
 msgstr "Tạo thông báo"
 
 #: templates/contest/contest.html:317 templates/problem/comments.html:24
-#: templates/problem/problem.html:550
+#: templates/problem/problem.html:563
 msgid "Clarifications"
 msgstr "Làm rõ"
 
@@ -6132,6 +6185,10 @@ msgid "This contest has %(count)s virtual participation"
 msgid_plural "This contest has %(count)s virtual participations"
 msgstr[0] "Kỳ thi này có %(count)s lượt tham gia ảo"
 
+#: templates/contest/list.html:142
+msgid "Already joined"
+msgstr "Đã tham gia"
+
 #: templates/contest/list.html:149
 msgid "Spectate"
 msgstr "Theo dõi"
@@ -6144,6 +6201,10 @@ msgstr "Tham gia"
 #, python-format
 msgid "Registration opens in %(countdown)s"
 msgstr "Đăng ký mở sau %(countdown)s"
+
+#: templates/contest/list.html:171
+msgid "Registration closed"
+msgstr "Đã đóng đăng ký"
 
 #: templates/contest/list.html:183
 msgid "Registered users:"
@@ -6327,6 +6388,10 @@ msgstr "Thời gian tham gia đã kết thúc."
 msgid "Penalty"
 msgstr "Penalty"
 
+#: templates/contest/ranking-table.html:103
+msgid "Total AC"
+msgstr "Tổng AC"
+
 #: templates/contest/ranking.html:187
 msgid "Search organizations"
 msgstr "Tìm tổ chức"
@@ -6458,6 +6523,13 @@ msgid "Please correct the error below."
 msgstr "Xin hãy sửa các lỗi sai dưới đây."
 
 #: templates/newsletter/common.html:6
+#: templates/newsletter/newsletter_detail.html:3
+#: templates/newsletter/newsletter_list.html:12
+#: templates/newsletter/newsletter_list.html:33
+#: templates/newsletter/subscription_activate.html:3
+#: templates/newsletter/subscription_activate.html:6
+#: templates/newsletter/subscription_subscribe_activated.html:3
+#: templates/newsletter/subscription_subscribe_activated.html:5
 #: templates/newsletter/subscription_unsubscribe_activated.html:3
 #: templates/newsletter/subscription_unsubscribe_activated.html:6
 #: templates/newsletter/subscription_update_activated.html:3
@@ -6465,6 +6537,144 @@ msgstr "Xin hãy sửa các lỗi sai dưới đây."
 msgid "Newsletter"
 msgstr "Bản tin"
 
+#: templates/newsletter/message/message.html:13
+msgid "Read more"
+msgstr "Đọc thêm"
+
+#: templates/newsletter/message/message.html:17
+#: templates/newsletter/newsletter_detail.html:9
+#: templates/newsletter/subscription_unsubscribe.html:14
+#: templates/newsletter/subscription_unsubscribe_user.html:21
+msgid "Unsubscribe"
+msgstr "Hủy đăng ký"
+
+#: templates/newsletter/message/message.html:19
+msgid "Read message online"
+msgstr "Đọc tin nhắn trực tuyến"
+
+#: templates/newsletter/message/message.txt:15
+msgid "Unsubscribe:"
+msgstr "Hủy đăng ký:"
+
+#: templates/newsletter/message/subscribe.html:7
+msgid "Subscription to"
+msgstr "Đăng ký nhận"
+
+#: templates/newsletter/message/subscribe.html:10
+#: templates/newsletter/message/unsubscribe.html:10
+#: templates/newsletter/message/update.html:10
+#, python-format
+msgid "Dear %(name)s,"
+msgstr "Xin chào %(name)s,"
+
+#: templates/newsletter/message/subscribe.html:12
+#, python-format
+msgid "you, or someone in your name requested a subscription to %(title)s."
+msgstr "Bạn, hoặc ai đó dùng tên của bạn, đã yêu cầu đăng ký nhận %(title)s."
+
+#: templates/newsletter/message/subscribe.html:14
+#: templates/newsletter/message/subscribe.txt:5
+msgid ""
+"If you would like to confirm your subscription, please follow this "
+"activation link:"
+msgstr "Nếu bạn muốn xác nhận đăng ký, vui lòng truy cập liên kết kích hoạt sau:"
+
+#: templates/newsletter/message/subscribe.html:17
+#: templates/newsletter/message/subscribe.txt:8
+#: templates/newsletter/message/unsubscribe.html:17
+#: templates/newsletter/message/unsubscribe.txt:8
+#: templates/newsletter/message/update.html:17
+#: templates/newsletter/message/update.txt:8
+msgid "Kind regards,"
+msgstr "Trân trọng,"
+
+#: templates/newsletter/message/subscribe_subject.txt:1
+msgid "Confirm subscription"
+msgstr "Xác nhận đăng ký"
+
+#: templates/newsletter/message/unsubscribe.html:7
+msgid "Unsubscription from"
+msgstr "Hủy đăng ký khỏi"
+
+#: templates/newsletter/message/unsubscribe.html:12
+#, python-format
+msgid "you, or someone in your name requested unsubscription from %(title)s."
+msgstr "Bạn, hoặc ai đó dùng tên của bạn, đã yêu cầu hủy đăng ký khỏi %(title)s."
+
+#: templates/newsletter/message/unsubscribe.html:14
+#: templates/newsletter/message/unsubscribe.txt:5
+msgid ""
+"If you would like to confirm your unsubscription, please follow this "
+"activation link:"
+msgstr "Nếu bạn muốn xác nhận hủy đăng ký, vui lòng truy cập liên kết kích hoạt sau:"
+
+#: templates/newsletter/message/unsubscribe_subject.txt:1
+msgid "Confirm unsubscription"
+msgstr "Xác nhận hủy đăng ký"
+
+#: templates/newsletter/message/update.html:7
+msgid "Update of subscription to"
+msgstr "Cập nhật đăng ký nhận"
+
+#: templates/newsletter/message/update.html:12
+#, python-format
+msgid ""
+"you, or someone in your name requested updating your personal information "
+"for %(title)s."
+msgstr "Bạn, hoặc ai đó dùng tên của bạn, đã yêu cầu cập nhật thông tin cá nhân cho %(title)s."
+
+#: templates/newsletter/message/update.html:14
+#: templates/newsletter/message/update.txt:5
+msgid ""
+"To make changes to your information in our database, please follow this "
+"activation link:"
+msgstr "Để thay đổi thông tin của bạn trong cơ sở dữ liệu của chúng tôi, vui lòng truy cập liên kết kích hoạt sau:"
+
+#: templates/newsletter/message/update_subject.txt:1
+msgid "Update information"
+msgstr "Cập nhật thông tin"
+
+#: templates/newsletter/newsletter_detail.html:4
+msgid "Newsletter:"
+msgstr "Bản tin:"
+
+#: templates/newsletter/newsletter_detail.html:8
+#: templates/newsletter/newsletter_list.html:13
+#: templates/newsletter/subscription_subscribe.html:16
+#: templates/newsletter/subscription_subscribe_user.html:19
+msgid "Subscribe"
+msgstr "Đăng ký"
+
+#: templates/newsletter/newsletter_detail.html:10
+msgid "Archive"
+msgstr "Lưu trữ"
+
+#: templates/newsletter/newsletter_detail.html:11
+#: templates/newsletter/submission_archive.html:12
+msgid "Back to list"
+msgstr "Quay lại danh sách"
+
+#: templates/newsletter/newsletter_list.html:2
+#: templates/newsletter/newsletter_list.html:3
+msgid "Newsletter list"
+msgstr "Danh sách bản tin"
+
+#: templates/newsletter/newsletter_list.html:27
+msgid "Update subscriptions"
+msgstr "Cập nhật đăng ký"
+
+#: templates/newsletter/submission_archive.html:2
+msgid "Newsletter Archive"
+msgstr "Lưu trữ bản tin"
+
+#: templates/newsletter/submission_archive.html:3
+msgid "Newsletter Archive:"
+msgstr "Lưu trữ bản tin:"
+
+#: templates/newsletter/subscription_activate.html:3
+#: templates/newsletter/subscription_activate.html:6
+#: templates/newsletter/subscription_subscribe_activated.html:3
+#: templates/newsletter/subscription_subscribe_activated.html:5
 #: templates/newsletter/subscription_unsubscribe_activated.html:3
 #: templates/newsletter/subscription_unsubscribe_activated.html:6
 #: templates/newsletter/subscription_update_activated.html:3
@@ -6472,16 +6682,63 @@ msgstr "Bản tin"
 msgid "activate"
 msgstr "kích hoạt"
 
-#: templates/newsletter/subscription_unsubscribe_activated.html:8
-msgid "You have successfully been unsubscribed."
-msgstr "Bạn đã bỏ đăng ký thành công."
+#: templates/newsletter/subscription_activate.html:10
+msgid "Activate"
+msgstr "Kích hoạt"
 
+#: templates/newsletter/subscription_subscribe.html:3
+#: templates/newsletter/subscription_subscribe.html:6
+#: templates/newsletter/subscription_subscribe_email_sent.html:2
+#: templates/newsletter/subscription_subscribe_email_sent.html:5
+#: templates/newsletter/subscription_subscribe_user.html:3
+#: templates/newsletter/subscription_subscribe_user.html:6
+msgid "Newsletter subscribe"
+msgstr "Đăng ký bản tin"
+
+#: templates/newsletter/subscription_subscribe.html:9
+#: templates/newsletter/subscription_unsubscribe.html:8
+msgid ""
+"Due to a technical error we were not able to submit your confirmation email."
+msgstr "Do lỗi kỹ thuật, chúng tôi không thể gửi email xác nhận của bạn."
+
+#: templates/newsletter/subscription_subscribe.html:10
+#: templates/newsletter/subscription_unsubscribe.html:9
+msgid "This could be because your email address is invalid."
+msgstr "Điều này có thể xảy ra vì địa chỉ email của bạn không hợp lệ."
+
+#: templates/newsletter/subscription_subscribe_activated.html:6
+msgid "Your subscription has successfully been activated."
+msgstr "Đăng ký của bạn đã được kích hoạt thành công."
+
+#: templates/newsletter/subscription_subscribe_email_sent.html:6
+msgid ""
+"Your subscription request was successfully received and an activation email "
+"has been sent to you. In that email you will find a link which you need to "
+"follow in order to activate your subscription."
+msgstr "Yêu cầu đăng ký của bạn đã được nhận thành công và email kích hoạt đã được gửi cho bạn. Trong email đó, bạn sẽ thấy một liên kết cần truy cập để kích hoạt đăng ký."
+
+#: templates/newsletter/subscription_subscribe_user.html:7
+#: templates/newsletter/subscription_unsubscribe_user.html:8
+#, python-format
+msgid "Welcome, %(user)s!"
+msgstr "Xin chào, %(user)s!"
+
+#: templates/newsletter/subscription_subscribe_user.html:15
+msgid "Do you want to subscribe to this newsletter?"
+msgstr "Bạn có muốn đăng ký nhận bản tin này không?"
+
+#: templates/newsletter/subscription_unsubscribe.html:3
+#: templates/newsletter/subscription_unsubscribe.html:6
 #: templates/newsletter/subscription_unsubscribe_email_sent.html:3
 #: templates/newsletter/subscription_unsubscribe_email_sent.html:6
 #: templates/newsletter/subscription_unsubscribe_user.html:3
 #: templates/newsletter/subscription_unsubscribe_user.html:6
 msgid "Newsletter unsubscribe"
-msgstr "Bỏ đăng ký bản tin"
+msgstr "Hủy đăng ký bản tin"
+
+#: templates/newsletter/subscription_unsubscribe_activated.html:8
+msgid "You have successfully been unsubscribed."
+msgstr "Bạn đã bỏ đăng ký thành công."
 
 #: templates/newsletter/subscription_unsubscribe_email_sent.html:8
 msgid ""
@@ -6494,11 +6751,7 @@ msgstr ""
 
 #: templates/newsletter/subscription_unsubscribe_user.html:17
 msgid "Do you want to unsubscribe from this newsletter?"
-msgstr "Bạn có muốn hủy đăng ký bản tin này?"
-
-#: templates/newsletter/subscription_unsubscribe_user.html:21
-msgid "Unsubscribe"
-msgstr "Hủy đăng ký"
+msgstr "Bạn có muốn hủy đăng ký nhận bản tin này không?"
 
 #: templates/newsletter/subscription_update.html:3
 #: templates/newsletter/subscription_update.html:6
@@ -6773,7 +7026,7 @@ msgstr "Nhập mã bài cho bài nhân bản:"
 msgid "Comments for"
 msgstr "Bình luận cho"
 
-#: templates/problem/comments.html:35 templates/problem/problem.html:561
+#: templates/problem/comments.html:35 templates/problem/problem.html:574
 msgid "No clarifications have been made at this time."
 msgstr "Chưa có làm rõ nào được đưa ra ở thời điểm này."
 
@@ -6980,7 +7233,7 @@ msgid ""
 msgstr ""
 "Nộp một lời giải chính thức trước khi tự giải là một hành động có thể bị ban."
 
-#: templates/problem/editorial.html:33 templates/problem/problem.html:396
+#: templates/problem/editorial.html:33 templates/problem/problem.html:409
 msgid "Author:"
 msgid_plural "Authors:"
 msgstr[0] "Tác giả:"
@@ -7165,125 +7418,125 @@ msgstr "Đề bài"
 msgid "Suggest"
 msgstr "Đề xuất"
 
-#: templates/problem/problem.html:246
+#: templates/problem/problem.html:259
 msgid "View as PDF"
 msgstr "Xem dạng PDF"
 
-#: templates/problem/problem.html:255 templates/problem/problem.html:265
-#: templates/problem/problem.html:270
+#: templates/problem/problem.html:268 templates/problem/problem.html:278
+#: templates/problem/problem.html:283
 msgid "Submit solution"
 msgstr "Gửi bài giải"
 
-#: templates/problem/problem.html:258
+#: templates/problem/problem.html:271
 #, python-format
 msgid "%(counter)s submission left"
 msgid_plural "%(counter)s submissions left"
 msgstr[0] "Còn %(counter)s lần nộp"
 msgstr[1] "Còn %(counter)s lần nộp"
 
-#: templates/problem/problem.html:266
+#: templates/problem/problem.html:279
 msgid "0 submissions left"
 msgstr "Còn 0 lần nộp"
 
-#: templates/problem/problem.html:277 templates/problem/problem.html:285
+#: templates/problem/problem.html:290 templates/problem/problem.html:298
 msgid "My submissions"
 msgstr "Bài nộp của tôi"
 
-#: templates/problem/problem.html:280 templates/problem/problem.html:289
+#: templates/problem/problem.html:293 templates/problem/problem.html:302
 msgid "Best submissions"
 msgstr "Bài nộp tốt nhất"
 
-#: templates/problem/problem.html:293
+#: templates/problem/problem.html:306
 msgid "Read editorial"
 msgstr "Đọc lời giải"
 
-#: templates/problem/problem.html:298
+#: templates/problem/problem.html:311
 msgid "Manage tickets"
 msgstr "Quản lý báo cáo"
 
-#: templates/problem/problem.html:302
+#: templates/problem/problem.html:315
 msgid "Edit problem"
 msgstr "Sửa đề bài"
 
-#: templates/problem/problem.html:303
+#: templates/problem/problem.html:316
 msgid "Delete problem"
 msgstr "Xoá bài tập"
 
-#: templates/problem/problem.html:305
+#: templates/problem/problem.html:318
 msgid "Edit test data"
 msgstr "Sửa đổi test"
 
-#: templates/problem/problem.html:310
+#: templates/problem/problem.html:323
 msgid "My tickets"
 msgstr "Các báo cáo của tôi"
 
-#: templates/problem/problem.html:317
+#: templates/problem/problem.html:330
 msgid "Edit type group"
 msgstr "Sửa nhóm loại"
 
-#: templates/problem/problem.html:322
+#: templates/problem/problem.html:335
 msgid "Manage submissions"
 msgstr "Quản lý bài nộp"
 
-#: templates/problem/problem.html:338 templates/problem/problem.html:340
+#: templates/problem/problem.html:351 templates/problem/problem.html:353
 msgid "(partial)"
 msgstr "(OI)"
 
-#: templates/problem/problem.html:370 templates/problem/problem.html:379
+#: templates/problem/problem.html:383 templates/problem/problem.html:392
 #: templates/submission/status-testcases.html:139
 msgid "Input:"
 msgstr "Input:"
 
-#: templates/problem/problem.html:374 templates/problem/problem.html:383
+#: templates/problem/problem.html:387 templates/problem/problem.html:396
 msgid "Output:"
 msgstr "Output:"
 
-#: templates/problem/problem.html:407
+#: templates/problem/problem.html:420
 msgid "Suggester:"
 msgstr "Người đăng:"
 
-#: templates/problem/problem.html:418
+#: templates/problem/problem.html:431
 msgid "Problem source:"
 msgstr "Nguồn bài:"
 
-#: templates/problem/problem.html:427
+#: templates/problem/problem.html:440
 msgid "Problem type"
 msgid_plural "Problem types"
 msgstr[0] "Dạng bài"
 msgstr[1] "Dạng bài"
 
-#: templates/problem/problem.html:440
+#: templates/problem/problem.html:453
 msgid "Allowed languages"
 msgstr "Ngôn ngữ cho phép"
 
-#: templates/problem/problem.html:448
+#: templates/problem/problem.html:461
 #, python-format
 msgid "No %(lang)s judge online"
 msgstr "Không có máy chấm %(lang)s đang online"
 
-#: templates/problem/problem.html:471
+#: templates/problem/problem.html:484
 msgid " and "
 msgstr " và "
 
-#: templates/problem/problem.html:471
+#: templates/problem/problem.html:484
 msgid " more"
 msgstr " kỳ thi nữa"
 
-#: templates/problem/problem.html:480
+#: templates/problem/problem.html:493
 msgid "Judge:"
 msgid_plural "Judges:"
 msgstr[0] "Máy chấm"
 msgstr[1] "Các máy chấm"
 
-#: templates/problem/problem.html:497
+#: templates/problem/problem.html:510
 msgid "none available"
 msgstr "Không có máy chấm nào"
 
-#: templates/problem/problem.html:509
+#: templates/problem/problem.html:522
 msgid "This problem is only a suggestion!"
 msgstr "Bài tập này đang được đề xuất!"
 
-#: templates/problem/problem.html:511
+#: templates/problem/problem.html:524
 msgid ""
 "This problem cannot be accessed by normal users until it is approved by an "
 "admin or staff. Please make sure that all the data for this problem is "
@@ -7292,15 +7545,15 @@ msgstr ""
 "Người dùng chưa thể truy cập bài tập này đến khi nó được thông qua bởi "
 "admin. Hãy đảm bảo các dữ liệu của đề bài này là chính xác."
 
-#: templates/problem/problem.html:521
+#: templates/problem/problem.html:534
 msgid "Request clarification"
 msgstr "Gửi thắc mắc"
 
-#: templates/problem/problem.html:523
+#: templates/problem/problem.html:536
 msgid "Report an issue"
 msgstr "Báo cáo vấn đề"
 
-#: templates/problem/problem.html:533
+#: templates/problem/problem.html:546
 msgid "Submit Solution"
 msgstr "Gửi bài giải"
 
@@ -7733,8 +7986,9 @@ msgid "Notify me about upcoming contests"
 msgstr "Thông báo cho tôi về các kỳ thi sắp tới"
 
 #: templates/registration/registration_form.html:237
+#: templates/registration/username_select.html:156
 msgid "Register!"
-msgstr "Đăng ký!"
+msgstr "Đăng ký!"
 
 #: templates/registration/registration_form.html:243
 msgid "By registering, you agree to our [Terms & Conditions][0]."
@@ -8212,6 +8466,10 @@ msgstr "Tốt nhất"
 msgid "%(user)s's"
 msgstr "%(user)s's"
 
+#: templates/tag/assign.html:41
+msgid "You can click on a group's name to show/hide that group."
+msgstr "Bạn có thể nhấp vào tên nhóm để hiện/ẩn nhóm đó."
+
 #: templates/tag/assign.html:54
 msgid "Assign"
 msgstr "Thêm"
@@ -8352,6 +8610,18 @@ msgstr ""
 #, python-brace-format
 msgid "Could not change ticket: {error}"
 msgstr "Không thể thay đổi ticket: {error}"
+
+#: templates/ticket/ticket.html:279
+msgid "Autofill"
+msgstr "Tự động điền"
+
+#: templates/ticket/ticket.html:282
+msgid "Select reply..."
+msgstr "Chọn trả lời..."
+
+#: templates/ticket/ticket.html:286
+msgid "Search..."
+msgstr "Tìm kiếm..."
 
 #: templates/ticket/ticket.html:315
 msgid "Associated object"
@@ -8496,6 +8766,10 @@ msgstr "Tìm kiếm bằng username"
 #: templates/user/comment.html:8
 msgid "Are you sure you want to delete all comments?"
 msgstr "Bạn có chắc muốn xoá tất cả bình luận?"
+
+#: templates/user/comment.html:26
+msgid "Delete all comments"
+msgstr "Xóa tất cả bình luận"
 
 #: templates/user/contrib-table.html:5
 msgid "Contribution points"

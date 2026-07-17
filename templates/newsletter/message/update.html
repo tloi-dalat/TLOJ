@@ -4,17 +4,17 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Update of subscription to {{ newsletter.title }}</title>
+    <title>{{ _('Update of subscription to') }} {{ newsletter.title }}</title>
 </head>
 <body>
-Dear {{ subscription.name }},
+{{ _('Dear %(name)s,', name=subscription.name) }}
 
-you, or someone in your name requested updating your personal information for {{ newsletter.title }}.
+{{ _('you, or someone in your name requested updating your personal information for %(title)s.', title=newsletter.title) }}
 
-To make changes to your information in our database, please follow this activation link:
+{{ _('To make changes to your information in our database, please follow this activation link:') }}
 http://{{ site.domain }}{{ subscription.update_activate_url }}
 
-Kind regards,
+{{ _('Kind regards,') }}
 {{ newsletter.sender }}
 </body>
 </html>

@@ -79,7 +79,7 @@
             <div class="blog-toc-sidebar" id="table-of-contents">
 
             <div class="blog-toc-header">
-                <h3>Table of Contents</h3>
+                <h3>${gettext('Table of Contents')}</h3>
             </div>
             <div class="blog-toc-nav"></div>
             </div>

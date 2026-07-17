@@ -7,7 +7,7 @@ from judge.models.profile import Profile
 
 
 class GeneralIssue(models.Model):
-    issue_url = models.URLField(max_length=200, verbose_name=('Link to the issue'))
+    issue_url = models.URLField(max_length=200, verbose_name=_('Link to the issue'))
 
     def get_absolute_url(self):
         return self.issue_url

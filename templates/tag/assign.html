@@ -38,7 +38,7 @@
         <form action="" method="post" class="form-area" style="display: flex; justify-content: center; flex-direction: column;">
             {% csrf_token %}
             <label for="tags"><b>{{ _('Tags') }}</b></label>
-            <span class="helptext">You can click on a group's name to show/hide that group.</span>
+            <span class="helptext">{{ _("You can click on a group's name to show/hide that group.") }}</span>
             <select id="tags" name="tags" multiple>
                 {% for group in groups %}
                     <optgroup label="{{ group.name }}">

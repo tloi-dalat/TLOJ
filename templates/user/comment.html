@@ -23,7 +23,7 @@
         {% if request.user.has_perm('judge.change_comment') %}
         <form action="{{url('user_comment', user.username)}}" method="post">
             {% csrf_token %}
-            <button id="btn-delete-all" type="submit">Delete all comments</button>
+            <button id="btn-delete-all" type="submit">{{ _('Delete all comments') }}</button>
         </form>
         {% endif %}
         <ul class="comments top-level-comments new-comments">
