@@ -100,7 +100,7 @@
 
 {% block after_user_list %}
     <tr>
-        <td colspan={% if is_ICPC_format %}4{% else %}3{% endif %}>Total AC</td>
+        <td colspan={% if is_ICPC_format %}4{% else %}3{% endif %}>{{ _('Total AC') }}</td>
         {% for problem in problems %}
             <td class="total-ac" id='{{- contest.get_label_for_problem(loop.index0) }}-total'>{% if result_hidden %}?{% else %}{{ total_ac.get(str(problem.id), 0) }}{% endif %}</td>
         {% endfor %}

@@ -10,13 +10,13 @@
         <div>{{ article.text|safe }}</div>
         
         {% if article.url %}
-            <div><a href="{{ article.url }}">Read more</a></div>
+            <div><a href="{{ article.url }}">{{ _('Read more') }}</a></div>
         {% endif %}
     {% endfor %}
 
-    <a href="http://{{ site.domain }}{{ url('newsletter_unsubscribe_request', newsletter.slug) }}" style="color:#999;float:right">Unsubscribe</a>
+    <a href="http://{{ site.domain }}{{ url('newsletter_unsubscribe_request', newsletter.slug) }}" style="color:#999;float:right">{{ _('Unsubscribe') }}</a>
     {% if submission and submission.publish %}
-        <a href="http://{{ site.domain }}{{ submission.get_absolute_url() }}" style="color:#999">Read message online</a>
+        <a href="http://{{ site.domain }}{{ submission.get_absolute_url() }}" style="color:#999">{{ _('Read message online') }}</a>
     {% endif %}
 </body>
 </html>

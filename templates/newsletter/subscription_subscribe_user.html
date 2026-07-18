@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
-{% block title %}Newsletter subscribe{% endblock %}
+{% block title %}{{ _('Newsletter subscribe') }}{% endblock %}
 
 {% block body %}
-    <h1>Newsletter subscribe {{ newsletter.title }}</h1>
-    <p>Welcome, {{ request.user }}!</p>
+    <h1>{{ _('Newsletter subscribe') }} {{ newsletter.title }}</h1>
+    <p>{{ _('Welcome, %(user)s!', user=request.user) }}</p>
     {% if messages %}
         <ul>
             {% for message in messages %}
@@ -12,11 +12,11 @@
             {% endfor %}
         </ul>
     {% else %}
-        Do you want to subscribe to this newsletter?
+        {{ _('Do you want to subscribe to this newsletter?') }}
         <form enctype="multipart/form-data" method="post"
               action="{{ url('newsletter_subscribe_confirm', newsletter.slug) }}">
             {% csrf_token %}
-            <p><input id="id_submit" name="submit" value="Subscribe" type="submit"></p>
+            <p><input id="id_submit" name="submit" value="{{ _('Subscribe') }}" type="submit"></p>
         </form>
     {% endif %}
 {% endblock %}

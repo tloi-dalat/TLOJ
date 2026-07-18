@@ -67,7 +67,7 @@ class Organization(models.Model):
                                                        'viewing the organization.'))
     performance_points = models.FloatField(default=0)
     member_count = models.IntegerField(default=0)
-    current_consumed_credit = models.FloatField(default=0, help_text='Total used credit this month')
+    current_consumed_credit = models.FloatField(default=0, help_text=_('Total used credit this month'))
     paid_credit = models.FloatField(default=0, help_text=_('Remaining purchased credits'), db_column='available_credit')
     free_credit = models.FloatField(
         default=0,

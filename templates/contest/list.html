@@ -143,7 +143,7 @@
 
 {% macro contest_join(contest, request, finished_contests) %}
     {% if request.in_contest and contest.key == request.participation.contest.key %}
-        <td><span>Already joined</span></td>
+        <td><span>{{ _('Already joined') }}</span></td>
     {% else %}
         <td>
             {% if contest.key in finished_contests or contest.has_author or contest.has_curator or contest.has_tester %}
@@ -172,7 +172,7 @@
                 {% if contest.time_before_register %}
                     <span class="time">{{ _('Registration opens in %(countdown)s', countdown=as_countdown(contest.time_before_register)) }}</span>
                 {% else %}
-                    <span>Registration closed</span>
+                    <span>{{ _('Registration closed') }}</span>
                 {% endif %}
             {% else %}
                 <form action="{{ url('contest_register', contest.key) }}" method="post">

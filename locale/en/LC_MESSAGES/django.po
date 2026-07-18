@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-17 18:03+0000\n"
+"POT-Creation-Date: 2026-07-17 02:50+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -141,8 +141,20 @@ msgstr ""
 msgid "Rejudge"
 msgstr ""
 
+#: judge/admin/contest.py:85
+msgid "Rescore"
+msgstr ""
+
 #: judge/admin/contest.py:100
 msgid "Resend announcement"
+msgstr ""
+
+#: judge/admin/contest.py:103
+msgid "Not available"
+msgstr ""
+
+#: judge/admin/contest.py:105
+msgid "Resend"
 msgstr ""
 
 #: judge/admin/contest.py:144
@@ -751,6 +763,36 @@ msgstr ""
 #: templates/organization/home.html:157
 #, python-format
 msgid "%(time_limit)s window"
+msgstr ""
+
+#: judge/feed.py:14
+#, python-format
+msgid "Recently Added %(site_name)s Problems"
+msgstr ""
+
+#: judge/feed.py:16
+#, python-format
+msgid "The latest problems added on the %(site_name)s website"
+msgstr ""
+
+#: judge/feed.py:44
+#, python-format
+msgid "Latest %(site_name)s Comments"
+msgstr ""
+
+#: judge/feed.py:46
+#, python-format
+msgid "The latest comments on the %(site_name)s website"
+msgstr ""
+
+#: judge/feed.py:74
+#, python-format
+msgid "Latest %(site_name)s Blog Posts"
+msgstr ""
+
+#: judge/feed.py:76
+#, python-format
+msgid "The latest blog posts from %(site_name)s"
 msgstr ""
 
 #: judge/forms.py:36
@@ -2328,7 +2370,7 @@ msgstr ""
 msgid "Edit problems with full markup"
 msgstr ""
 
-#: judge/models/problem.py:661 templates/problem/problem.html:328
+#: judge/models/problem.py:661 templates/problem/problem.html:341
 msgid "Clone problem"
 msgstr ""
 
@@ -2678,6 +2720,10 @@ msgstr ""
 msgid ""
 "This image will replace the default site logo for users viewing the "
 "organization."
+msgstr ""
+
+#: judge/models/profile.py:70
+msgid "Total used credit this month"
 msgstr ""
 
 #: judge/models/profile.py:71
@@ -3471,16 +3517,20 @@ msgstr ""
 msgid "Original OJ of the problem"
 msgstr ""
 
-#: judge/models/tag.py:40 judge/models/tag.py:51
+#: judge/models/tag.py:40 judge/models/tag.py:51 templates/tag/problem.html:42
 msgid "Tag"
 msgstr ""
 
-#: judge/models/tag.py:50
+#: judge/models/tag.py:50 templates/tag/problem.html:43
 msgid "Assigner"
 msgstr ""
 
 #: judge/models/tests/test_submission.py:103
 msgid "AC"
+msgstr ""
+
+#: judge/models/ticket.py:10 judge/views/ticket.py:42
+msgid "Link to the issue"
 msgstr ""
 
 #: judge/models/ticket.py:20
@@ -3762,40 +3812,40 @@ msgstr ""
 msgid "Blog"
 msgstr ""
 
-#: judge/views/blog.py:373 judge/views/blog.py:376
+#: judge/views/blog.py:374 judge/views/blog.py:377
 msgid "Creating new blog post"
 msgstr ""
 
-#: judge/views/blog.py:394 judge/views/contests.py:1297
+#: judge/views/blog.py:395 judge/views/contests.py:1297
 #: judge/views/organization.py:395 judge/views/organization.py:699
 #: judge/views/organization.py:723 judge/views/problem.py:948
 #: judge/views/problem.py:988 judge/views/tag.py:182
 msgid "Created on site"
 msgstr ""
 
-#: judge/views/blog.py:408 judge/views/blog.py:447 judge/views/contests.py:296
+#: judge/views/blog.py:409 judge/views/blog.py:448 judge/views/contests.py:296
 #: judge/views/contests.py:1308
 msgid "Permission denied"
 msgstr ""
 
-#: judge/views/blog.py:409
+#: judge/views/blog.py:410
 #, python-format
 msgid ""
 "You cannot create blog post.\n"
 "Note: You need to solve at least %d problems to create new blog post."
 msgstr ""
 
-#: judge/views/blog.py:423 judge/views/blog.py:426
+#: judge/views/blog.py:424 judge/views/blog.py:427
 msgid "Updating blog post"
 msgstr ""
 
-#: judge/views/blog.py:441 judge/views/comment.py:142
+#: judge/views/blog.py:442 judge/views/comment.py:142
 #: judge/views/contests.py:1366 judge/views/organization.py:438
 #: judge/views/problem.py:1156
 msgid "Edited from site"
 msgstr ""
 
-#: judge/views/blog.py:448
+#: judge/views/blog.py:449
 msgid "You cannot edit blog post."
 msgstr ""
 
@@ -4634,7 +4684,7 @@ msgid "Comparing submission %(first)s with %(second)s"
 msgstr ""
 
 #: judge/views/submission.py:356 judge/views/submission.py:357
-#: templates/problem/problem.html:279 templates/problem/problem.html:288
+#: templates/problem/problem.html:292 templates/problem/problem.html:301
 msgid "All submissions"
 msgstr ""
 
@@ -4720,10 +4770,6 @@ msgstr ""
 
 #: judge/views/ticket.py:34 judge/views/ticket.py:41
 msgid "Ticket title"
-msgstr ""
-
-#: judge/views/ticket.py:42
-msgid "Link to the issue"
 msgstr ""
 
 #: judge/views/ticket.py:43
@@ -5232,6 +5278,10 @@ msgstr ""
 msgid "Please log in to vote"
 msgstr ""
 
+#: templates/blog/blog-post.html:28
+msgid "Sticky"
+msgstr ""
+
 #: templates/blog/blog-post.html:34
 #, python-brace-format
 msgid "posted on {time}"
@@ -5494,7 +5544,7 @@ msgstr ""
 msgid "Post!"
 msgstr ""
 
-#: templates/comments/list.html:3 templates/problem/problem.html:535
+#: templates/comments/list.html:3 templates/problem/problem.html:548
 #: templates/user/prepare-data.html:98 templates/user/user-tabs.html:13
 msgid "Comments"
 msgstr ""
@@ -5581,7 +5631,7 @@ msgstr ""
 
 #: templates/contest/access_code.html:40 templates/contest/list.html:197
 #: templates/contest/list.html:237 templates/contest/list.html:277
-#: templates/contest/list.html:327 templates/problem/problem.html:460
+#: templates/contest/list.html:327 templates/problem/problem.html:473
 msgid "Contest"
 msgid_plural "Contests"
 msgstr[0] ""
@@ -5631,22 +5681,22 @@ msgstr ""
 msgid "Clone!"
 msgstr ""
 
-#: templates/contest/contest-all-problems.html:42
+#: templates/contest/contest-all-problems.html:42 templates/user/ban.html:7
 msgid "Submit"
 msgstr ""
 
 #: templates/contest/contest-all-problems.html:47
-#: templates/problem/problem.html:345 templates/problem/raw.html:95
+#: templates/problem/problem.html:358 templates/problem/raw.html:95
 msgid "Time limit:"
 msgstr ""
 
 #: templates/contest/contest-all-problems.html:48
-#: templates/problem/problem.html:357 templates/problem/raw.html:104
+#: templates/problem/problem.html:370 templates/problem/raw.html:104
 msgid "Memory limit:"
 msgstr ""
 
 #: templates/contest/contest-all-problems.html:49
-#: templates/problem/problem.html:335
+#: templates/problem/problem.html:348
 msgid "Points:"
 msgstr ""
 
@@ -5947,7 +5997,7 @@ msgid "Add an announcement"
 msgstr ""
 
 #: templates/contest/contest.html:317 templates/problem/comments.html:24
-#: templates/problem/problem.html:550
+#: templates/problem/problem.html:563
 msgid "Clarifications"
 msgstr ""
 
@@ -6024,6 +6074,10 @@ msgid_plural "This contest has %(count)s virtual participations"
 msgstr[0] ""
 msgstr[1] ""
 
+#: templates/contest/list.html:142
+msgid "Already joined"
+msgstr ""
+
 #: templates/contest/list.html:149
 msgid "Spectate"
 msgstr ""
@@ -6035,6 +6089,10 @@ msgstr ""
 #: templates/contest/list.html:169
 #, python-format
 msgid "Registration opens in %(countdown)s"
+msgstr ""
+
+#: templates/contest/list.html:171
+msgid "Registration closed"
 msgstr ""
 
 #: templates/contest/list.html:183
@@ -6214,6 +6272,10 @@ msgstr ""
 msgid "Penalty"
 msgstr ""
 
+#: templates/contest/ranking-table.html:103
+msgid "Total AC"
+msgstr ""
+
 #: templates/contest/ranking.html:187
 msgid "Search organizations"
 msgstr ""
@@ -6338,6 +6400,13 @@ msgid "Please correct the error below."
 msgstr ""
 
 #: templates/newsletter/common.html:6
+#: templates/newsletter/newsletter_detail.html:3
+#: templates/newsletter/newsletter_list.html:12
+#: templates/newsletter/newsletter_list.html:33
+#: templates/newsletter/subscription_activate.html:3
+#: templates/newsletter/subscription_activate.html:6
+#: templates/newsletter/subscription_subscribe_activated.html:3
+#: templates/newsletter/subscription_subscribe_activated.html:5
 #: templates/newsletter/subscription_unsubscribe_activated.html:3
 #: templates/newsletter/subscription_unsubscribe_activated.html:6
 #: templates/newsletter/subscription_update_activated.html:3
@@ -6345,6 +6414,144 @@ msgstr ""
 msgid "Newsletter"
 msgstr ""
 
+#: templates/newsletter/message/message.html:13
+msgid "Read more"
+msgstr ""
+
+#: templates/newsletter/message/message.html:17
+#: templates/newsletter/newsletter_detail.html:9
+#: templates/newsletter/subscription_unsubscribe.html:14
+#: templates/newsletter/subscription_unsubscribe_user.html:21
+msgid "Unsubscribe"
+msgstr ""
+
+#: templates/newsletter/message/message.html:19
+msgid "Read message online"
+msgstr ""
+
+#: templates/newsletter/message/message.txt:15
+msgid "Unsubscribe:"
+msgstr ""
+
+#: templates/newsletter/message/subscribe.html:7
+msgid "Subscription to"
+msgstr ""
+
+#: templates/newsletter/message/subscribe.html:10
+#: templates/newsletter/message/unsubscribe.html:10
+#: templates/newsletter/message/update.html:10
+#, python-format
+msgid "Dear %(name)s,"
+msgstr ""
+
+#: templates/newsletter/message/subscribe.html:12
+#, python-format
+msgid "you, or someone in your name requested a subscription to %(title)s."
+msgstr ""
+
+#: templates/newsletter/message/subscribe.html:14
+#: templates/newsletter/message/subscribe.txt:5
+msgid ""
+"If you would like to confirm your subscription, please follow this "
+"activation link:"
+msgstr ""
+
+#: templates/newsletter/message/subscribe.html:17
+#: templates/newsletter/message/subscribe.txt:8
+#: templates/newsletter/message/unsubscribe.html:17
+#: templates/newsletter/message/unsubscribe.txt:8
+#: templates/newsletter/message/update.html:17
+#: templates/newsletter/message/update.txt:8
+msgid "Kind regards,"
+msgstr ""
+
+#: templates/newsletter/message/subscribe_subject.txt:1
+msgid "Confirm subscription"
+msgstr ""
+
+#: templates/newsletter/message/unsubscribe.html:7
+msgid "Unsubscription from"
+msgstr ""
+
+#: templates/newsletter/message/unsubscribe.html:12
+#, python-format
+msgid "you, or someone in your name requested unsubscription from %(title)s."
+msgstr ""
+
+#: templates/newsletter/message/unsubscribe.html:14
+#: templates/newsletter/message/unsubscribe.txt:5
+msgid ""
+"If you would like to confirm your unsubscription, please follow this "
+"activation link:"
+msgstr ""
+
+#: templates/newsletter/message/unsubscribe_subject.txt:1
+msgid "Confirm unsubscription"
+msgstr ""
+
+#: templates/newsletter/message/update.html:7
+msgid "Update of subscription to"
+msgstr ""
+
+#: templates/newsletter/message/update.html:12
+#, python-format
+msgid ""
+"you, or someone in your name requested updating your personal information "
+"for %(title)s."
+msgstr ""
+
+#: templates/newsletter/message/update.html:14
+#: templates/newsletter/message/update.txt:5
+msgid ""
+"To make changes to your information in our database, please follow this "
+"activation link:"
+msgstr ""
+
+#: templates/newsletter/message/update_subject.txt:1
+msgid "Update information"
+msgstr ""
+
+#: templates/newsletter/newsletter_detail.html:4
+msgid "Newsletter:"
+msgstr ""
+
+#: templates/newsletter/newsletter_detail.html:8
+#: templates/newsletter/newsletter_list.html:13
+#: templates/newsletter/subscription_subscribe.html:16
+#: templates/newsletter/subscription_subscribe_user.html:19
+msgid "Subscribe"
+msgstr ""
+
+#: templates/newsletter/newsletter_detail.html:10
+msgid "Archive"
+msgstr ""
+
+#: templates/newsletter/newsletter_detail.html:11
+#: templates/newsletter/submission_archive.html:12
+msgid "Back to list"
+msgstr ""
+
+#: templates/newsletter/newsletter_list.html:2
+#: templates/newsletter/newsletter_list.html:3
+msgid "Newsletter list"
+msgstr ""
+
+#: templates/newsletter/newsletter_list.html:27
+msgid "Update subscriptions"
+msgstr ""
+
+#: templates/newsletter/submission_archive.html:2
+msgid "Newsletter Archive"
+msgstr ""
+
+#: templates/newsletter/submission_archive.html:3
+msgid "Newsletter Archive:"
+msgstr ""
+
+#: templates/newsletter/subscription_activate.html:3
+#: templates/newsletter/subscription_activate.html:6
+#: templates/newsletter/subscription_subscribe_activated.html:3
+#: templates/newsletter/subscription_subscribe_activated.html:5
 #: templates/newsletter/subscription_unsubscribe_activated.html:3
 #: templates/newsletter/subscription_unsubscribe_activated.html:6
 #: templates/newsletter/subscription_update_activated.html:3
@@ -6352,15 +6559,62 @@ msgstr ""
 msgid "activate"
 msgstr ""
 
-#: templates/newsletter/subscription_unsubscribe_activated.html:8
-msgid "You have successfully been unsubscribed."
+#: templates/newsletter/subscription_activate.html:10
+msgid "Activate"
 msgstr ""
 
+#: templates/newsletter/subscription_subscribe.html:3
+#: templates/newsletter/subscription_subscribe.html:6
+#: templates/newsletter/subscription_subscribe_email_sent.html:2
+#: templates/newsletter/subscription_subscribe_email_sent.html:5
+#: templates/newsletter/subscription_subscribe_user.html:3
+#: templates/newsletter/subscription_subscribe_user.html:6
+msgid "Newsletter subscribe"
+msgstr ""
+
+#: templates/newsletter/subscription_subscribe.html:9
+#: templates/newsletter/subscription_unsubscribe.html:8
+msgid ""
+"Due to a technical error we were not able to submit your confirmation email."
+msgstr ""
+
+#: templates/newsletter/subscription_subscribe.html:10
+#: templates/newsletter/subscription_unsubscribe.html:9
+msgid "This could be because your email address is invalid."
+msgstr ""
+
+#: templates/newsletter/subscription_subscribe_activated.html:6
+msgid "Your subscription has successfully been activated."
+msgstr ""
+
+#: templates/newsletter/subscription_subscribe_email_sent.html:6
+msgid ""
+"Your subscription request was successfully received and an activation email "
+"has been sent to you. In that email you will find a link which you need to "
+"follow in order to activate your subscription."
+msgstr ""
+
+#: templates/newsletter/subscription_subscribe_user.html:7
+#: templates/newsletter/subscription_unsubscribe_user.html:8
+#, python-format
+msgid "Welcome, %(user)s!"
+msgstr ""
+
+#: templates/newsletter/subscription_subscribe_user.html:15
+msgid "Do you want to subscribe to this newsletter?"
+msgstr ""
+
+#: templates/newsletter/subscription_unsubscribe.html:3
+#: templates/newsletter/subscription_unsubscribe.html:6
 #: templates/newsletter/subscription_unsubscribe_email_sent.html:3
 #: templates/newsletter/subscription_unsubscribe_email_sent.html:6
 #: templates/newsletter/subscription_unsubscribe_user.html:3
 #: templates/newsletter/subscription_unsubscribe_user.html:6
 msgid "Newsletter unsubscribe"
+msgstr ""
+
+#: templates/newsletter/subscription_unsubscribe_activated.html:8
+msgid "You have successfully been unsubscribed."
 msgstr ""
 
 #: templates/newsletter/subscription_unsubscribe_email_sent.html:8
@@ -6372,10 +6626,6 @@ msgstr ""
 
 #: templates/newsletter/subscription_unsubscribe_user.html:17
 msgid "Do you want to unsubscribe from this newsletter?"
-msgstr ""
-
-#: templates/newsletter/subscription_unsubscribe_user.html:21
-msgid "Unsubscribe"
 msgstr ""
 
 #: templates/newsletter/subscription_update.html:3
@@ -6644,7 +6894,7 @@ msgstr ""
 msgid "Comments for"
 msgstr ""
 
-#: templates/problem/comments.html:35 templates/problem/problem.html:561
+#: templates/problem/comments.html:35 templates/problem/problem.html:574
 msgid "No clarifications have been made at this time."
 msgstr ""
 
@@ -6841,7 +7091,7 @@ msgid ""
 "bannable offence."
 msgstr ""
 
-#: templates/problem/editorial.html:33 templates/problem/problem.html:396
+#: templates/problem/editorial.html:33 templates/problem/problem.html:409
 msgid "Author:"
 msgid_plural "Authors:"
 msgstr[0] ""
@@ -7026,140 +7276,140 @@ msgstr ""
 msgid "Suggest"
 msgstr ""
 
-#: templates/problem/problem.html:246
+#: templates/problem/problem.html:259
 msgid "View as PDF"
 msgstr ""
 
-#: templates/problem/problem.html:255 templates/problem/problem.html:265
-#: templates/problem/problem.html:270
+#: templates/problem/problem.html:268 templates/problem/problem.html:278
+#: templates/problem/problem.html:283
 msgid "Submit solution"
 msgstr ""
 
-#: templates/problem/problem.html:258
+#: templates/problem/problem.html:271
 #, python-format
 msgid "%(counter)s submission left"
 msgid_plural "%(counter)s submissions left"
 msgstr[0] ""
 msgstr[1] ""
 
-#: templates/problem/problem.html:266
+#: templates/problem/problem.html:279
 msgid "0 submissions left"
 msgstr ""
 
-#: templates/problem/problem.html:277 templates/problem/problem.html:285
+#: templates/problem/problem.html:290 templates/problem/problem.html:298
 msgid "My submissions"
 msgstr ""
 
-#: templates/problem/problem.html:280 templates/problem/problem.html:289
+#: templates/problem/problem.html:293 templates/problem/problem.html:302
 msgid "Best submissions"
 msgstr ""
 
-#: templates/problem/problem.html:293
+#: templates/problem/problem.html:306
 msgid "Read editorial"
 msgstr ""
 
-#: templates/problem/problem.html:298
+#: templates/problem/problem.html:311
 msgid "Manage tickets"
 msgstr ""
 
-#: templates/problem/problem.html:302
+#: templates/problem/problem.html:315
 msgid "Edit problem"
 msgstr ""
 
-#: templates/problem/problem.html:303
+#: templates/problem/problem.html:316
 msgid "Delete problem"
 msgstr ""
 
-#: templates/problem/problem.html:305
+#: templates/problem/problem.html:318
 msgid "Edit test data"
 msgstr ""
 
-#: templates/problem/problem.html:310
+#: templates/problem/problem.html:323
 msgid "My tickets"
 msgstr ""
 
-#: templates/problem/problem.html:317
+#: templates/problem/problem.html:330
 msgid "Edit type group"
 msgstr ""
 
-#: templates/problem/problem.html:322
+#: templates/problem/problem.html:335
 msgid "Manage submissions"
 msgstr ""
 
-#: templates/problem/problem.html:338 templates/problem/problem.html:340
+#: templates/problem/problem.html:351 templates/problem/problem.html:353
 msgid "(partial)"
 msgstr ""
 
-#: templates/problem/problem.html:370 templates/problem/problem.html:379
+#: templates/problem/problem.html:383 templates/problem/problem.html:392
 #: templates/submission/status-testcases.html:139
 msgid "Input:"
 msgstr ""
 
-#: templates/problem/problem.html:374 templates/problem/problem.html:383
+#: templates/problem/problem.html:387 templates/problem/problem.html:396
 msgid "Output:"
 msgstr ""
 
-#: templates/problem/problem.html:407
+#: templates/problem/problem.html:420
 msgid "Suggester:"
 msgstr ""
 
-#: templates/problem/problem.html:418
+#: templates/problem/problem.html:431
 msgid "Problem source:"
 msgstr ""
 
-#: templates/problem/problem.html:427
+#: templates/problem/problem.html:440
 msgid "Problem type"
 msgid_plural "Problem types"
 msgstr[0] ""
 msgstr[1] ""
 
-#: templates/problem/problem.html:440
+#: templates/problem/problem.html:453
 msgid "Allowed languages"
 msgstr ""
 
-#: templates/problem/problem.html:448
+#: templates/problem/problem.html:461
 #, python-format
 msgid "No %(lang)s judge online"
 msgstr ""
 
-#: templates/problem/problem.html:471
+#: templates/problem/problem.html:484
 msgid " and "
 msgstr ""
 
-#: templates/problem/problem.html:471
+#: templates/problem/problem.html:484
 msgid " more"
 msgstr ""
 
-#: templates/problem/problem.html:480
+#: templates/problem/problem.html:493
 msgid "Judge:"
 msgid_plural "Judges:"
 msgstr[0] ""
 msgstr[1] ""
 
-#: templates/problem/problem.html:497
+#: templates/problem/problem.html:510
 msgid "none available"
 msgstr ""
 
-#: templates/problem/problem.html:509
+#: templates/problem/problem.html:522
 msgid "This problem is only a suggestion!"
 msgstr ""
 
-#: templates/problem/problem.html:511
+#: templates/problem/problem.html:524
 msgid ""
 "This problem cannot be accessed by normal users until it is approved by an "
 "admin or staff. Please make sure that all the data for this problem is "
 "correct."
 msgstr ""
 
-#: templates/problem/problem.html:521
+#: templates/problem/problem.html:534
 msgid "Request clarification"
 msgstr ""
 
-#: templates/problem/problem.html:523
+#: templates/problem/problem.html:536
 msgid "Report an issue"
 msgstr ""
 
-#: templates/problem/problem.html:533
+#: templates/problem/problem.html:546
 msgid "Submit Solution"
 msgstr ""
 
@@ -7575,6 +7825,7 @@ msgid "Notify me about upcoming contests"
 msgstr ""
 
 #: templates/registration/registration_form.html:237
+#: templates/registration/username_select.html:156
 msgid "Register!"
 msgstr ""
 
@@ -8031,6 +8282,10 @@ msgstr ""
 msgid "%(user)s's"
 msgstr ""
 
+#: templates/tag/assign.html:41
+msgid "You can click on a group's name to show/hide that group."
+msgstr ""
+
 #: templates/tag/assign.html:54
 msgid "Assign"
 msgstr ""
@@ -8163,6 +8418,18 @@ msgstr ""
 #: templates/ticket/ticket.html:38
 #, python-brace-format
 msgid "Could not change ticket: {error}"
+msgstr ""
+
+#: templates/ticket/ticket.html:279
+msgid "Autofill"
+msgstr ""
+
+#: templates/ticket/ticket.html:282
+msgid "Select reply..."
+msgstr ""
+
+#: templates/ticket/ticket.html:286
+msgid "Search..."
 msgstr ""
 
 #: templates/ticket/ticket.html:315
@@ -8306,6 +8573,10 @@ msgstr ""
 
 #: templates/user/comment.html:8
 msgid "Are you sure you want to delete all comments?"
+msgstr ""
+
+#: templates/user/comment.html:26
+msgid "Delete all comments"
 msgstr ""
 
 #: templates/user/contrib-table.html:5

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
-{% block title %}Newsletter {{ newsletter.title }} {{ action }} activate{% endblock %}
+{% block title %}{{ _('Newsletter') }} {{ newsletter.title }} {{ action }} {{ _('activate') }}{% endblock %}
 {% block body %}
-    <h1>Newsletter {{ newsletter.title }} {{ action }} activate</h1>
-    <p>Your subscription has successfully been activated.</p>
+    <h1>{{ _('Newsletter') }} {{ newsletter.title }} {{ action }} {{ _('activate') }}</h1>
+    <p>{{ _('Your subscription has successfully been activated.') }}</p>
 {% endblock %}

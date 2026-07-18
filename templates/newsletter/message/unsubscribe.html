@@ -4,17 +4,17 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unsubscription from {{ newsletter.title }}</title>
+    <title>{{ _('Unsubscription from') }} {{ newsletter.title }}</title>
 </head>
 <body>
-Dear {{ subscription.name }},
+{{ _('Dear %(name)s,', name=subscription.name) }}
 
-you, or someone in your name requested unsubscription from {{ newsletter.title }}.
+{{ _('you, or someone in your name requested unsubscription from %(title)s.', title=newsletter.title) }}
 
-If you would like to confirm your unsubscription, please follow this activation link:
+{{ _('If you would like to confirm your unsubscription, please follow this activation link:') }}
 http://{{ site.domain }}{{ subscription.unsubscribe_activate_url }}
 
-Kind regards,
+{{ _('Kind regards,') }}
 {{ newsletter.sender }}
 </body>
 </html>
