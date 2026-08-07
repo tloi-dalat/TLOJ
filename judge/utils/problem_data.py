@@ -224,11 +224,11 @@ class ProblemDataCompiler(object):
                 data = {}
                 if batch:
                     case.points = None
-                    case.is_pretest = batch['is_pretest']
                 else:
                     if case.points is None:
                         raise ProblemDataError(_('Points must be defined for non-batch case #%d.') % i)
-                    data['is_pretest'] = case.is_pretest
+
+                data['is_pretest'] = case.is_pretest
 
                 if not self.generator:
                     if case.input_file not in self.files:
@@ -255,7 +255,7 @@ class ProblemDataCompiler(object):
                     data['checker'] = make_checker(case)
                 else:
                     case.checker_args = ''
-                case.save(update_fields=('checker_args', 'is_pretest'))
+                case.save(update_fields=('checker_args',))
                 (batch['batched'] if batch else cases).append(data)
             elif case.type == 'S':
                 if batch:
@@ -266,7 +266,6 @@ class ProblemDataCompiler(object):
                 batch = {
                     'points': case.points,
                     'batched': [],
-                    'is_pretest': case.is_pretest,
                 }
                 if case.generator_args:
                     batch['generator_args'] = case.generator_args.splitlines()
@@ -284,7 +283,6 @@ class ProblemDataCompiler(object):
             elif case.type == 'E':
                 if not batch:
                     raise ProblemDataError(_('Attempt to end batch outside of one in case #%d.') % i)
-                case.is_pretest = batch['is_pretest']
                 case.input_file = ''
                 case.output_file = ''
                 case.generator_args = ''
