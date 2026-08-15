@@ -22,8 +22,8 @@ from judge.models.runtime import Language
 from judge.user_translations import gettext as user_gettext
 from judge.utils.url import get_absolute_pdf_url
 
-__all__ = ['ProblemGroup', 'ProblemType', 'Problem', 'ProblemTranslation', 'ProblemClarification', 'License',
-           'Solution', 'SubmissionSourceAccess', 'TranslatedProblemQuerySet']
+__all__ = ['ProblemGroup', 'ProblemType', 'OrganizationProblemTag', 'Problem', 'ProblemTranslation',
+           'ProblemClarification', 'License', 'Solution', 'SubmissionSourceAccess', 'TranslatedProblemQuerySet']
 
 
 def disallowed_characters_validator(text):
@@ -57,6 +57,21 @@ class ProblemGroup(models.Model):
         ordering = ['full_name']
         verbose_name = _('problem group')
         verbose_name_plural = _('problem groups')
+
+
+class OrganizationProblemTag(models.Model):
+    name = models.CharField(max_length=50, verbose_name=_('problem tag'))
+    organization = models.ForeignKey(Organization, related_name='problem_tags', on_delete=CASCADE,
+                                     verbose_name=_('organization'))
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ['name']
+        unique_together = ('organization', 'name')
+        verbose_name = _('organization problem tag')
+        verbose_name_plural = _('organization problem tags')
 
 
 class License(models.Model):
@@ -178,6 +193,9 @@ class Problem(models.Model):
                                    help_text=_("The type of problem, as shown on the problem's page."))
     group = models.ForeignKey(ProblemGroup, verbose_name=_('problem group'), on_delete=CASCADE,
                               help_text=_('The group of problem, shown under Category in the problem list.'))
+    tags = models.ManyToManyField(OrganizationProblemTag, blank=True, related_name='problems',
+                                  verbose_name=_('problem tags'),
+                                  help_text=_("Tags from this problem's organization."))
     time_limit = models.FloatField(verbose_name=_('time limit'),
                                    help_text=_('The time limit for this problem, in seconds. '
                                                'Fractional seconds (e.g. 1.5) are supported.'),
@@ -237,8 +255,6 @@ class Problem(models.Model):
                                      help_text=_('If private, only this organization may see the problem.'))
     is_organization_private = models.BooleanField(verbose_name=_('private to organizations'), default=False)
 
-    suggester = models.ForeignKey(Profile, blank=True, null=True, related_name='suggested_problems', on_delete=SET_NULL)
-
     allow_view_feedback = models.BooleanField(
         help_text=_('Allow user to view checker feedback.'),
         default=False,
@@ -262,6 +278,9 @@ class Problem(models.Model):
 
     @cached_property
     def types_list(self):
+        # if problem is in an organization, we show the tags instead of types
+        if self.is_organization_private:
+            return list(map(attrgetter('name'), self.tags.all()))
         return list(map(user_gettext, map(attrgetter('full_name'), self.types.all())))
 
     def languages_list(self):
@@ -270,17 +289,11 @@ class Problem(models.Model):
     def is_editor(self, profile):
         return (self.authors.filter(id=profile.id) | self.curators.filter(id=profile.id)).exists()
 
-    @property
-    def is_suggesting(self):
-        return self.suggester is not None and not self.is_public
-
     def is_editable_by(self, user):
         if not user.is_authenticated:
             return False
         if not user.has_perm('judge.edit_own_problem'):
             return False
-        if user.has_perm('judge.suggest_new_problem') and self.is_suggesting:
-            return True
         if user.has_perm('judge.edit_all_problem') or user.has_perm('judge.edit_public_problem') and self.is_public:
             return True
         if user.profile.id in self.editor_ids:
@@ -302,7 +315,7 @@ class Problem(models.Model):
                     return True
 
         # Problem is public.
-        if self.is_public and not self.is_suggesting:
+        if self.is_public:
             # Problem is not private to an organization.
             if not self.is_organization_private:
                 return True
@@ -326,10 +339,6 @@ class Problem(models.Model):
         # If the user can edit the problem.
         # We are using self.editor_ids to take advantage of caching.
         if self.is_editable_by(user) or user.profile.id in self.editor_ids:
-            return True
-
-        # If user is a suggester
-        if user.has_perm('judge.suggest_new_problem') and self.is_suggesting:
             return True
 
         # If user is a tester.
@@ -379,7 +388,6 @@ class Problem(models.Model):
         #       - not is_public problems
         #           - author or curator or tester
         #           - is_organization_private and admin of organization
-        #           - is_suggesting and user is a suggester
         #       - is_public problems
         #           - not is_organization_private or in organization or `judge.see_organization_problem`
         #           - author or curator or tester
@@ -388,7 +396,6 @@ class Problem(models.Model):
         edit_own_problem = user.has_perm('judge.edit_own_problem')
         edit_public_problem = edit_own_problem and user.has_perm('judge.edit_public_problem')
         edit_all_problem = edit_own_problem and user.has_perm('judge.edit_all_problem')
-        edit_suggesting_problem = edit_own_problem and user.has_perm('judge.suggest_new_problem')
 
         if not (user.has_perm('judge.see_private_problem') or edit_all_problem):
             q = Q(is_public=True)
@@ -398,10 +405,6 @@ class Problem(models.Model):
                     # Avoids needlessly joining Organization
                     Profile.organizations.through.objects.filter(profile=user.profile).values('organization_id'),
                 )
-
-            # Suggesters should be able to view suggesting problems
-            if edit_suggesting_problem:
-                q |= Q(suggester__isnull=False, is_public=False)
 
             # Authors, curators, and testers should always have access.
             q = cls.q_add_author_curator_tester(q, user.profile)
@@ -437,12 +440,10 @@ class Problem(models.Model):
         if user.has_perm('judge.edit_all_problem'):
             return cls.objects.all()
 
-        q = Q(authors=user.profile) | Q(curators=user.profile) | Q(suggester=user.profile)
+        q = Q(authors=user.profile) | Q(curators=user.profile)
 
         if user.has_perm('judge.edit_public_problem'):
             q |= Q(is_public=True)
-        if user.has_perm('judge.suggest_new_problem'):
-            q |= Q(suggester__isnull=False, is_public=False)
 
         return cls.objects.filter(q)
 
@@ -460,9 +461,6 @@ class Problem(models.Model):
     def editor_ids(self):
         editors = self.author_ids.union(
             Problem.curators.through.objects.filter(problem=self).values_list('profile_id', flat=True))
-        if self.suggester is not None:
-            editors = list(editors)
-            editors.append(self.suggester.id)
         return editors
 
     @cached_property
@@ -514,7 +512,7 @@ class Problem(models.Model):
 
     def update_stats(self):
         all_queryset = self.submission_set.filter(user__is_unlisted=False)
-        ac_queryset = all_queryset.filter(points__gte=self.points, result='AC')
+        ac_queryset = all_queryset.filter(result='AC')
         self.user_count = ac_queryset.values('user').distinct().count()
         submissions = all_queryset.count()
         if submissions:
@@ -635,16 +633,19 @@ class Problem(models.Model):
 
     def _rescore(self):
         from judge.tasks import rescore_problem
-        transaction.on_commit(rescore_problem.s(self.id, False).delay)
+        transaction.on_commit(rescore_problem.s(self.id).delay)
 
     @property
     def is_deleted(self):
         return self.deleted_at is not None
 
-    def mark_as_deleted(self):
+    def mark_as_deleted(self, invalidate_storage_cache=True):
         """Soft-delete this problem. Use the garbage collector to permanently remove it after the grace period."""
         self.deleted_at = timezone.now()
         self.save(update_fields=['deleted_at'])
+        if invalidate_storage_cache and self.organization_id:
+            from judge.utils.cache_helper import storage_pie_cache_factory
+            storage_pie_cache_factory(self.organization_id).delete_cache()
 
     mark_as_deleted.alters_data = True
 
@@ -656,7 +657,6 @@ class Problem(models.Model):
             ('create_organization_problem', _('Create organization problem')),
             ('edit_all_problem', _('Edit all problems')),
             ('edit_public_problem', _('Edit all public problems')),
-            ('suggest_new_problem', _('Suggest new problem')),
             ('problem_full_markup', _('Edit problems with full markup')),
             ('clone_problem', _('Clone problem')),
             ('upload_file_statement', _('Upload file-type statement')),

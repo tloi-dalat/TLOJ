@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('judge', '0219_problemdata_zipfile_size_alter_contest_authors_and_more'),
+        ('judge', '0233_organization_problem_tag'),
     ]
 
     operations = [
         migrations.AlterModelOptions(
             name='problem',
-            options={'permissions': (('see_private_problem', 'See hidden problems'), ('edit_own_problem', 'Edit own problems'), ('manage_own_problem_submissions', 'Manage submissions for own problems'), ('create_organization_problem', 'Create organization problem'), ('edit_all_problem', 'Edit all problems'), ('edit_public_problem', 'Edit all public problems'), ('suggest_new_problem', 'Suggest new problem'), ('problem_full_markup', 'Edit problems with full markup'), ('clone_problem', 'Clone problem'), ('upload_file_statement', 'Upload file-type statement'), ('change_public_visibility', 'Change is_public field'), ('change_manually_managed', 'Change is_manually_managed field'), ('see_organization_problem', 'See organization-private problems'), ('import_polygon_package', 'Import Codeforces Polygon package'), ('edit_type_group_all_problem', 'Edit type and group for all problems')), 'verbose_name': 'problem', 'verbose_name_plural': 'problems'},
+            options={'permissions': (('see_private_problem', 'See hidden problems'), ('edit_own_problem', 'Edit own problems'), ('manage_own_problem_submissions', 'Manage submissions for own problems'), ('create_organization_problem', 'Create organization problem'), ('edit_all_problem', 'Edit all problems'), ('edit_public_problem', 'Edit all public problems'), ('problem_full_markup', 'Edit problems with full markup'), ('clone_problem', 'Clone problem'), ('upload_file_statement', 'Upload file-type statement'), ('change_public_visibility', 'Change is_public field'), ('change_manually_managed', 'Change is_manually_managed field'), ('see_organization_problem', 'See organization-private problems'), ('import_polygon_package', 'Import Codeforces Polygon package'), ('edit_type_group_all_problem', 'Edit type and group for all problems')), 'verbose_name': 'problem', 'verbose_name_plural': 'problems'},
         ),
         migrations.AddField(
             model_name='problemtestcase',

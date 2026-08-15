@@ -3,6 +3,7 @@ import hmac
 from datetime import date, timedelta
 
 from django.conf import settings
+from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models, transaction
@@ -15,7 +16,7 @@ from jsonfield import JSONField
 from lupa import LuaRuntime
 from moss import MOSS_LANG_C, MOSS_LANG_CC, MOSS_LANG_JAVA, MOSS_LANG_PASCAL, MOSS_LANG_PYTHON
 
-from judge import contest_format, event_poster as event
+from judge import contest_format
 from judge.models.problem import Problem
 from judge.models.profile import Organization, Profile
 from judge.models.submission import Submission
@@ -71,6 +72,9 @@ class Contest(models.Model):
         (SCOREBOARD_AFTER_CONTEST, _('Hidden for duration of contest')),
         (SCOREBOARD_AFTER_PARTICIPATION, _('Hidden for duration of participation')),
     )
+    # Sentinel stored in csv_ranking to flag that the replay data has ghost participations
+    # merged in (set by the merge_replay_data command), rather than real CSV ranking data.
+    HAS_GHOST_PARTICIPATION = 'ghost'
     key = models.CharField(max_length=32, verbose_name=_('contest id'), unique=True,
                            validators=[RegexValidator('^[a-z0-9_]+$', _('Contest id must be ^[a-z0-9_]+$'))])
     name = models.CharField(max_length=100, verbose_name=_('contest name'), db_index=True)
@@ -203,6 +207,32 @@ class Contest(models.Model):
                                            help_text=_('An optional code to view the contest ranking. '
                                                        'Leave it blank to disable.'),
                                            blank=True, default='', max_length=255)
+    replay_version = models.PositiveIntegerField(default=0)
+
+    @property
+    def can_replay(self):
+        """
+        Determine if the contest can be replayed.
+
+        If a contest is replayable, **the ranking will be leaked**, regardless of whether the contest is private or not.
+
+        `can_replay` is independent of users, so we need to be very strict about **what contests can be replayed**,
+        otherwise, the ranking information will be leaked to all users.
+
+        1. The contest must be visible to all users.
+        2. The contest must be ended and not frozen.
+        3. Ranking must be visible.
+        4. The contest format must support replay.
+        5. Results must not still be globally hidden (e.g. VOI blind round / unfreeze_time not reached yet) —
+           the replay would otherwise leak the exact submission-by-submission history to everyone.
+        """
+        try:
+            self.access_check(AnonymousUser())
+        except Exception:
+            return False
+        return self.ended and self.frozen_last_minutes == 0 and self.show_scoreboard and \
+            self.format.name != contest_format.IOIContestFormat.name and \
+            not self.should_hide_result(AnonymousUser())  # IOI format not replayable; results must not be hidden
 
     @cached_property
     def format_class(self):
@@ -635,11 +665,10 @@ class ContestAnnouncement(models.Model):
     date = models.DateTimeField(verbose_name=_('announcement timestamp'), auto_now_add=True)
 
     def send(self):
-        if self.contest.push_announcements:
-            event.post(f'contest_{self.contest.id_secret}', {
-                'title': self.title,
-                'message': self.description,
-            })
+        if not self.contest.push_announcements:
+            return
+        from judge.tasks import send_contest_announcement
+        send_contest_announcement.delay(self.id)
 
 
 class ContestParticipation(models.Model):

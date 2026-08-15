@@ -1,34 +1,42 @@
+import datetime
+from collections import defaultdict
 from functools import cached_property
+from operator import itemgetter
+from random import randrange
 
 from django import forms
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.exceptions import ImproperlyConfigured, PermissionDenied
-from django.db.models import Count, FilteredRelation, Q, Sum
+from django.db import IntegrityError, transaction
+from django.db.models import Count, FilteredRelation, OuterRef, Q, Subquery, Sum
 from django.db.models.expressions import F, Value
 from django.db.models.functions import Coalesce
 from django.forms import Form, modelformset_factory
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
+from django.template.defaultfilters import filesizeformat
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.dateparse import parse_date
 from django.utils.html import format_html
 from django.utils.translation import gettext as _, gettext_lazy, ngettext
-from django.views.generic import CreateView, DetailView, FormView, ListView, UpdateView, View
+from django.views.generic import CreateView, DetailView, FormView, ListView, TemplateView, UpdateView, View
 from django.views.generic.detail import SingleObjectMixin, SingleObjectTemplateResponseMixin
 from reversion import revisions
 
-from judge.forms import OrganizationForm
-from judge.models import BlogPost, Comment, Contest, Language, Organization, OrganizationRequest, \
-    Problem, ProblemData, Profile
-from judge.models.profile import OrganizationMonthlyUsage
+from judge.forms import OrganizationForm, OrganizationProblemTagForm, QuotaGrantForm
+from judge.models import BlogPost, Comment, Contest, Language, Organization, \
+    OrganizationRequest, Problem, Profile, Submission
+from judge.models.profile import OrganizationMonthlyUsage, OrganizationQuota
 from judge.tasks import on_new_problem
-from judge.utils import cache_helper
+from judge.utils.cache_helper import storage_pie_cache_factory
 from judge.utils.infinite_paginator import InfinitePaginationMixin
-from judge.utils.organization import add_admin_to_group
+from judge.utils.organization import add_admin_to_group, add_quota_context
+from judge.utils.problems import user_completed_ids
 from judge.utils.ranker import ranker
-from judge.utils.stats import get_lines_chart
+from judge.utils.stats import get_lines_chart, get_pie_chart
 from judge.utils.views import DiggPaginatorMixin, QueryStringSortMixin, TitleMixin, generic_message, \
     paginate_query_context
 from judge.views.blog import BlogPostCreate, PostListBase
@@ -39,7 +47,13 @@ from judge.views.submission import SubmissionsListBase
 __all__ = ['OrganizationList', 'OrganizationHome', 'OrganizationUsers', 'OrganizationMembershipChange',
            'JoinOrganization', 'LeaveOrganization', 'EditOrganization', 'RequestJoinOrganization',
            'OrganizationRequestDetail', 'OrganizationRequestView', 'OrganizationRequestLog',
-           'KickUserWidgetView', 'OrganizationStorageDashboard']
+           'KickUserWidgetView', 'OrganizationStorageDashboard',
+           'OrganizationQuotaAdd', 'OrganizationQuotaDelete', 'get_organization_problem_filter',
+           'OrganizationUserSolvedProblems']
+
+
+MAX_BULK_DELETE_PROBLEMS = 200
+SOLVED_PROBLEMS_PAGE_SIZE = 10
 
 
 class OrganizationMixin(object):
@@ -54,7 +68,7 @@ class OrganizationMixin(object):
 
     @cached_property
     def organization(self):
-        return get_object_or_404(Organization, slug=self.kwargs['slug'])
+        return get_object_or_404(Organization.objects.prefetch_related('admins__user'), slug=self.kwargs['slug'])
 
     def dispatch(self, request, *args, **kwargs):
         if 'slug' not in kwargs:
@@ -141,14 +155,62 @@ class BaseOrganizationListView(PublicOrganizationMixin, ListView):
         return super(BaseOrganizationListView, self).get_object(queryset)
 
 
-class OrganizationList(TitleMixin, ListView):
+class OrganizationList(DiggPaginatorMixin, TitleMixin, ListView):
     model = Organization
     context_object_name = 'organizations'
     template_name = 'organization/list.html'
     title = gettext_lazy('Organizations')
+    paginate_by = 200
+
+    @cached_property
+    def can_manage_organizations(self):
+        return self.request.user.has_perm('judge.edit_all_organization')
+
+    def GET_with_session(self, key):
+        if key not in self.request.GET:
+            return self.request.session.get(key, False)
+        return self.request.GET.get(key, None) == '1'
+
+    @cached_property
+    def show_all_orgs(self):
+        return self.can_manage_organizations and self.GET_with_session('show_all_orgs')
 
     def get_queryset(self):
-        return Organization.objects.filter(is_unlisted=False)
+        if self.show_all_orgs:
+            queryset = Organization.objects.prefetch_related('admins__user')
+        else:
+            queryset = Organization.objects.filter(is_unlisted=False)
+
+        self.search_query = None
+        if self.show_all_orgs and 'search' in self.request.GET:
+            self.search_query = search_query = ' '.join(self.request.GET.getlist('search')).strip()
+            if search_query:
+                queryset = queryset.filter(
+                    Q(name__icontains=search_query) |
+                    Q(slug__icontains=search_query) |
+                    Q(short_name__icontains=search_query) |
+                    Q(admins__user__username__icontains=search_query),
+                ).distinct()
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['show_all_orgs'] = self.show_all_orgs
+        context['search_query'] = self.search_query
+        context.update(paginate_query_context(self.request))
+        if self.request.user.is_authenticated:
+            user_organizations = self.request.profile.organizations.all()
+            if self.show_all_orgs:
+                user_organizations = user_organizations.prefetch_related('admins__user')
+            context['user_organizations'] = user_organizations
+        return context
+
+    def post(self, request, *args, **kwargs):
+        if 'show_all_orgs' in request.GET:
+            request.session['show_all_orgs'] = request.GET.get('show_all_orgs') == '1'
+        else:
+            request.session.pop('show_all_orgs', None)
+        return HttpResponseRedirect(request.get_full_path())
 
 
 class OrganizationUsers(QueryStringSortMixin, DiggPaginatorMixin, BaseOrganizationListView):
@@ -390,6 +452,11 @@ class CreateOrganization(PermissionRequiredMixin, TitleMixin, CreateView):
     def get_title(self):
         return _('Create new organization')
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
     def form_valid(self, form):
         with revisions.create_revision(atomic=True):
             revisions.set_comment(_('Created on site'))
@@ -433,6 +500,13 @@ class EditOrganization(LoginRequiredMixin, TitleMixin, AdminOrganizationMixin, U
             raise PermissionDenied()
         return object
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.user.has_perm('judge.add_organizationquota'):
+            context['quota_form'] = QuotaGrantForm()
+            context['existing_quotas'] = self.organization.quotas.order_by('start_date')
+        return context
+
     def form_valid(self, form):
         with revisions.create_revision(atomic=True):
             revisions.set_comment(_('Edited from site'))
@@ -444,6 +518,100 @@ class EditOrganization(LoginRequiredMixin, TitleMixin, AdminOrganizationMixin, U
         kwargs = super().get_form_kwargs()
         kwargs['request'] = self.request  # Pass the request object to the form
         return kwargs
+
+
+class OrganizationQuotaAdd(LoginRequiredMixin, AdminOrganizationMixin, View):
+    def post(self, request, *args, **kwargs):
+        if not request.user.has_perm('judge.add_organizationquota'):
+            raise PermissionDenied()
+        form = QuotaGrantForm(request.POST)
+        if form.is_valid():
+            packages = form.cleaned_data['packages']
+            OrganizationQuota.objects.create(
+                organization=self.organization,
+                start_date=form.cleaned_data['start_date'],
+                end_date=form.cleaned_data['end_date'],
+                added_problems=packages * settings.VNOJ_QUOTA_PACKAGE_PROBLEMS,
+                added_storage=packages * settings.VNOJ_QUOTA_PACKAGE_STORAGE,
+            )
+        return HttpResponseRedirect(reverse('edit_organization', args=[self.organization.slug]))
+
+
+class OrganizationQuotaDelete(LoginRequiredMixin, AdminOrganizationMixin, View):
+    def post(self, request, *args, **kwargs):
+        # We use `add_organizationquota` permission to indicate that this user has all edit permissions.
+        # I don't want to make this too complex.
+        if not request.user.has_perm('judge.add_organizationquota'):
+            raise PermissionDenied()
+        quota_id = kwargs.get('quota_id')
+        OrganizationQuota.objects.filter(id=quota_id, organization=self.organization).delete()
+        return HttpResponseRedirect(reverse('edit_organization', args=[self.organization.slug]))
+
+
+class OrganizationTagList(AdminOrganizationMixin, TitleMixin, ListView):
+    template_name = 'organization/tags.html'
+    context_object_name = 'tags'
+
+    def get_title(self):
+        return _('Tags of %s') % self.organization.name
+
+    def get_queryset(self):
+        return self.organization.problem_tags.annotate(
+            problem_count=Count('problems', filter=Q(problems__deleted_at__isnull=True)))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['tab'] = 'tags'
+        return context
+
+
+class OrganizationTagCreate(AdminOrganizationMixin, View):
+    form_class = OrganizationProblemTagForm
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        if not form.is_valid():
+            return JsonResponse({'errors': form.errors.get_json_data()}, status=400)
+
+        tag = form.save(commit=False)
+        tag.organization = self.organization
+        try:
+            with transaction.atomic():
+                tag.save()
+        except IntegrityError:
+            # Only the unique_together(organization, name) constraint can trip here.
+            form.add_error('name', _('A tag with this name already exists.'))
+            return JsonResponse({'errors': form.errors.get_json_data()}, status=400)
+
+        return JsonResponse({'id': tag.id, 'name': tag.name})
+
+
+class OrganizationTagUpdate(AdminOrganizationMixin, View):
+    form_class = OrganizationProblemTagForm
+
+    def post(self, request, *args, **kwargs):
+        tag = get_object_or_404(self.organization.problem_tags.all(), pk=kwargs.get('pk'))
+        form = self.form_class(request.POST, instance=tag)
+        if not form.is_valid():
+            return JsonResponse({'errors': form.errors.get_json_data()}, status=400)
+
+        try:
+            with transaction.atomic():
+                tag = form.save()
+        except IntegrityError:
+            # Only the unique_together(organization, name) constraint can trip here.
+            form.add_error('name', _('A tag with this name already exists.'))
+            return JsonResponse({'errors': form.errors.get_json_data()}, status=400)
+
+        return JsonResponse({'id': tag.id, 'name': tag.name})
+
+
+class OrganizationTagDelete(AdminOrganizationMixin, View):
+    def post(self, request, *args, **kwargs):
+        tag = get_object_or_404(self.organization.problem_tags.all(), pk=kwargs.get('pk'))
+        tag_id = tag.id
+        tag.delete()
+        return JsonResponse({'id': tag_id, 'deleted': True})
 
 
 class KickUserWidgetView(LoginRequiredMixin, AdminOrganizationMixin, SingleObjectMixin, View):
@@ -548,6 +716,32 @@ class OrganizationHome(TitleMixin, PublicOrganizationMixin, PostListBase):
         return context
 
 
+def get_organization_problem_filter(organization, user, profile):
+    """Get filter for visible problems in an organization
+
+    The logic of this is:
+        - If user has perm `see_private_problem`, they
+        can view all org's problem (including private problems)
+        - Otherwise, they can view all public problems and
+        problems that they are authors/curators/testers
+
+    With that logic, Organization admins cannot view private
+    problems of other admins unless they are authors/curators/testers
+    """
+    if user.has_perm('judge.see_private_problem'):
+        return Q(organization=organization)
+
+    _filter = Q(is_public=True)
+
+    # Authors, curators, and testers should always have access, so OR at the very end.
+    if profile is not None:
+        _filter |= Q(authors=profile)
+        _filter |= Q(curators=profile)
+        _filter |= Q(testers=profile)
+
+    return _filter & Q(organization=organization)
+
+
 class ProblemListOrganization(PrivateOrganizationMixin, ProblemList):
     context_object_name = 'problems'
     template_name = 'organization/problem-list.html'
@@ -556,84 +750,152 @@ class ProblemListOrganization(PrivateOrganizationMixin, ProblemList):
     def get_hot_problems(self):
         return None
 
+    def get_normal_queryset(self):
+        return super().get_normal_queryset().prefetch_related('tags')
+
     def get_context_data(self, **kwargs):
         context = super(ProblemListOrganization, self).get_context_data(**kwargs)
+        context['show_org_tags'] = True
+        context['org_tags_filter'] = self.organization.problem_tags.all()
+        raw_tags = self.request.GET.getlist('tag')
+        context['selected_tags'] = [int(t) for t in raw_tags if t.isdigit()]
+        context['untagged_selected'] = 'untagged' in raw_tags or self.request.GET.get('untagged') == '1'
         if not self.is_in_organization_subdomain():
             context['title'] = self.organization.name
         return context
 
     def get_filter(self):
-        """Get filter for visible problems in an organization
+        _filter = get_organization_problem_filter(self.organization, self.request.user, self.profile)
 
-        The logic of this is:
-            - If user has perm `see_private_problem`, they
-            can view all org's problem (including private problems)
-            - Otherwise, they can view all public problems and
-            problems that they are authors/curators/testers
+        # The tag filter is a multi-select whose values are tag ids plus an
+        # 'untagged' sentinel; ?untagged=1 is the equivalent single-purpose link.
+        raw_tags = self.request.GET.getlist('tag')
+        tag_ids = [t for t in raw_tags if t.isdigit()]
+        want_untagged = 'untagged' in raw_tags or self.request.GET.get('untagged') == '1'
 
-        With that logic, Organization admins cannot view private
-        problems of other admins unless they are authors/curators/testers
-        """
-        if self.request.user.has_perm('judge.see_private_problem'):
-            return Q(organization=self.organization)
+        tag_filter = Q()
+        if tag_ids:
+            tag_filter |= Q(tags__id__in=tag_ids)
+        if want_untagged:
+            tag_filter |= Q(tags__isnull=True)
+        if tag_filter:
+            _filter &= tag_filter
 
-        _filter = Q(is_public=True)
-
-        # Authors, curators, and testers should always have access, so OR at the very end.
-        if self.profile is not None:
-            _filter |= Q(authors=self.profile)
-            _filter |= Q(curators=self.profile)
-            _filter |= Q(testers=self.profile)
-
-        return _filter & Q(organization=self.organization)
+        return _filter
 
 
-class MonthlyCreditUsageOrganization(LoginRequiredMixin, TitleMixin, AdminOrganizationMixin, ListView):
-    template_name = 'organization/usage.html'
+class RandomProblemOrganization(ProblemListOrganization):
+    def get(self, request, *args, **kwargs):
+        self.setup_problem_list(request)
+        if self.in_contest:
+            raise Http404()
+        queryset = self.get_normal_queryset()
+        count = queryset.count()
+        if not count:
+            return HttpResponseRedirect(reverse('problem_list_organization', args=[self.organization.slug]))
+        return HttpResponseRedirect(queryset[randrange(count)].get_absolute_url())
+
+
+class OrganizationUserSolvedProblems(AdminOrganizationMixin, TitleMixin, TemplateView):
+    template_name = 'organization/user-solved.html'
+
+    def get_member(self):
+        member = get_object_or_404(Profile, user__username=self.kwargs['user'])
+        if member not in self.organization:
+            raise Http404()
+        return member
+
+    def get(self, request, *args, **kwargs):
+        try:
+            self.member = self.get_member()
+        except Http404:
+            return generic_message(
+                request, _('No such member'),
+                _('Could not find a member with the username "%s" in this organization.') % self.kwargs['user'],
+                status=404,
+            )
+        return super(OrganizationUserSolvedProblems, self).get(request, *args, **kwargs)
+
+    def get_title(self):
+        return self.organization.name
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['title'] = self.organization.name
-        context['usages'] = OrganizationMonthlyUsage.objects.filter(organization=self.organization)\
-            .order_by('time').values('time', 'consumed_credit')
+        context = super(OrganizationUserSolvedProblems, self).get_context_data(**kwargs)
 
-        usages = context['usages']
-        days = [usage['time'].isoformat() for usage in usages] + [_('Current month')]
-        used_credits = [usage['consumed_credit'] for usage in usages] + [self.organization.current_consumed_credit]
-        sec_per_hour = 60 * 60
-        chart = get_lines_chart(days, {
-            _('Credit usage (hour)'): [
-                round(credit / sec_per_hour, 2) for credit in used_credits
-            ],
-        })
+        problems = Problem.objects.filter(
+            get_organization_problem_filter(self.organization, self.request.user, self.request.profile),
+        )
 
-        cost_chart = get_lines_chart(days, {
-            _('Cost (thousand vnd)'): [
-                round(
-                    max(0, credit - settings.VNOJ_MONTHLY_FREE_CREDIT) / sec_per_hour * settings.VNOJ_PRICE_PER_HOUR, 3,
-                ) for credit in used_credits
-            ],
-        })
+        solved_ids = user_completed_ids(self.member)
 
-        free_credit = int(self.organization.free_credit)
+        untagged = _('Untagged')
+        sections = defaultdict(list)
+        solved = set()
+        # The tags join yields one row per (problem, tag); untagged problems come through as tags__name=None.
+        for row in problems.filter(id__in=solved_ids).values('id', 'code', 'name', 'tags__name'):
+            solved.add(row['id'])
+            sections[row['tags__name'] or untagged].append({'code': row['code'], 'name': row['name']})
+        solved_cnt = len(solved)
 
-        context['free_credit'] = {
-            'hour': free_credit // sec_per_hour,
-            'minute': (free_credit % sec_per_hour) // 60,
-            'second': free_credit % 60,
-        }
+        tag_sections = []
+        for name, solved_problems in sections.items():
+            solved_problems.sort(key=itemgetter('name'))
+            tag_sections.append({'name': name, 'count': len(solved_problems), 'problems': solved_problems})
+        tag_sections.sort(key=lambda section: (section['name'] == untagged, -section['count'], section['name']))
 
-        paid_credit = int(self.organization.paid_credit)
-
-        context['paid_credit'] = {
-            'hour': paid_credit // sec_per_hour,
-            'minute': (paid_credit % sec_per_hour) // 60,
-            'second': paid_credit % 60,
-        }
-
-        context['credit_chart'] = chart
-        context['cost_chart'] = cost_chart
+        context['member'] = self.member
+        context['solved_count'] = solved_cnt
+        context['page_size'] = SOLVED_PROBLEMS_PAGE_SIZE
+        context['tag_sections'] = tag_sections
         return context
+
+
+class BulkDeleteOrganizationProblems(LoginRequiredMixin, AdminOrganizationMixin, View):
+    def post(self, request, *args, **kwargs):
+        org = self.organization
+        problem_ids = request.POST.getlist('problem_ids')
+        if not problem_ids:
+            messages.warning(request, _('No problems selected for deletion.'))
+            return HttpResponseRedirect(reverse('organization_monthly_usage', args=[org.slug]))
+
+        if len(problem_ids) > MAX_BULK_DELETE_PROBLEMS:
+            messages.error(request, _('Cannot delete more than %d problems at once.') % MAX_BULK_DELETE_PROBLEMS)
+            return HttpResponseRedirect(reverse('organization_monthly_usage', args=[org.slug]))
+
+        problems = Problem.available.filter(
+            id__in=problem_ids,
+            organization=org,
+        )
+
+        if not request.user.is_superuser:
+            all_count = problems.count()
+            problems = problems.filter(Q(authors=request.profile) | Q(curators=request.profile))
+            skipped = all_count - problems.count()
+            if skipped > 0:
+                messages.error(request, ngettext(
+                    '%d problem was skipped because you are not its author.',
+                    '%d problems were skipped because you are not their author.',
+                    skipped,
+                ) % skipped)
+
+        count = problems.count()
+        if count > 0:
+            with revisions.create_revision(atomic=True):
+                for problem in problems:
+                    problem.mark_as_deleted(invalidate_storage_cache=False)
+                revisions.set_user(request.user)
+                revisions.set_comment(_('Bulk marked as deleted'))
+
+            storage_pie_cache_factory(org.id).delete_cache()
+            messages.success(request, ngettext(
+                'Successfully deleted %d problem.',
+                'Successfully deleted %d problems.',
+                count,
+            ) % count)
+        else:
+            messages.error(request, _('No valid problems could be deleted.'))
+
+        return HttpResponseRedirect(reverse('organization_monthly_usage', args=[org.slug]))
 
 
 class ContestListOrganization(PrivateOrganizationMixin, ContestList):
@@ -673,6 +935,26 @@ class SubmissionListOrganization(InfinitePaginationMixin, PrivateOrganizationMix
 class ProblemCreateOrganization(AdminOrganizationMixin, ProblemCreate):
     permission_required = 'judge.create_organization_problem'
 
+    def _quota_error_response(self):
+        return render(self.request, 'organization/quota-error.html', {
+            'title': _('Problem limit reached'),
+            'message': _('This organization has reached its maximum number of problems (%d). '
+                         'Please delete some problems before creating new ones.')
+            % self.organization.max_problems,
+            'quota_warning_suffix': settings.VNOJ_QUOTA_WARNING_SUFFIX,
+        })
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        add_quota_context(self.organization, context)
+        context['organization'] = self.organization
+        return context
+
+    def get(self, request, *args, **kwargs):
+        if settings.VNOJ_QUOTA_ENFORCEMENT_ENABLED and not self.organization.can_create_problem():
+            return self._quota_error_response()
+        return super().get(request, *args, **kwargs)
+
     def get_initial(self):
         initial = super(ProblemCreateOrganization, self).get_initial()
         initial = initial.copy()
@@ -685,6 +967,8 @@ class ProblemCreateOrganization(AdminOrganizationMixin, ProblemCreate):
         return kwargs
 
     def form_valid(self, form):
+        if settings.VNOJ_QUOTA_ENFORCEMENT_ENABLED and not self.organization.can_create_problem():
+            return self._quota_error_response()
         with revisions.create_revision(atomic=True):
             self.object = problem = form.save()
             problem.authors.add(self.request.user.profile)
@@ -747,16 +1031,21 @@ class ContestCreateOrganization(AdminOrganizationMixin, CreateContest):
         self.object.organization = self.organization
         self.object.save()
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['contest_org'] = self.organization
+        return context
+
 
 class OrganizationStorageDashboard(LoginRequiredMixin, TitleMixin, AdminOrganizationMixin,
                                    InfinitePaginationMixin, ListView):
     """Dashboard showing storage usage for organization admins."""
-    template_name = 'organization/storage.html'
+    template_name = 'organization/usage.html'
     context_object_name = 'problems'
-    paginate_by = 100
+    paginate_by = MAX_BULK_DELETE_PROBLEMS
 
     def get_title(self):
-        return _('Storage Dashboard - %s') % self.organization.name
+        return _('Organization cost - %s') % self.organization.name
 
     def get_queryset(self):
         queryset = Problem.available.filter(
@@ -765,32 +1054,150 @@ class OrganizationStorageDashboard(LoginRequiredMixin, TitleMixin, AdminOrganiza
             data_size=Coalesce(F('data_files__zipfile_size'), Value(0)),
         ).only(
             'code', 'name',
-        ).order_by('-data_size')
+        ).prefetch_related('authors__user', 'curators__user')
 
-        return queryset
+        # Annotate with the latest submission date
+
+        last_sub_query = Submission.objects.filter(problem=OuterRef('pk')).order_by('-date').values('date')[:1]
+        queryset = queryset.annotate(last_submission_date=Subquery(last_sub_query))
+
+        # Filter by author
+        author_id = self.request.GET.get('author')
+        if author_id:
+            try:
+                author_id = int(author_id)
+                if self.organization.admins.filter(id=author_id).exists():
+                    queryset = queryset.filter(Q(authors__id=author_id) | Q(curators__id=author_id))
+            except ValueError:
+                pass
+
+        # Filter by last submission time (after / before / never)
+        if self.request.GET.get('no_submission'):
+            queryset = queryset.filter(last_submission_date__isnull=True)
+        else:
+            for key, lookup, time_val in [('last_sub_after', '__gte', datetime.time.min),
+                                          ('last_sub_before', '__lte', datetime.time.max)]:
+                val = self.request.GET.get(key)
+                if val:
+                    try:
+                        date_val = parse_date(val)
+                        if date_val:
+                            dt_val = timezone.make_aware(datetime.datetime.combine(date_val, time_val))
+                            queryset = queryset.filter(**{f'last_submission_date{lookup}': dt_val})
+                    except ValueError:
+                        pass
+
+        return queryset.order_by('-data_size', 'id')
+
+    def _get_storage_pie_charts(self, now):
+        org = self.organization
+
+        def ago(days):
+            return now - datetime.timedelta(days=days)
+
+        bucket_ranges = [
+            (None, None),
+            (ago(365), None),
+            (ago(274), ago(365)),
+            (ago(183), ago(274)),
+            (ago(91), ago(183)),
+            (now, ago(91)),
+        ]
+
+        cache = storage_pie_cache_factory(org.id)
+        raw = cache.get_cache()
+        if raw is None:
+            all_problems = Problem.available.filter(organization=org).annotate(
+                data_size=Coalesce(F('data_files__zipfile_size'), Value(0)),
+            )
+            last_sub_qs = Submission.objects.filter(
+                problem=OuterRef('pk'),
+            ).order_by('-date').values('date')[:1]
+            all_problems = all_problems.annotate(last_submission_date=Subquery(last_sub_qs))
+
+            raw = []
+            for after, before in bucket_ranges:
+                if after is None:
+                    qs = all_problems.filter(last_submission_date__isnull=True)
+                else:
+                    filters = {'last_submission_date__lte': after}
+                    if before is not None:
+                        filters['last_submission_date__gt'] = before
+                    qs = all_problems.filter(**filters)
+                agg = qs.aggregate(cnt=Count('id'), total=Coalesce(Sum('data_size'), Value(0)))
+                raw.append((agg['cnt'], agg['total']))
+            cache.set_cache(raw)
+
+        label_threshold = _('Last submission %(months)d+ months ago')
+        label_range = _('Last submission %(from)d-%(to)d months ago')
+        label_recent = _('Last submission < %(months)d months ago')
+        labels = [
+            _('No submissions'),
+            label_threshold % {'months': 12},
+            label_range % {'from': 9, 'to': 12},
+            label_range % {'from': 6, 'to': 9},
+            label_range % {'from': 3, 'to': 6},
+            label_recent % {'months': 3},
+        ]
+
+        total_cnt = sum(r[0] for r in raw) or 1
+        total_size = sum(r[1] for r in raw) or 1
+
+        count_data, size_data = [], []
+        for label, (cnt, size) in zip(labels, raw):
+            cnt_pct = round(cnt / total_cnt * 100)
+            size_pct = round(size / total_size * 100)
+            count_data.append(('{} ({}%, {} {})'.format(label, cnt_pct, cnt, _('problems')), cnt))
+            size_data.append(('{} ({}%, {})'.format(label, size_pct, filesizeformat(size)), size))
+
+        return get_pie_chart(count_data), get_pie_chart(size_data)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        cache_factory = cache_helper.organization_storage_cache_factory(self.organization.id)
-        cached_data = cache_factory.get_cache()
+        org = self.organization
+        add_quota_context(org, context)
 
-        if cached_data is None:
-            storage_totals = ProblemData.objects.filter(
-                problem__organization=self.organization,
-            ).aggregate(
-                test_data=Sum('zipfile_size'),
-            )
+        today = timezone.now()
+        context['active_quotas'] = list(
+            org.quotas.filter(start_date__lte=today.date(), end_date__gte=today.date()).order_by('end_date'),
+        )
 
-            test_data_total = storage_totals['test_data'] or 0
+        context['storage_count_chart'], context['storage_size_chart'] = self._get_storage_pie_charts(today)
 
-            cached_data = {
-                'test_data': test_data_total,
-            }
+        # Credit/cost chart context (merged from usage page)
+        usages = OrganizationMonthlyUsage.objects.filter(organization=org) \
+            .order_by('time').values('time', 'consumed_credit')
+        context['usages'] = usages
+        days = [usage['time'].isoformat() for usage in usages] + [_('Current month')]
+        used_credits = [usage['consumed_credit'] for usage in usages] + [org.current_consumed_credit]
+        sec_per_hour = 60 * 60
+        context['credit_chart'] = get_lines_chart(days, {
+            _('Credit usage (hour)'): [round(c / sec_per_hour, 2) for c in used_credits],
+        })
+        context['cost_chart'] = get_lines_chart(days, {
+            _('Cost (thousand vnd)'): [
+                round(max(0, c - settings.VNOJ_MONTHLY_FREE_CREDIT) / sec_per_hour * settings.VNOJ_PRICE_PER_HOUR, 3)
+                for c in used_credits
+            ],
+        })
+        free_credit = int(org.free_credit)
+        context['free_credit'] = {
+            'hour': free_credit // sec_per_hour,
+            'minute': (free_credit % sec_per_hour) // 60,
+            'second': free_credit % 60,
+        }
+        paid_credit = int(org.paid_credit)
+        context['paid_credit'] = {
+            'hour': paid_credit // sec_per_hour,
+            'minute': (paid_credit % sec_per_hour) // 60,
+            'second': paid_credit % 60,
+        }
 
-            cache_factory.set_cache(cached_data)
-
-        context['test_data_storage'] = cached_data['test_data']
+        context['org_admins'] = org.admins.select_related('user')
+        context['selected_author'] = self.request.GET.get('author')
+        context['last_sub_after'] = self.request.GET.get('last_sub_after')
+        context['last_sub_before'] = self.request.GET.get('last_sub_before')
 
         context.update(paginate_query_context(self.request))
 

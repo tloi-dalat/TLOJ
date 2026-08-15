@@ -148,12 +148,11 @@ def link_user(user):
         user, profile = user.user, user
     elif isinstance(user, AbstractUser):
         profile = user.profile
-    elif type(user).__name__ == 'ContestRankingProfile':
-        user, profile = user.user, user
     else:
         raise ValueError('Expected profile or user, got %s' % (type(user),))
 
-    if isinstance(profile, Profile) and profile.display_badge:
+    # only show display_badge if it is explicitly prefetched
+    if isinstance(profile, Profile) and 'display_badge' in profile.__dict__ and profile.display_badge:
         display_badge_img = f'<img src="{escape(profile.display_badge.mini)}"' \
                             f' title="{escape(profile.display_badge.name)}"' \
                             f' style="height: 1em; width: auto; margin-left: 0.25em;" />'

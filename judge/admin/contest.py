@@ -2,7 +2,7 @@ from adminsortable2.admin import SortableAdminBase, SortableInlineAdminMixin
 from django.contrib import admin
 from django.core.exceptions import PermissionDenied
 from django.db import connection, transaction
-from django.db.models import Q, TextField
+from django.db.models import F, Q, TextField
 from django.forms import ModelForm, ModelMultipleChoiceField
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -14,11 +14,12 @@ from django.utils.translation import gettext_lazy as _, ngettext
 from django.views.decorators.http import require_POST
 from reversion.admin import VersionAdmin
 
+from judge.admin.utils import AdminFastPaginationMixin
 from judge.models import Contest, ContestAnnouncement, ContestProblem, ContestSubmission, Profile, Rating, Submission
 from judge.ratings import rate_contest
 from judge.utils.views import NoBatchDeleteMixin
 from judge.widgets import AdminAceWidget, AdminHeavySelect2MultipleWidget, AdminHeavySelect2Widget, \
-    AdminMartorWidget, AdminSelect2MultipleWidget, AdminSelect2Widget
+    AdminMartorWidget, AdminSelect2MultipleWidget
 
 
 class AdminHeavySelect2Widget(AdminHeavySelect2Widget):
@@ -75,14 +76,14 @@ class ContestProblemInline(SortableInlineAdminMixin, admin.TabularInline):
         if obj.id is None:
             return ''
         return format_html('<a class="button rejudge-link action-link" href="{0}">{1}</a>',
-                           reverse('admin:judge_contest_rejudge', args=(obj.contest.id, obj.id)), _('Rejudge'))
+                           reverse('admin:judge_contest_rejudge', args=(obj.contest_id, obj.id)), _('Rejudge'))
 
     @admin.display(description='')
     def rescore_column(self, obj):
         if obj.id is None:
             return ''
         return format_html('<a class="button rescore-link action-link" href="{}">Rescore</a>',
-                           reverse('admin:judge_contest_rescore', args=(obj.contest.id, obj.id)))
+                           reverse('admin:judge_contest_rescore', args=(obj.contest_id, obj.id)))
 
 
 class ContestAnnouncementInlineForm(ModelForm):
@@ -102,7 +103,7 @@ class ContestAnnouncementInline(admin.StackedInline):
         if obj.id is None:
             return 'Not available'
         return format_html('<a class="button resend-link action-link" href="{}">Resend</a>',
-                           reverse('admin:judge_contest_resend', args=(obj.contest.id, obj.id)))
+                           reverse('admin:judge_contest_resend', args=(obj.contest_id, obj.id)))
 
 
 class ContestForm(ModelForm):
@@ -111,9 +112,15 @@ class ContestForm(ModelForm):
         if 'rate_exclude' in self.fields:
             if self.instance and self.instance.id:
                 self.fields['rate_exclude'].queryset = \
-                    Profile.objects.filter(contest_history__contest=self.instance).distinct()
+                    Profile.objects.filter(contest_history__contest=self.instance).select_related('user').distinct()
             else:
                 self.fields['rate_exclude'].queryset = Profile.objects.none()
+        profile_qs = Profile.objects.select_related('user')
+        for field in (
+            'authors', 'curators', 'testers', 'private_contestants', 'banned_users', 'view_contest_scoreboard',
+        ):
+            if field in self.fields:
+                self.fields[field].queryset = profile_qs
         self.fields['banned_users'].widget.can_add_related = False
         self.fields['view_contest_scoreboard'].widget.can_add_related = False
         self.fields['banned_judges'].widget.can_add_related = False
@@ -138,7 +145,7 @@ class ContestForm(ModelForm):
         }
 
 
-class ContestAdmin(NoBatchDeleteMixin, SortableAdminBase, VersionAdmin):
+class ContestAdmin(AdminFastPaginationMixin, NoBatchDeleteMixin, SortableAdminBase, VersionAdmin):
     fieldsets = (
         (None, {'fields': ('key', 'name', 'authors', 'curators', 'testers')}),
         (_('Settings'), {'fields': ('is_visible', 'use_clarifications', 'push_announcements', 'disallow_virtual',
@@ -278,6 +285,15 @@ class ContestAdmin(NoBatchDeleteMixin, SortableAdminBase, VersionAdmin):
                                             '%d contests successfully unlocked.',
                                             count) % count)
 
+    def invalidate_replay_view(self, request, contest_id):
+        if not request.user.has_perm('judge.change_contest'):
+            raise PermissionDenied()
+        contest = get_object_or_404(Contest, id=contest_id)
+        if not contest.ended:
+            raise Http404()
+        Contest.objects.filter(pk=contest.pk).update(replay_version=F('replay_version') + 1)
+        return HttpResponseRedirect(request.headers.get('referer', reverse('admin:judge_contest_changelist')))
+
     def set_locked_after(self, contest, locked_after):
         with transaction.atomic():
             contest.locked_after = locked_after
@@ -289,6 +305,8 @@ class ContestAdmin(NoBatchDeleteMixin, SortableAdminBase, VersionAdmin):
         return [
             path('rate/all/', self.rate_all_view, name='judge_contest_rate_all'),
             path('<int:id>/rate/', self.rate_view, name='judge_contest_rate'),
+            path('<int:contest_id>/invalidate_replay/', self.invalidate_replay_view,
+                 name='judge_contest_invalidate_replay'),
             path('<int:contest_id>/rejudge/<int:problem_id>/', self.rejudge_view, name='judge_contest_rejudge'),
             path('<int:contest_id>/rescore/<int:problem_id>/', self.rescore_view, name='judge_contest_rescore'),
             path('<int:contest_id>/resend/<int:announcement_id>/', self.resend_view, name='judge_contest_resend'),
@@ -364,20 +382,13 @@ class ContestAdmin(NoBatchDeleteMixin, SortableAdminBase, VersionAdmin):
             form.base_fields['problem_label_script'].widget = AdminAceWidget(
                 mode='lua', theme=request.profile.resolved_ace_theme,
             )
-
-        perms = ('edit_own_contest', 'edit_all_contest')
-        form.base_fields['curators'].queryset = Profile.objects.filter(
-            Q(user__is_superuser=True) |
-            Q(user__groups__permissions__codename__in=perms) |
-            Q(user__user_permissions__codename__in=perms),
-        ).distinct()
         return form
 
 
 class ContestParticipationForm(ModelForm):
     class Meta:
         widgets = {
-            'contest': AdminSelect2Widget(),
+            'contest': AdminHeavySelect2Widget(data_view='contest_select2'),
             'user': AdminHeavySelect2Widget(data_view='profile_select2'),
         }
 

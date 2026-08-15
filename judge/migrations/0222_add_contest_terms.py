@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('judge', '0222_problem_compound_index'),
+        ('judge', '0221_problem_compound_index'),
     ]
 
     operations = [

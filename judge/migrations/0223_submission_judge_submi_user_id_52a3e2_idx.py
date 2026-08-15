@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('judge', '0223_add_contest_terms'),
+        ('judge', '0222_add_contest_terms'),
     ]
 
     operations = [

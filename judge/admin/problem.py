@@ -10,7 +10,9 @@ from django.utils.html import format_html
 from django.utils.translation import gettext, gettext_lazy as _, ngettext
 from reversion.admin import VersionAdmin
 
-from judge.models import LanguageLimit, Problem, ProblemClarification, ProblemTranslation, Profile, Solution
+from judge.admin.utils import AdminFastPaginationMixin
+from judge.models import LanguageLimit, OrganizationProblemTag, Problem, ProblemClarification, ProblemTranslation, \
+    Profile, Solution
 from judge.utils.views import NoBatchDeleteMixin
 from judge.widgets import AdminHeavySelect2MultipleWidget, AdminHeavySelect2Widget, AdminMartorWidget, \
     AdminSelect2MultipleWidget, AdminSelect2Widget, CheckboxSelectMultipleWithSelectAll
@@ -23,7 +25,6 @@ class ProblemForm(ModelForm):
         super(ProblemForm, self).__init__(*args, **kwargs)
         self.fields['authors'].widget.can_add_related = False
         self.fields['curators'].widget.can_add_related = False
-        self.fields['suggester'].widget.can_add_related = False
         self.fields['testers'].widget.can_add_related = False
         self.fields['banned_users'].widget.can_add_related = False
         self.fields['change_message'].widget.attrs.update({
@@ -34,11 +35,11 @@ class ProblemForm(ModelForm):
         widgets = {
             'authors': AdminHeavySelect2MultipleWidget(data_view='profile_select2'),
             'curators': AdminHeavySelect2MultipleWidget(data_view='profile_select2'),
-            'suggester': AdminHeavySelect2Widget(data_view='profile_select2'),
             'testers': AdminHeavySelect2MultipleWidget(data_view='profile_select2'),
             'banned_users': AdminHeavySelect2MultipleWidget(data_view='profile_select2'),
             'organization': AdminHeavySelect2Widget(data_view='organization_select2'),
             'types': AdminSelect2MultipleWidget,
+            'tags': AdminSelect2MultipleWidget,
             'group': AdminSelect2Widget,
             'description': AdminMartorWidget(attrs={'data-markdownfy-url': reverse_lazy('problem_preview')}),
         }
@@ -118,18 +119,18 @@ class ProblemTranslationInline(admin.StackedInline):
     has_add_permission = has_change_permission = has_delete_permission = has_permission_full_markup
 
 
-class ProblemAdmin(NoBatchDeleteMixin, VersionAdmin):
+class ProblemAdmin(AdminFastPaginationMixin, NoBatchDeleteMixin, VersionAdmin):
     fieldsets = (
         (None, {
             'fields': (
-                'code', 'name', 'suggester', 'is_public', 'is_manually_managed', 'date', 'authors',
+                'code', 'name', 'is_public', 'is_manually_managed', 'date', 'authors',
                 'curators', 'testers', 'is_organization_private', 'organization', 'submission_source_visibility_mode',
                 'testcase_visibility_mode', 'testcase_result_visibility_mode', 'allow_view_feedback',
                 'is_full_markup', 'pdf_url', 'source', 'description', 'license',
             ),
         }),
         (_('Social Media'), {'classes': ('collapse',), 'fields': ('og_image', 'summary')}),
-        (_('Taxonomy'), {'fields': ('types', 'group')}),
+        (_('Taxonomy'), {'fields': ('types', 'group', 'tags')}),
         (_('Points'), {'fields': (('points', 'partial'), 'short_circuit')}),
         (_('Limits'), {'fields': ('time_limit', 'memory_limit')}),
         (_('Language'), {'fields': ('allowed_languages',)}),
@@ -140,7 +141,6 @@ class ProblemAdmin(NoBatchDeleteMixin, VersionAdmin):
     ordering = ['code']
     search_fields = ('code', 'name', 'authors__user__username', 'curators__user__username')
     inlines = [LanguageLimitInline, ProblemClarificationInline, ProblemSolutionInline, ProblemTranslationInline]
-    list_max_show_all = 1000
     actions_on_top = True
     actions_on_bottom = True
     list_filter = ('is_public', ProblemCreatorListFilter)
@@ -179,15 +179,15 @@ class ProblemAdmin(NoBatchDeleteMixin, VersionAdmin):
     def show_public(self, obj):
         return format_html('<a href="{1}">{0}</a>', gettext('View on site'), obj.get_absolute_url())
 
-    def _rescore(self, request, problem_id, publicy_changed=False):
+    def _rescore(self, request, problem_id):
         from judge.tasks import rescore_problem
-        transaction.on_commit(rescore_problem.s(problem_id, publicy_changed).delay)
+        transaction.on_commit(rescore_problem.s(problem_id).delay)
 
     @admin.display(description=_('Mark problems as public and set publish date to now'))
     def make_public_and_update_publish_date(self, request, queryset):
         count = queryset.update(is_public=True, date=timezone.now())
         for problem_id in queryset.values_list('id', flat=True):
-            self._rescore(request, problem_id, True)
+            self._rescore(request, problem_id)
 
         self.message_user(request, ngettext('%d problem successfully marked as public.',
                                             '%d problems successfully marked as public.',
@@ -197,13 +197,14 @@ class ProblemAdmin(NoBatchDeleteMixin, VersionAdmin):
     def make_private(self, request, queryset):
         count = queryset.update(is_public=False)
         for problem_id in queryset.values_list('id', flat=True):
-            self._rescore(request, problem_id, True)
+            self._rescore(request, problem_id)
         self.message_user(request, ngettext('%d problem successfully marked as private.',
                                             '%d problems successfully marked as private.',
                                             count) % count)
 
     def get_queryset(self, request):
-        return Problem.get_editable_problems(request.user).prefetch_related('authors__user').distinct()
+        editable_ids = Problem.get_editable_problems(request.user).values('id')
+        return Problem.objects.filter(id__in=editable_ids).prefetch_related('authors__user')
 
     def has_change_permission(self, request, obj=None):
         if obj is None:
@@ -215,9 +216,14 @@ class ProblemAdmin(NoBatchDeleteMixin, VersionAdmin):
             kwargs['widget'] = CheckboxSelectMultipleWithSelectAll()
         return super(ProblemAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
 
-    def get_form(self, *args, **kwargs):
-        form = super(ProblemAdmin, self).get_form(*args, **kwargs)
+    def get_form(self, request, obj=None, **kwargs):
+        form = super(ProblemAdmin, self).get_form(request, obj, **kwargs)
         form.base_fields['authors'].queryset = Profile.objects.all()
+        if obj is not None and obj.organization_id:
+            form.base_fields['tags'].queryset = OrganizationProblemTag.objects.filter(
+                organization_id=obj.organization_id)
+        else:
+            form.base_fields['tags'].queryset = OrganizationProblemTag.objects.none()
         return form
 
     def save_model(self, request, obj, form, change):
@@ -226,7 +232,7 @@ class ProblemAdmin(NoBatchDeleteMixin, VersionAdmin):
             form.changed_data and
             any(f in form.changed_data for f in ('is_public', 'is_organization_private', 'partial'))
         ):
-            self._rescore(request, obj.id, 'is_public' in form.changed_data)
+            self._rescore(request, obj.id)
 
     def construct_change_message(self, request, form, *args, **kwargs):
         if form.cleaned_data.get('change_message'):

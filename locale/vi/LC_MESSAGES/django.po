@@ -6853,8 +6853,8 @@ msgstr "Quá nhiều testcase"
 #, python-brace-format
 msgid "Number of testcases must not exceed ${window.testcase_limit}"
 msgstr ""
-"Quá nhiều testcase, số lượng testcase không được vượt quá $"
-"{window.testcase_limit}"
+"Quá nhiều testcase, số lượng testcase không được vượt quá ${window."
+"testcase_limit}"
 
 #: templates/problem/data.html:482 templates/problem/data.html:495
 msgid "Files are not in the same format!"
@@ -7443,8 +7443,8 @@ msgstr "Nhấn để chọn file hoặc kéo thả file vào đây"
 msgid ""
 "`Only accept \"${file_ext}\". Maximum file size is ${file_size_limit}MB.`"
 msgstr ""
-"`Chỉ chấp nhận file có đuôi \"${file_ext}\". Độ lớn tối đa của file là $"
-"{file_size_limit}MB.`"
+"`Chỉ chấp nhận file có đuôi \"${file_ext}\". Độ lớn tối đa của file là "
+"${file_size_limit}MB.`"
 
 #: templates/problem/submit-js.html:251
 msgid "File name"
@@ -8870,3 +8870,861 @@ msgstr "Không tìm thấy URL rút gọn."
 #: urlshortener/views.py:97
 msgid "This shortened URL is not active."
 msgstr "URL rút gọn này không hoạt động."
+
+#: dmoj/settings.py:99
+msgid "Bedao Team"
+msgstr "Đội Bedao"
+
+#: judge/admin/organization.py:26
+msgid "Additional storage (GB)"
+msgstr "Dung lượng lưu trữ thêm (GB)"
+
+#: judge/admin/organization.py:27
+msgid ""
+"Decimal values allowed, e.g. 1.5. Leave blank for no additional storage."
+msgstr ""
+"Cho phép số thập phân, ví dụ 1.5. Để trống nếu không có dung lượng thêm."
+
+#: judge/admin/organization.py:55
+msgid "Quota Grant"
+msgstr "Cấp phát hạn mức"
+
+#: judge/admin/organization.py:56 templates/organization/edit.html:56
+msgid "Quota Grants"
+msgstr "Các hạn mức đã cấp"
+
+#: judge/forms.py:520
+msgid "Start date"
+msgstr "Ngày bắt đầu"
+
+#: judge/forms.py:526
+msgid "Number of packages"
+msgstr "Số lượng gói"
+
+#: judge/forms.py:527
+#, python-format
+msgid "Each package adds %(storage)s and %(problems)d problems."
+msgstr "Mỗi gói thêm %(storage)s và %(problems)d bài tập."
+
+#: judge/forms.py:534
+msgid "End date"
+msgstr "Ngày kết thúc"
+
+#: judge/forms.py:542
+msgid "End date must be after start date."
+msgstr "Ngày kết thúc phải sau ngày bắt đầu."
+
+#: judge/models/notification.py:19
+msgid "recipient"
+msgstr "người nhận"
+
+#: judge/models/notification.py:21
+msgid "title"
+msgstr "tiêu đề"
+
+#: judge/models/notification.py:22
+msgid "body"
+msgstr "nội dung"
+
+#: judge/models/notification.py:23
+msgid "target link"
+msgstr "liên kết đích"
+
+#: judge/models/notification.py:25
+msgid "is read?"
+msgstr "đã đọc?"
+
+#: judge/models/notification.py:26
+msgid "priority"
+msgstr "độ ưu tiên"
+
+#: judge/models/notification.py:33
+msgid "notification"
+msgstr "thông báo"
+
+#: judge/models/notification.py:34
+msgid "notifications"
+msgstr "thông báo"
+
+#: judge/models/problem.py:63
+msgid "problem tag"
+msgstr "dạng bài"
+
+#: judge/models/problem.py:73
+msgid "organization problem tag"
+msgstr "Dạng bài của tổ chức"
+
+#: judge/models/problem.py:74
+msgid "organization problem tags"
+msgstr "Dạng bài của tổ chức"
+
+#: judge/models/problem.py:197
+msgid "problem tags"
+msgstr "dạng bài"
+
+#: judge/models/problem.py:198
+msgid "Tags from this problem's organization."
+msgstr "Dạng bài của tổ chức"
+
+#: judge/models/profile.py:199
+msgid "start date"
+msgstr "ngày bắt đầu"
+
+#: judge/models/profile.py:200
+msgid "end date"
+msgstr "ngày kết thúc"
+
+#: judge/models/profile.py:202
+msgid "additional problems"
+msgstr "bài tập bổ sung"
+
+#: judge/models/profile.py:204
+msgid "Number of additional problems allowed above the default limit."
+msgstr "Số bài tập được thêm so với giới hạn mặc định."
+
+#: judge/models/profile.py:207
+msgid "additional storage (bytes)"
+msgstr "dung lượng lưu trữ thêm (bytes)"
+
+#: judge/models/profile.py:209
+msgid "Additional storage allowed above the default limit, in bytes."
+msgstr "Dung lượng lưu trữ thêm so với giới hạn mặc định, tính bằng bytes."
+
+#: judge/models/profile.py:213
+msgid "organization quota"
+msgstr "hạn mức tổ chức"
+
+#: judge/models/profile.py:214
+msgid "organization quotas"
+msgstr "hạn mức tổ chức"
+
+#: judge/models/submission.py:23 judge/models/submission.py:58
+#: judge/models/tests/test_submission.py:104
+msgid "Partially Accepted"
+msgstr "Kết quả đúng một phần"
+
+#: judge/utils/problem_data.py:149
+msgid "How did you corrupt the checker arguments?"
+msgstr "Phá kiểu gì mà mất tiêu checker arguments rồi?"
+
+#: judge/utils/problems.py:68
+msgid "Partial"
+msgstr "một phần"
+
+#: judge/views/misc_config.py:22
+msgid "Site logo"
+msgstr "Logo trang web"
+
+#: judge/views/misc_config.py:23
+msgid "The site logo (top left corner). Leave empty to keep current."
+msgstr ""
+"Logo trang web (góc trên bên trái). Để trống để giữ nguyên logo hiện tại."
+
+#: judge/views/misc_config.py:27
+msgid "Site favicon"
+msgstr "Favicon trang web"
+
+#: judge/views/misc_config.py:28
+msgid "The site favicon. Leave empty to keep current."
+msgstr "Favicon trang web. Để trống để giữ nguyên favicon hiện tại."
+
+#: judge/views/misc_config.py:32
+msgid "Meta keywords"
+msgstr "Từ khóa meta"
+
+#: judge/views/misc_config.py:33
+msgid "HTML meta keywords for SEO."
+msgstr "Từ khóa meta HTML cho SEO."
+
+#: judge/views/misc_config.py:37
+msgid "Meta description"
+msgstr "Mô tả meta"
+
+#: judge/views/misc_config.py:38
+msgid "HTML meta description for SEO."
+msgstr "Mô tả meta HTML cho SEO."
+
+#: judge/views/misc_config.py:42 templates/misc_config/edit.html:104
+msgid "Analytics"
+msgstr "Analytics"
+
+#: judge/views/misc_config.py:44
+msgid "Analytics tracking code (raw HTML/JS, injected into every page)."
+msgstr "Mã theo dõi Analytics (HTML/JS thô, được chèn vào mọi trang)."
+
+#: judge/views/misc_config.py:48
+msgid "Top notification"
+msgstr "Thông báo đầu trang"
+
+#: judge/views/misc_config.py:50
+msgid ""
+"Notification banner shown at the top of every page. Supports Django template "
+"syntax."
+msgstr ""
+"Thông báo banner hiển thị ở đầu mọi trang. Hỗ trợ cú pháp template Django."
+
+#: judge/views/misc_config.py:54
+msgid "Announcement"
+msgstr "Thông báo"
+
+#: judge/views/misc_config.py:56
+msgid "Site-wide announcement (raw HTML)."
+msgstr "Thông báo toàn trang (HTML thô)."
+
+#: judge/views/misc_config.py:60
+msgid "Footer"
+msgstr "Footer"
+
+#: judge/views/misc_config.py:62
+msgid "Footer content (raw HTML)."
+msgstr "Nội dung footer (HTML thô)."
+
+#: judge/views/misc_config.py:66
+msgid "Home page top"
+msgstr "Đầu trang chủ"
+
+#: judge/views/misc_config.py:68
+msgid ""
+"Content rendered at the top of the homepage. Supports Django template syntax."
+msgstr "Nội dung hiển thị ở đầu trang chủ. Hỗ trợ cú pháp template Django."
+
+#: judge/views/misc_config.py:72
+msgid "Discord invite link"
+msgstr "Liên kết mời Discord"
+
+#: judge/views/misc_config.py:73
+msgid "Discord server invite URL."
+msgstr "URL mời vào server Discord."
+
+#: judge/views/misc_config.py:77
+msgid "Discord Shield.io badge URL"
+msgstr "URL badge Shield.io Discord"
+
+#: judge/views/misc_config.py:78
+msgid "Shield.io badge URL shown alongside the Discord invite link."
+msgstr "URL badge Shield.io hiển thị cùng liên kết mời Discord."
+
+#: judge/views/misc_config.py:82
+msgid "Description example"
+msgstr "Mô tả mẫu"
+
+#: judge/views/misc_config.py:84
+msgid "Example problem description pre-filled when creating new problems."
+msgstr "Mô tả bài tập mẫu được điền sẵn khi tạo bài mới."
+
+#: judge/views/notification.py:43 templates/base.html:319
+#: templates/misc_config/edit.html:97
+msgid "Notifications"
+msgstr "Thông báo"
+
+#: judge/views/organization.py:556
+#, python-format
+msgid "Tags of %s"
+msgstr "Dạng bài của %s"
+
+#: judge/views/organization.py:583 judge/views/organization.py:603
+msgid "A tag with this name already exists."
+msgstr "Dạng bài cùng tên đã tồn tại."
+
+#: judge/views/organization.py:813
+msgid "No such member"
+msgstr "Không có thành viên"
+
+#: judge/views/organization.py:814
+#, python-format
+msgid "Could not find a member with the username \"%s\" in this organization."
+msgstr ""
+"Không thể tìm thấy thành viên với tên đăng nhập \"%s\" trong tổ chức này."
+
+#: judge/views/organization.py:831
+msgid "Untagged"
+msgstr "Chưa phân loại"
+
+#: judge/views/organization.py:858
+msgid "No problems selected for deletion."
+msgstr "Chưa chọn bài tập nào để xóa."
+
+#: judge/views/organization.py:862
+#, python-format
+msgid "Cannot delete more than %d problems at once."
+msgstr "Không thể xóa quá %d bài tập cùng lúc."
+
+#: judge/views/organization.py:876
+#, python-format
+msgid "%d problem was skipped because you are not its author."
+msgid_plural "%d problems were skipped because you are not their author."
+msgstr[0] "%d bài tập đã bị bỏ qua vì bạn không phải tác giả."
+
+#: judge/views/organization.py:887
+msgid "Bulk marked as deleted"
+msgstr "Đã đánh dấu xóa hàng loạt"
+
+#: judge/views/organization.py:891
+#, python-format
+msgid "Successfully deleted %d problem."
+msgid_plural "Successfully deleted %d problems."
+msgstr[0] "Đã xóa thành công %d bài tập."
+
+#: judge/views/organization.py:896
+msgid "No valid problems could be deleted."
+msgstr "Không có bài tập hợp lệ nào để xóa."
+
+#: judge/views/organization.py:940
+msgid "Problem limit reached"
+msgstr "Đã đạt giới hạn bài tập"
+
+#: judge/views/organization.py:941
+#, python-format
+msgid ""
+"This organization has reached its maximum number of problems (%d). Please "
+"delete some problems before creating new ones."
+msgstr ""
+"Tổ chức đã đạt giới hạn số bài tập tối đa (%d). Vui lòng xóa một số bài "
+"trước khi tạo thêm."
+
+#: judge/views/organization.py:1048
+#, python-format
+msgid "Organization cost - %s"
+msgstr "Chi phí của tổ chức - %s"
+
+#: judge/views/organization.py:1131 templates/organization/usage.html:351
+#: templates/organization/usage.html:352 templates/organization/usage.html:353
+#: templates/organization/usage.html:354
+#, python-format
+msgid "Last submission %(months)d+ months ago"
+msgstr "Lần nộp cuối %(months)d+ tháng trước"
+
+#: judge/views/organization.py:1132
+#, python-format
+msgid "Last submission %(from)d-%(to)d months ago"
+msgstr "Lần nộp cuối %(from)d-%(to)d tháng trước"
+
+#: judge/views/organization.py:1133
+#, python-format
+msgid "Last submission < %(months)d months ago"
+msgstr "Lần nộp cuối < %(months)d+ tháng trước"
+
+#: judge/views/problem.py:1034
+msgid "Failed to import problem"
+msgstr "Nhập bài thất bại"
+
+#: judge/views/problem_data.py:261
+#, python-format
+msgid ""
+"Storage limit exceeded for organization \"%(org)s\". Please delete some test "
+"data before uploading more."
+msgstr ""
+"Dung lượng lưu trữ đã vượt giới hạn cho tổ chức \"%(org)s\". Vui lòng xóa "
+"một số dữ liệu test trước khi tải lên thêm."
+
+#: judge/views/ticket.py:85
+#, python-format
+msgid "New ticket: %s"
+msgstr "Ticket mới: %s"
+
+#: judge/views/ticket.py:199
+#, python-format
+msgid "New reply on ticket: %s"
+msgstr "Phản hồi mới trên ticket: %s"
+
+#: templates/admin/judge/contest/change_form.html:22
+msgid "Invalidate replay cache? Users will need to re-fetch the replay data."
+msgstr "Xóa cache replay? Người dùng sẽ cần tải lại dữ liệu replay."
+
+#: templates/admin/judge/contest/change_form.html:37
+msgid "Invalidate Replay Cache"
+msgstr "Xóa Cache Replay"
+
+#: templates/admin/judge/contest/change_form.html:41
+msgid "Invalidate Replay"
+msgstr "Xóa Replay"
+
+#: templates/base.html:104 templates/base.html:330
+msgid "No notifications."
+msgstr "Không có thông báo nào."
+
+#: templates/base.html:286
+msgid "Theme"
+msgstr "Giao diện"
+
+#: templates/base.html:325 templates/notification/list.html:55
+msgid "Unread"
+msgstr "Chưa đọc"
+
+#: templates/base.html:326
+msgid "Mark all read"
+msgstr "Đánh dấu tất cả đã đọc"
+
+#: templates/base.html:333
+msgid "See all notifications"
+msgstr "Xem tất cả thông báo"
+
+#: templates/base.html:431
+#, python-format
+msgid "proudly powered by %(dmoj)s"
+msgstr "dựa trên nền tảng %(dmoj)s"
+
+#: templates/blog/content.html:91 templates/blog/modern-content.html:141
+#: templates/comments/lazy-load-js.html:18 templates/contest/contest.html:366
+#: templates/problem/editorial.html:53 templates/problem/problem.html:454
+#: templates/tag/problem.html:69
+msgid "Loading..."
+msgstr "Đang tải..."
+
+#: templates/contest/edit.html:107
+msgid "Switch to manual order mode"
+msgstr "Chuyển sang chế độ sắp xếp thủ công"
+
+#: templates/contest/edit.html:119 templates/contest/edit.html:373
+msgid "Switch to drag and drop mode"
+msgstr "Chuyển sang chế độ kéo thả"
+
+#: templates/contest/edit.html:215
+msgid "Organization problems"
+msgstr "Bài tập của tổ chức"
+
+#: templates/contest/edit.html:216
+msgid "Public problems"
+msgstr "Bài tập công khai"
+
+#: templates/contest/edit.html:380
+msgid "Order in contest"
+msgstr "Thứ tự của bài tập trong kỳ thi"
+
+#: templates/contest/ranking.html:70
+msgid "Virtual participations aren't supported in replay, turn it off first."
+msgstr "Không hỗ trợ tham gia ảo trong chế độ phát lại, hãy tắt nó trước."
+
+#: templates/contest/ranking.html:494
+msgid "Show ghost participations"
+msgstr "Hiển thị xếp hạng chính thức"
+
+#: templates/misc_config/edit.html:44
+msgid "Branding"
+msgstr "Thương hiệu"
+
+#: templates/misc_config/edit.html:51 templates/misc_config/edit.html:67
+msgid "Current:"
+msgstr "Hiện tại:"
+
+#: templates/misc_config/edit.html:80
+msgid "SEO"
+msgstr "SEO"
+
+#: templates/misc_config/edit.html:111
+msgid "Community"
+msgstr "Cộng đồng"
+
+#: templates/misc_config/edit.html:119
+msgid "Problem editor"
+msgstr "Người soạn đề"
+
+#: templates/notification/list.html:56
+msgid "Read"
+msgstr "Đã đọc"
+
+#: templates/notification/list.html:58
+msgid "Mark all as read"
+msgstr "Đánh dấu tất cả đã đọc"
+
+#: templates/notification/list.html:80
+msgid "You have no notifications."
+msgstr "Bạn không có thông báo nào."
+
+#: templates/organization/edit.html:62 templates/organization/usage.html:285
+msgid "Start"
+msgstr "Bắt đầu"
+
+#: templates/organization/edit.html:63
+msgid "End"
+msgstr "Kết thúc"
+
+#: templates/organization/edit.html:64 templates/organization/usage.html:287
+msgid "+ Problems"
+msgstr "+ Bài tập"
+
+#: templates/organization/edit.html:65 templates/organization/usage.html:288
+msgid "+ Storage"
+msgstr "+ Dung lượng"
+
+#: templates/organization/edit.html:80
+msgid "Delete this quota grant?"
+msgstr "Xóa khoản cấp phát hạn mức này?"
+
+#: templates/organization/edit.html:90
+msgid "No quota grants yet."
+msgstr "Chưa có khoản cấp phát hạn mức nào."
+
+#: templates/organization/edit.html:93
+msgid "Add Quota Grant"
+msgstr "Thêm khoản cấp phát hạn mức"
+
+#: templates/organization/list-tabs.html:8
+msgid "Show all orgs"
+msgstr "Xem tất cả tổ chức"
+
+#: templates/organization/list.html:34
+msgid "Short name"
+msgstr "Tên viết tắt"
+
+#: templates/organization/list.html:35
+msgid "Slug"
+msgstr "Slug"
+
+#: templates/organization/list.html:36
+msgid "Admins"
+msgstr "Quản trị viên"
+
+#: templates/organization/list.html:72
+msgid "Search organization..."
+msgstr "Tìm tổ chức..."
+
+#: templates/organization/tabs.html:34
+msgid "Manage tags"
+msgstr "Quản lý dạng bài"
+
+#: templates/organization/tag-confirm-delete.html:12
+#, python-format
+msgid "Are you sure you want to delete the tag \"%(name)s\"?"
+msgstr "Bạn có chắc muốn xóa dạng bài \"%(name)s\"?"
+
+#: templates/organization/tag-confirm-delete.html:15
+#, python-format
+msgid "It will be removed from %(count)d problem(s)."
+msgstr "Nó sẽ bị gỡ khỏi %(count)d bài tập."
+
+#: templates/organization/tags.html:110
+msgid "Search tags"
+msgstr "Tìm dạng bài..."
+
+#: templates/organization/tags.html:112 templates/organization/tags.html:274
+#: templates/problem/editor.html:87 templates/problem/editor.html:88
+#: templates/problem/editor.html:253
+msgid "Create new tag"
+msgstr "Tạo dạng bài mới"
+
+#: templates/organization/tags.html:134 templates/organization/tags.html:203
+msgid "unused"
+msgstr "chưa dùng"
+
+#: templates/organization/tags.html:158
+msgid "Delete tag"
+msgstr "Xoá dạng bài"
+
+#: templates/organization/tags.html:238 templates/problem/editor.html:107
+msgid "Tag name is required."
+msgstr "Cần nhập tên dạng bài."
+
+#: templates/organization/tags.html:277 templates/problem/editor.html:127
+msgid "Could not create tag."
+msgstr "Không thể tạo dạng bài."
+
+#: templates/organization/tags.html:288
+msgid "Edit tag name"
+msgstr "Sửa tên dạng bài"
+
+#: templates/organization/tags.html:291
+msgid "Could not update tag."
+msgstr "Không thể cập nhật dạng bài."
+
+#: templates/organization/tags.html:312
+#, python-format
+msgid "Delete tag \"%(name)s\"?"
+msgstr "Xóa dạng bài \"%(name)s\"?"
+
+#: templates/organization/tags.html:334
+msgid "Could not delete tag."
+msgstr "Không thể xóa dạng bài."
+
+#: templates/organization/usage.html:114
+msgid "Filter by author..."
+msgstr "Lọc theo tác giả..."
+
+#: templates/organization/usage.html:131 templates/organization/usage.html:136
+msgid "Cannot delete problems from other authors."
+msgstr "Không thể xóa bài tập của tác giả khác."
+
+#: templates/organization/usage.html:167
+msgid ""
+"Are you sure you want to delete the selected problems? This action cannot be "
+"undone."
+msgstr ""
+"Bạn có chắc muốn xóa các bài tập đã chọn? Hành động này không thể hoàn tác."
+
+#: templates/organization/usage.html:255
+msgid "Storage usage"
+msgstr "Mức sử dụng dung lượng"
+
+#: templates/organization/usage.html:260
+msgid "Credit usage"
+msgstr "Chi phí chấm bài"
+
+#: templates/organization/usage.html:271
+msgid "Total used storage: "
+msgstr "Tổng dung lượng đã dùng: "
+
+#: templates/organization/usage.html:274
+msgid "Number of problems: "
+msgstr "Số lượng bài tập: "
+
+#: templates/organization/usage.html:281
+msgid "Active Quota Grants"
+msgstr "Các hạn mức"
+
+#: templates/organization/usage.html:286
+msgid "Expires"
+msgstr "Hết hạn"
+
+#: templates/organization/usage.html:307
+msgid "Storage limit reached! Please delete some problems to free up space."
+msgstr ""
+"Đã đạt giới hạn lưu trữ! Vui lòng xóa một số bài tập để giải phóng dung "
+"lượng."
+
+#: templates/organization/usage.html:312 templates/problem/data.html:1013
+msgid "You are approaching the storage limit"
+msgstr "Bạn đang sắp đạt giới hạn dung lượng lưu trữ"
+
+#: templates/organization/usage.html:313 templates/problem/data.html:1014
+msgid "You will not be able to upload test if the limit is exceeded."
+msgstr "Bạn sẽ không thể tải lên dữ liệu test nếu vượt quá giới hạn."
+
+#: templates/organization/usage.html:320 templates/problem/create.html:7
+msgid ""
+"Problem limit reached! Please delete some problems before creating new ones."
+msgstr "Đã đạt giới hạn số bài tập! Vui lòng xóa một số bài trước khi tạo mới."
+
+#: templates/organization/usage.html:325 templates/problem/create.html:12
+msgid "You are approaching the problem limit"
+msgstr "Bạn đang sắp đạt giới hạn số lượng bài tập"
+
+#: templates/organization/usage.html:326 templates/problem/create.html:13
+msgid "You will not be able to create more problems if the limit is exceeded."
+msgstr "Bạn sẽ không thể tạo thêm bài tập nếu vượt quá giới hạn."
+
+#: templates/organization/usage.html:334
+msgid "Problems by last submission time"
+msgstr "Bài tập theo thời gian nộp bài cuối"
+
+#: templates/organization/usage.html:338
+msgid "Storage by last submission time"
+msgstr "Dung lượng theo thời gian nộp bài cuối"
+
+#: templates/organization/usage.html:347
+msgid "Quick filter"
+msgstr "Lọc nhanh"
+
+#: templates/organization/usage.html:349
+msgid "Select a filter"
+msgstr "Chọn bộ lọc"
+
+#: templates/organization/usage.html:357
+msgid "Advanced filter"
+msgstr "Bộ lọc nâng cao"
+
+#: templates/organization/usage.html:365
+msgid "Author"
+msgstr "Tác giả"
+
+#: templates/organization/usage.html:367
+msgid "All Authors"
+msgstr "Tất cả tác giả"
+
+#: templates/organization/usage.html:377
+msgid "Last Submission Time"
+msgstr "Thời gian nộp bài cuối"
+
+#: templates/organization/usage.html:390
+msgid "Reset"
+msgstr "Đặt lại"
+
+#: templates/organization/usage.html:402
+msgid "Select All (Current Page)"
+msgstr "Chọn tất cả (Trang hiện tại)"
+
+#: templates/organization/usage.html:405
+msgid "Delete Selected"
+msgstr "Xóa đã chọn"
+
+#: templates/organization/usage.html:415
+msgid "Authors"
+msgstr "Tác giả"
+
+#: templates/organization/usage.html:416
+msgid "Total Size"
+msgstr "Tổng kích thước"
+
+#: templates/organization/usage.html:417
+msgid "Last Submission"
+msgstr "Lần nộp cuối"
+
+#: templates/organization/usage.html:450
+msgid "Test data"
+msgstr "Dữ liệu test"
+
+#: templates/organization/user-solved.html:117
+#, python-format
+msgid "%(count)d solved"
+msgstr "Đã giải %(count)d bài"
+
+#: templates/organization/user-solved.html:139
+msgid "This user hasn't solved any problems in this organization yet."
+msgstr "Người dùng này chưa giải bài tập nào trong tổ chức này."
+
+#: templates/organization/users-table.html:23
+msgid "Solved problems"
+msgstr "Các bài đã giải"
+
+#: templates/problem/confirm_delete.html:28
+msgid ""
+"Are you sure you want to delete this problem? This action cannot be undone."
+msgstr "Bạn có chắc muốn xoá bài tập này? Hành động này không thể hoàn tác."
+
+#: templates/problem/data.html:268
+msgid "or click here to build zip file"
+msgstr "hoặc nhấn vào đây để tạo file zip"
+
+#: templates/problem/data.html:585
+msgid "File too large!"
+msgstr "File quá lớn!"
+
+#: templates/problem/data.html:586
+msgid "Your file is"
+msgstr "File của bạn là"
+
+#: templates/problem/data.html:587
+msgid "Maximum allowed is 100 MB."
+msgstr "Giới hạn tối đa là 100 MB."
+
+#: templates/problem/data.html:625 templates/problem/data.html:1117
+msgid "No files selected"
+msgstr "Chưa chọn tập tin nào"
+
+#: templates/problem/data.html:629
+msgid "files selected"
+msgstr "tập tin đã chọn"
+
+#: templates/problem/data.html:636
+msgid "and"
+msgstr "và"
+
+#: templates/problem/data.html:636
+msgid "more files"
+msgstr "tập tin khác"
+
+#: templates/problem/data.html:754
+msgid "Adding files..."
+msgstr "Đang thêm tập tin..."
+
+#: templates/problem/data.html:760
+msgid "Compressing..."
+msgstr "Đang nén..."
+
+#: templates/problem/data.html:767
+msgid ""
+"Automatic zipping is not supported in this browser. Please upload a ZIP file "
+"manually."
+msgstr ""
+"Trình duyệt này không hỗ trợ nén tự động. Vui lòng tải lên file ZIP thủ công."
+
+#: templates/problem/data.html:777
+msgid "Failed to create ZIP file"
+msgstr "Tạo file ZIP thất bại"
+
+#: templates/problem/data.html:779 templates/problem/data.html:1121
+msgid "Build & Upload ZIP"
+msgstr "Tạo & Tải lên ZIP"
+
+#: templates/problem/data.html:1007
+msgid "Storage limit exceeded!"
+msgstr "Vượt giới hạn lưu trữ!"
+
+#: templates/problem/data.html:1008
+msgid ""
+"This organization has reached its storage quota. Please delete some test "
+"data before uploading more."
+msgstr ""
+"Tổ chức đã đạt hạn mức lưu trữ. Vui lòng xóa một số dữ liệu test trước khi "
+"tải lên thêm."
+
+#: templates/problem/data.html:1104
+msgid "Build Test Data"
+msgstr "Tạo dữ liệu test"
+
+#: templates/problem/data.html:1107
+msgid "Choose Files"
+msgstr "Chọn tập tin"
+
+#: templates/problem/data.html:1110
+msgid "Choose Folder"
+msgstr "Chọn thư mục"
+
+#: templates/problem/data.html:1115
+msgid "Drop files or folder here"
+msgstr "Kéo thả tập tin hoặc thư mục vào đây"
+
+#: templates/problem/editor.html:254
+msgid "New tag name"
+msgstr "Tên dạng bài mới"
+
+#: templates/problem/list.html:62
+msgid "Filter by tag..."
+msgstr "Lọc theo dạng bài..."
+
+#: templates/problem/search-form.html:53
+msgid "Uncategorized"
+msgstr "Chưa phân loại"
+
+#: templates/registration/activation_email_subject.txt:1
+#, python-format
+msgid "Activate your %(SITE_NAME)s account)"
+msgstr "Kích hoạt tài khoản %(SITE_NAME)s"
+
+#: templates/user/edit-profile.html:322
+msgid "Site theme:"
+msgstr "Giao diện trang web:"
+
+#, python-format
+#~ msgid "%(months)d+ months ago"
+#~ msgstr "%(months)d+ tháng trước"
+
+#, python-format
+#~ msgid "%(from)d-%(to)d months ago"
+#~ msgstr "%(from)d-%(to)d tháng trước"
+
+#, python-format
+#~ msgid "< %(months)d months ago"
+#~ msgstr "< %(months)d tháng trước"
+
+#, python-format
+#~ msgid "Enter access code for \"%s\""
+#~ msgstr "Nhập access code của \"%s\""
+
+#~ msgid "Invalid access code."
+#~ msgstr "Mã truy cập không hợp lệ."
+
+#~ msgid "Rate all users who joined."
+#~ msgstr ""
+#~ "Tính rating tất cả những người đã tham gia kỳ thi (kể cả không nộp bài "
+#~ "nào)."
+
+#~ msgid "In the meantime, try resubmitting in a few seconds."
+#~ msgstr "Bạn có thể thử nộp lại bài trong vài giây nữa"
+
+#~ msgid "Associated page"
+#~ msgstr "Trang liên kết"
+
+#~ msgid "Page %(current)s of %(total)s"
+#~ msgstr "Trang %(current)s / %(total)s"
+
+#~ msgid "You are not allowed to kick people from this organization."
+#~ msgstr "Bạn không có quyền loại người từ tổ chức này."
+
+#~ msgid "Update preview"
+#~ msgstr "Cập nhật preview"
+
+#~ msgid "Version Matrix"
+#~ msgstr "Phiên bản của trình chấm"
+
+#~ msgid "Maximum single-case runtime:"
+#~ msgstr "Thời gian chạy test lâu nhất:"

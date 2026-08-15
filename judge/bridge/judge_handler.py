@@ -33,6 +33,10 @@ def _ensure_connection():
     db.connection.close_if_unusable_or_obsolete()
 
 
+class SubmissionUnavailable(Exception):
+    """Raised when a submission cannot be prepared for dispatch, in which case no judge is at fault."""
+
+
 class JudgeHandler(ZlibPacketHandler):
     proxies = proxy_list(settings.BRIDGED_JUDGE_PROXIES or [])
 
@@ -235,6 +239,9 @@ class JudgeHandler(ZlibPacketHandler):
 
     def submit(self, id, problem, language, source):
         data = self.get_related_submission_data(id)
+        if data is None:
+            raise SubmissionUnavailable('submission %s vanished before it could be dispatched' % id)
+
         self._working = id
         self._no_response_job = threading.Timer(20, self._kill_if_no_response)
         self.send({
@@ -412,7 +419,7 @@ class JudgeHandler(ZlibPacketHandler):
         points = 0.0
         total = 0
         status = 0
-        status_codes = ['SC', 'AC', 'WA', 'MLE', 'TLE', 'IR', 'RTE', 'OLE']
+        status_codes = ['SC', 'AC', 'PAC', 'WA', 'MLE', 'TLE', 'IR', 'RTE', 'OLE']
         batches = {}  # batch number: (points, total)
 
         for case in SubmissionTestCase.objects.filter(submission=submission):
@@ -579,7 +586,10 @@ class JudgeHandler(ZlibPacketHandler):
             elif status & 32:
                 test_case.status = 'SC'
             else:
-                test_case.status = 'AC'
+                if result['points'] < result['total-points']:
+                    test_case.status = 'PAC'
+                else:
+                    test_case.status = 'AC'
             test_case.time = result['time']
             test_case.memory = result['memory']
             test_case.points = result['points']

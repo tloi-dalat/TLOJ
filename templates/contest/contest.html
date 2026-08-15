@@ -26,7 +26,12 @@
     </script>
     {% include "contest/media-js.html" %}
     {% if not comment_lock %}
-        {% include "comments/media-js.html" %}
+        {% if comment_form and comment_form.errors %}
+            {# comments/list.html is SSR'd directly below (not via the AJAX fragment) in
+               this case, so it needs its own media JS (martor editor, vote/hide/edit). #}
+            {% include "comments/media-js.html" %}
+        {% endif %}
+        {% include "comments/lazy-load-js.html" %}
     {% endif %}
 {% endblock %}
 
@@ -81,7 +86,7 @@
         {% if contest.show_short_display %}
             <div id="details">
                 <ul>
-                    {% with authors=contest.authors.all() %}
+                    {% with authors=contest.authors.all().prefetch_related('user') %}
                         {% if not contest.hide_problem_authors and authors %}
                             <li>
                                 {% trans trimmed count=authors|length, link_authors=link_users(authors) %}
@@ -92,7 +97,7 @@
                             </li>
                         {% endif %}
                     {% endwith %}
-                    {% with testers=contest.testers.all() %}
+                    {% with testers=contest.testers.all().prefetch_related('user') %}
                         {% if not contest.hide_problem_authors and testers %}
                             <li>
                                 {% trans trimmed count=testers|length, link_testers=link_users(testers) %}
@@ -358,7 +363,15 @@
 
 
     {% if not comment_lock %}
-        {% include "comments/list.html" %}
+        <div id="comments" data-comments-url="{{ url('contest_comments', contest.key) }}"
+             data-comments-trigger="auto"
+             data-comments-preloaded="{{ 'true' if comment_form and comment_form.errors else 'false' }}">
+            {% if comment_form and comment_form.errors %}
+                {% include "comments/list.html" %}
+            {% else %}
+                <div class="comments-loading">{{ _('Loading...') }}</div>
+            {% endif %}
+        </div>
     {% endif %}
 
     <div style="clear: both;"></div>

@@ -17,12 +17,14 @@ from django.forms import BooleanField, CharField, ChoiceField, DateInput, Form, 
 from django.forms.widgets import DateTimeInput
 from django.template.defaultfilters import filesizeformat
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _, ngettext_lazy
 
 from judge.models import BlogPost, Contest, ContestAnnouncement, ContestParticipation, ContestProblem, Language, \
-    LanguageLimit, Organization, Problem, Profile, Solution, Submission, Tag, WebAuthnCredential
+    LanguageLimit, Organization, OrganizationProblemTag, Problem, Profile, Solution, Submission, Tag, \
+    WebAuthnCredential
 from judge.utils.subscription import newsletter_id
 from judge.widgets import AceWidget, ChunkedFileUploadWidget, HeavySelect2MultipleWidget, HeavySelect2Widget, \
     MartorWidget, Select2MultipleWidget, Select2Widget
@@ -177,7 +179,11 @@ class ProblemEditForm(ModelForm):
         # Only allow to public/private problem in organization
         if org_pk is None:
             self.fields.pop('is_public')
+            self.fields.pop('tags')
         else:
+            self.fields['tags'].queryset = OrganizationProblemTag.objects.filter(organization_id=org_pk)
+            self.fields.pop('types')
+            self.fields['group'].widget = forms.HiddenInput()
             self.fields['testers'].label = _('Private users')
             self.fields['testers'].help_text = _('If private, only these users may see the problem.')
             self.fields['testers'].widget.data_view = None
@@ -224,10 +230,11 @@ class ProblemEditForm(ModelForm):
     class Meta:
         model = Problem
         fields = ['is_public', 'code', 'name', 'time_limit', 'memory_limit', 'points', 'partial',
-                  'statement_file', 'source', 'types', 'group', 'submission_source_visibility_mode',
+                  'statement_file', 'source', 'types', 'group', 'tags', 'submission_source_visibility_mode',
                   'testcase_visibility_mode', 'description', 'testers']
         widgets = {
             'types': Select2MultipleWidget,
+            'tags': Select2MultipleWidget(),
             'group': Select2Widget,
             'submission_source_visibility_mode': Select2Widget,
             'testcase_visibility_mode': Select2Widget,
@@ -502,6 +509,41 @@ class OrganizationForm(ModelForm):
             self.fields.pop('admins')
             self.fields.pop('paid_credit')
             self.fields.pop('monthly_free_credit_limit')
+
+
+class OrganizationProblemTagForm(ModelForm):
+    class Meta:
+        model = OrganizationProblemTag
+        fields = ['name']
+
+
+class QuotaGrantForm(Form):
+    start_date = forms.DateField(
+        widget=DateInput(attrs={'type': 'date'}),
+        label=_('Start date'),
+        initial=lambda: timezone.now().date(),
+    )
+    packages = forms.IntegerField(
+        min_value=1,
+        initial=1,
+        label=_('Number of packages'),
+        help_text=_('Each package adds %(storage)s and %(problems)d problems.') % {
+            'storage': filesizeformat(settings.VNOJ_QUOTA_PACKAGE_STORAGE),
+            'problems': settings.VNOJ_QUOTA_PACKAGE_PROBLEMS,
+        },
+    )
+    end_date = forms.DateField(
+        widget=DateInput(attrs={'type': 'date'}),
+        label=_('End date'),
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start = cleaned_data.get('start_date')
+        end = cleaned_data.get('end_date')
+        if start and end and end <= start:
+            raise ValidationError(_('End date must be after start date.'))
+        return cleaned_data
 
 
 class SocialAuthMixin:
